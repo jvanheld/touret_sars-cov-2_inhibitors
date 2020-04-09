@@ -460,8 +460,8 @@ div.tocify {
 <h3>Distribution</h3>
 <p>The distribution of inhibition index values is trongly asymmetrical. The mode is much lower than the mean and the median (robust estimator of central tendency). A normal fit will tuhs give a poor estimate of the p-values.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>Inhibition.Index, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>mean, <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>median, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>mean, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>median, <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
 <a class="sourceLine" id="cb4-4" data-line-number="4"></a>
 <a class="sourceLine" id="cb4-5" data-line-number="5"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
 <a class="sourceLine" id="cb4-6" data-line-number="6">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
@@ -958,23 +958,38 @@ Values of the plate-wise normalised inhibition index for all the tested molecule
 Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index.
 </p>
 </div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="co">#### Volcano plot ####</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="kw">plot</span>(<span class="dt">x =</span> supTable<span class="op">$</span>normInhibIndex,</a>
+<a class="sourceLine" id="cb17-4" data-line-number="4">     <span class="dt">y =</span> <span class="op">-</span>supTable<span class="op">$</span>log10Padj, </a>
+<a class="sourceLine" id="cb17-5" data-line-number="5">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb17-6" data-line-number="6">     <span class="dt">main =</span> <span class="st">&quot;Volcano plot&quot;</span>,</a>
+<a class="sourceLine" id="cb17-7" data-line-number="7">     <span class="dt">xlab =</span> <span class="st">&quot;Normalised inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb17-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>)</a>
+<a class="sourceLine" id="cb17-9" data-line-number="9"><span class="kw">grid</span>()</a></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="figures/touret_covid19_volcano_plot-1.png" alt="Volcano plot. " width="60%" />
+<p class="caption">
+Volcano plot.
+</p>
+</div>
 </div>
 <div id="selection-of-candidate-molecules" class="section level2">
 <h2>Selection of candidate molecules</h2>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="co">#### Select significant normalised II values ####</span></a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></a>
-<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="co"># table(supTable$padj &lt; alpha)</span></a>
-<a class="sourceLine" id="cb17-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
-<a class="sourceLine" id="cb17-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb17-6" data-line-number="6"><span class="co">## Sort by decreasing adjusted p-value</span></a>
-<a class="sourceLine" id="cb17-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
-<a class="sourceLine" id="cb17-8" data-line-number="8"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
-<a class="sourceLine" id="cb17-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb17-10" data-line-number="10"><span class="co">## Print selected molecules</span></a>
-<a class="sourceLine" id="cb17-11" data-line-number="11"><span class="kw">kable</span>(selected[ , <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">:</span><span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>)], </a>
-<a class="sourceLine" id="cb17-12" data-line-number="12">      <span class="dt">row.names =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb17-13" data-line-number="13">      <span class="dt">digits =</span> <span class="dv">4</span>,</a>
-<a class="sourceLine" id="cb17-14" data-line-number="14">      <span class="dt">caption =</span> <span class="st">&quot;Candidate moecules sorted by significance after plate-wise normalisation. &quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co">#### Select significant normalised II values ####</span></a>
+<a class="sourceLine" id="cb18-2" data-line-number="2">alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></a>
+<a class="sourceLine" id="cb18-3" data-line-number="3"><span class="co"># table(supTable$padj &lt; alpha)</span></a>
+<a class="sourceLine" id="cb18-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
+<a class="sourceLine" id="cb18-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb18-6" data-line-number="6"><span class="co">## Sort by decreasing adjusted p-value</span></a>
+<a class="sourceLine" id="cb18-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
+<a class="sourceLine" id="cb18-8" data-line-number="8"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
+<a class="sourceLine" id="cb18-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb18-10" data-line-number="10"><span class="co">## Print selected molecules</span></a>
+<a class="sourceLine" id="cb18-11" data-line-number="11"><span class="kw">kable</span>(selected[ , <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">:</span><span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>)], </a>
+<a class="sourceLine" id="cb18-12" data-line-number="12">      <span class="dt">row.names =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb18-13" data-line-number="13">      <span class="dt">digits =</span> <span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb18-14" data-line-number="14">      <span class="dt">caption =</span> <span class="st">&quot;Candidate moecules sorted by significance after plate-wise normalisation. &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Candidate moecules sorted by significance after plate-wise normalisation.</caption>
 <thead>
@@ -2252,6 +2267,9 @@ Histogram of the nominal (unadjusted) p-values derived from the plate-wise norma
 <h2>Conclusions</h2>
 <p>I strongly recommend to use the plate-wise normalised inhibition index in order to select the candidate molecules.</p>
 <p>With an adjusted p-value of 0.05, 114 molecules are declared significant and could be considered as candidate for further characterisation.</p>
+</div>
+<div id="experimental-design" class="section level2">
+<h2>Experimental design</h2>
 </div>
 
 

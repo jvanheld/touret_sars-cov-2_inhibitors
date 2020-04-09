@@ -1,6 +1,6 @@
 ---
-title: "Statistical analysis of the Inhibition Index from Touret et al (2020)"
-author: "Jacques van Helden"
+title: "Statistical analysis of *in vitro* screening for inhibitors of viral infection "
+author: "Touret et al. (2020). "
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -173,8 +173,8 @@ The distribution of inhibition index values is trongly asymmetrical. The mode is
 ```{r inhib_index_distribution, fig.width=7, fig.height=5, out.width="60%",  fig.cap="Distribution of the inhibition index"}
 
 hist(supTable$Inhibition.Index, breaks = 100, col = "grey", border = "grey")
-abline(v = iiStat$mean, col = "darkgreen")
-abline(v = iiStat$median, col = "blue")
+abline(v = iiStat$mean, col = "blue")
+abline(v = iiStat$median, col = "darkgreen")
 
 legend("topright", legend = c("mean", "median"),
        col = c("blue", "darkgreen"),
@@ -424,6 +424,21 @@ hist(supTable$p.value, breaks = 20,
 ```
 
 
+
+```{r volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
+#### Volcano plot ####
+
+plot(x = supTable$normInhibIndex,
+     y = -supTable$log10Padj, 
+     col = supTable$color,
+     main = "Volcano plot",
+     xlab = "Normalised inhibition index",
+     ylab = "Significance = -log10(Padj)")
+grid()
+
+```
+
+
 ## Selection of candidate molecules
 
 ```{r candidated}
@@ -456,5 +471,67 @@ With an adjusted p-value of `r alpha`,  `r nrow(selected)` molecules are declare
 
 
 
+
+## Experimental design
+
+- la manip consiste à faire un test colorimétrique
+
+    - sur certains puits tout est négatif, sur d'autres tout est positiv
+
+- mortalité des cellules
+
+    - infectées non-traitées ("virus control")
+    - 6 puits
+
+- viabilité des cellules -> 100%
+
+    - cellules non-infectées et non-traitées ("cell control")
+    - 8 puits
+
+- duplicat de traitement à l'arabidol 10µM
+
+    - seuil par plaque
+    - contrôle interne de la protection des cellules contre la mortalité viro-induite
+
+
+- Valeurs de départ
+
+    - mort cellulaire (moyenne sur 6 puits)
+    - viabilité (moyenne sur 8 puits)
+    - valeur du composé (monoplicat) : même concentration de 10µM par composé
+
+Indice d'inhibition: 
+
+$$v = A / (D + A)$$
+
+
+
+$$II = $$
+
+On cherche des molécules inhibitrices avec l'EC50 aux alentours de 5µM -> la concentration standard de 10µM on espère se trouver au début du plateau. 
+
+## A faire
+
+- comparer les listes de composés avant / après normalisation par plaque
+- boxplot ou violin par plaque avant / après
+- standardisation des valeurs de viabilité par la médiane
+- distribution de valeurs plaque par plaque --> vérifier si certaines plaques ont l'air d'avoir plus de 20 cibles (percentile75)
+
+
+- Contrôles intra-plaques
+    - utiliser médiane plutôt que moyenne ?
+
+- Valeurs négatives: 
+
+    - fluctuations expérimentales ?
+    - mortalité induite par le virus + la molécule ?
+    
+- Marquer sur les graphiques les valeurs de l'arbidol (contrôle interne en duplicat)
+
+
+- boxplot des contrôles par plaque: 
+
+    - cell viability
+    - viral 
 
 
