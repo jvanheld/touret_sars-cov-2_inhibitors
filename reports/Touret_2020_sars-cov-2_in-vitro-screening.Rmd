@@ -283,7 +283,7 @@ The raw data consists of viability measurements in cell cultures.
 
 ### Distribution of raw viability measurements
 
-```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the raw viability measures. "}
+```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the raw viability measures. Top: uninfected cells. Middle: infected cells without treatment. Bottom: infected cells treated with a specific molecule. "}
 
 #### Distribution of raw measurements ####
 classInterval <- 500
@@ -295,35 +295,53 @@ breaks = seq(from = xmin, to = xmax, by = classInterval)
 
 par(mfrow = c(3, 1))
 par(mar = c(2,5,3,1))
-hist(inhibTable[wellType == "treated", "viability"], 
-     main = "Treated cells",
-     xlab = "Viability",
-     ylab = "Number of plate wells",
-     las = 1, 
-     breaks = breaks, col = "grey", border = "grey")
-
 hist(inhibTable[wellType == "cellCtl", "viability"], 
-     main = "Cell control (uninfected)",
+     main = "Uninfected (cell control)",
      xlab = "Viability",
      ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "palegreen", border = "palegreen")
 
 hist(inhibTable[wellType == "virusCtl", "viability"], 
-     main = "Virus control (infected, no treatment)",
+     main = "Infected, no treatment (virus control))",
      xlab = "Viability",
      ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "orange", border = "orange")
 
+hist(inhibTable[wellType == "treated", "viability"], 
+     main = "Treated cells",
+     xlab = "Viability",
+     ylab = "Number of plate wells",
+     las = 1, 
+     breaks = breaks, col = "#AACCFF", border = "#AACCFF")
+
+
 par(par.ori)
 
 ```
 
-The distribution is strongly asymmetrical, and seems bi- or multi-modal. 
-This probably reflects the presence of a mixture of distribution, comprising
+- ***Cell control***. 
 
-- controls: uninfected cells
+    - The top panel (green) shows the distribution of viability measurements in controls cultures, where the cells were neither infected by the virus nor treated with a drug. 
+    - Each plate contains 8 wells with uninfected cells (total = `r sum(wellType == "cellCtl")`). 
+
+- ***Virus control***. 
+
+    - The middle panel (orange) shows the distribution of viability measurements in infected cells without drug treatment
+    - The virus control was performed on 6 wells per plate, total = `r sum(wellType == "virusCtl")`). 
+
+- ***Treated cells***. 
+
+    - The bottom distribution (pale blue) shows the viability values for cells infected and treated with a given drug. 
+    
+    - Note that each drug was tested on a single well (no replicates). Indeed, in order to face the COVID-19 emergency, the study attempted to test as fast as possible a wide range of molecules. This first screening was thus performed without replicates. This has to be taken into account for the normalisation, which should be done with no estimation of the variance for the individual drugs. 
+
+    - The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions
+    
+        - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control)
+        - various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution) 
+
 
 
 ## Inhibition index
