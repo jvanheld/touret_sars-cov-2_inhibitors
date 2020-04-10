@@ -79,7 +79,7 @@ library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
   fig.width = 7, fig.height = 5, 
-  fig.path = 'figures/touret_covid19_',
+  fig.path = '../figures/touret_sars-cov-2_inhibitors',
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, eval = TRUE, 
@@ -97,11 +97,12 @@ par.ori <- par(no.readonly = TRUE)
 ## Supplementary data tables
 
 ```{r parameters}
+#### Directories ####
+message("Directories and files")
 
-## Directories
-dir <- c(data = "data", 
-         results = "results",
-         figures = "figures")
+dir <- c(data = "../data", 
+         results = "../results",
+         figures = "../figures")
 dir.create(dir["results"], showWarnings = FALSE, recursive = TRUE)
 
 ## Data file
@@ -112,6 +113,8 @@ supTableFile <- file.path(dir["data"], "suppl-table_Touret-2020.xlsx")
 
 
 ```{r load_table}
+#### Load data from Excel workbook ####
+message("Loading data from excel workbook.")
 supTable <- read.xlsx(file = supTableFile, sheetIndex = 1, rowIndex = TRUE)
 # dim(supTable)
 # View(supTable)
@@ -140,10 +143,38 @@ plateColor <- rainbow(n = length(plateNumbers))
 names(plateColor) <- unique(supTable$plateNumber)
 
 supTable$color <- plateColor[supTable$plateNumber]
-
+message("\tLoaded main table with ", nrow(supTable), " rows ")
 ```
 
 The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` molecules. 
+
+
+## Raw data
+
+```{r raw_data}
+#### Load raw data ####
+message("Loading raw data")
+nbPLates <- 19
+rowsPerPlate <- 8
+colPerPlate <- 12
+
+i <- 1 ## for quick test
+for (i in 1:nbPLates) {
+  message("\tLoading data from plate ", i)
+  sheetName <- paste0("Plate", i)
+  rawMeasures <- read.xlsx(file = supTableFile, 
+                           sheetName = sheetName, 
+                           rowIndex = 30:37,
+                           colIndex = 2:13, header = FALSE)
+  # View(rawMeasures)
+  
+  
+}
+
+```
+
+
+The raw data consists of viability measurements in 
 
 ## Inhibitiion index
 
