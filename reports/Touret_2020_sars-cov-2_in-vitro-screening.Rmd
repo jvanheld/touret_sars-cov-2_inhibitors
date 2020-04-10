@@ -115,7 +115,7 @@ supTableFile <- file.path(dir["data"], "suppl-table_Touret-2020.xlsx")
 ```{r load_table}
 #### Load data from Excel workbook ####
 message("Loading data from excel workbook.")
-supTable <- read.xlsx(file = supTableFile, sheetIndex = 1, rowIndex = TRUE)
+supTable <- read.xlsx(file = supTableFile, sheetIndex = 1)
 # dim(supTable)
 # View(supTable)
 # names(supTable)
@@ -151,7 +151,7 @@ The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` mole
 
 ## Raw data
 
-```{r raw_data}
+```{r raw_data, eval=FALSE}
 #### Load raw data ####
 message("Loading raw data")
 nbPLates <- 19
@@ -159,6 +159,8 @@ rowsPerPlate <- 8
 colPerPlate <- 12
 
 i <- 1 ## for quick test
+dataPerPlate <- list()
+
 for (i in 1:nbPLates) {
   message("\tLoading data from plate ", i)
   sheetName <- paste0("Plate", i)
@@ -166,10 +168,17 @@ for (i in 1:nbPLates) {
                            sheetName = sheetName, 
                            rowIndex = 30:37,
                            colIndex = 2:13, header = FALSE)
+  rownames(rawMeasures) <- LETTERS[1:nrow(rawMeasures)]
+  colnames(rawMeasures) <- 1:ncol(rawMeasures)
   # View(rawMeasures)
   
+  dataPerPlate[[i]] <- list()
+  dataPerPlate[[i]][["rawMeasures"]] <- rawMeasures
   
 }
+
+# View(dataPerPlate)
+# View(dataPerPlate[[1]][["rawMeasures"]])
 
 ```
 
