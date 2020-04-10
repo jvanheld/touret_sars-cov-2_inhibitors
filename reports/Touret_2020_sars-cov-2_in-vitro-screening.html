@@ -623,18 +623,28 @@ Distributions of the raw viability measures. Top: uninfected cells. Middle: infe
 <a class="sourceLine" id="cb6-14" data-line-number="14"><span class="co">## Assign a color to each result according to its plate</span></a>
 <a class="sourceLine" id="cb6-15" data-line-number="15">inhibTable<span class="op">$</span>color &lt;-<span class="st"> </span>plateColor[inhibTable<span class="op">$</span>Plate]</a>
 <a class="sourceLine" id="cb6-16" data-line-number="16"><span class="co"># table(inhibTable$color) ## Check that each plate has 96 wells</span></a></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</a>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">#### Boxplots per plate  ####</span></a>
 <a class="sourceLine" id="cb7-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="co">#### Boxplots per plate  ####</span></a>
-<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="kw">boxplot</span>(viability <span class="op">~</span><span class="st"> </span>Plate, </a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">        <span class="dt">main =</span> <span class="st">&quot;Raw viability per plate&quot;</span>,</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">        <span class="dt">data =</span> inhibTable, </a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">        <span class="dt">las =</span> <span class="dv">1</span>, <span class="dt">col =</span> plateColor, </a>
-<a class="sourceLine" id="cb7-8" data-line-number="8">        <span class="dt">xlab =</span> <span class="st">&quot;Viability (raw)&quot;</span>, </a>
-<a class="sourceLine" id="cb7-9" data-line-number="9">        <span class="dt">horizontal =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
-<a class="sourceLine" id="cb7-11" data-line-number="11">       <span class="dt">title =</span> <span class="st">&quot;Plate&quot;</span>, <span class="dt">fill =</span> plateColor, <span class="dt">cex =</span> <span class="fl">0.8</span>)</a>
-<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="kw">par</span>(par.ori)</a></code></pre></div>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="kw">boxplot</span>(viability <span class="op">~</span><span class="st"> </span>Plate, </a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">        <span class="dt">main =</span> <span class="st">&quot;Raw viability per plate&quot;</span>,</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">        <span class="dt">data =</span> inhibTable, </a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">        <span class="dt">las =</span> <span class="dv">1</span>, <span class="dt">col =</span> plateColor, </a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">        <span class="dt">xlab =</span> <span class="st">&quot;Viability (raw)&quot;</span>, </a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">        <span class="dt">horizontal =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">       <span class="dt">title =</span> <span class="st">&quot;Plate&quot;</span>, <span class="dt">fill =</span> plateColor, <span class="dt">cex =</span> <span class="fl">0.8</span>)</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb7-14" data-line-number="14"><span class="kw">vioplot</span>(viability <span class="op">~</span><span class="st"> </span>Plate, </a>
+<a class="sourceLine" id="cb7-15" data-line-number="15">        <span class="dt">main =</span> <span class="st">&quot;Raw viability per plate&quot;</span>,</a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">        <span class="dt">data =</span> inhibTable, </a>
+<a class="sourceLine" id="cb7-17" data-line-number="17">        <span class="dt">las =</span> <span class="dv">1</span>, <span class="dt">col =</span> plateColor, </a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">        <span class="dt">xlab =</span> <span class="st">&quot;Viability (raw)&quot;</span>, </a>
+<a class="sourceLine" id="cb7-19" data-line-number="19">        <span class="dt">horizontal =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb7-20" data-line-number="20"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb7-21" data-line-number="21">       <span class="dt">title =</span> <span class="st">&quot;Plate&quot;</span>, <span class="dt">fill =</span> plateColor, <span class="dt">cex =</span> <span class="fl">0.8</span>)</a>
+<a class="sourceLine" id="cb7-22" data-line-number="22"><span class="kw">par</span>(par.ori)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsboxplots_per_plate-1.png" alt="Distribution of raw viability valyes per plate" width="80%" />
 <p class="caption">
