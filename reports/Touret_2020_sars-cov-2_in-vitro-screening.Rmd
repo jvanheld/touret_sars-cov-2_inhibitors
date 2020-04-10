@@ -344,6 +344,8 @@ par(par.ori)
 
 ## Distribution per plate
 
+
+
 ```{r plate_colors}
 #### Plate-wise colors ####
 
@@ -365,35 +367,121 @@ inhibTable$color <- plateColor[inhibTable$Plate]
 ```
 
 
-```{r boxplots_per_plate, fig.width=10, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+```{r boxplots_per_plate, fig.width=7, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
 #### Boxplots per plate  ####
 
-par(mfrow = c(2,2))
+# par(mfrow = c(1,2))
+# # names(inhibTable)
+# boxplot(viability ~ Plate, 
+#         main = "Raw viability per plate",
+#         data = inhibTable, 
+#         las = 1, col = plateColor, 
+#         xlab = "Viability (raw)", 
+#         horizontal = TRUE)
+# legend("topright", legend = names(plateColor), 
+#        title = "Plate", fill = plateColor, cex = 0.8)
 
-boxplot(viability ~ Plate, 
+boxplot(viability ~ Plate + wellType, 
         main = "Raw viability per plate",
         data = inhibTable, 
         las = 1, col = plateColor, 
         xlab = "Viability (raw)", 
-        horizontal = TRUE)
+        cex.axis = 0.5,
+        horizontal = TRUE
+        )
+abline(v = seq(from = 0, to = max(inhibTable$viability), by = 2000), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 0, to = max(inhibTable$viability), by = 10000), col = "grey")
+
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
 
-vioplot(viability ~ Plate, 
-        main = "Raw viability per plate",
-        data = inhibTable, 
-        las = 1, col = plateColor, 
-        xlab = "Viability (raw)", 
-        horizontal = TRUE)
-legend("topright", legend = names(plateColor), 
-       title = "Plate", fill = plateColor, cex = 0.8)
 par(par.ori)
+
+```
+
+The boxplot of the raw viability measurements highlights a plate effect, for the treated cells (middle barplots) but also for the untreated virus control (top boxplots) and uninfected cell control (bottom boxplots). 
+
+
+- **Treated:**
+
+    - The medians and interquartile ranges show strong variations between plates. 
+    - In particular, plate 1 (in red) has a the smallest median and a remarkably compact interquartile range. There are many statistical outliers (empty circles) in this plate, which might correspond to the molecules having a significant inhibitory effect. 
+    - In contrast, plates 11 to 15 show a high median and a wide dispersion of the viability measures, and there is not a single statistical outlier. 
+
+- **Virus control**
+
+    - Not surprisingly, untreated infected cells generally gave a very small viability, with small variations (very compact interquartile rectangles)
+    - There is an obvious problem for plate 17, which shows a broad range of values, with a third quartile falling in the range of the uninfected cells. This suggests a problem with at least 2 of the 6 replicates (missed infection ?). Noticeably, the median falls in the same range as for the virus control of the other plates. 
+
+- **Cell control**
+
+    - The cell control performed as expected in all the plates, with high viability values.
+    - Note however that the viability measurements show inter-plate variations, with median values ranging from ~37,000 to ~53,000. 
+
+Importantly, there is a consistency between the inter-plate differences observed for virus control, treated cells and cell control, respectively. For example, plate 2 whose consistently higher value than the other plates for the three types of wells. This highlights the importances to perform a plate-wise standardisation. 
+    
+## Log2-transformed values
+
+We performed a log2 transformation of the raw viability measures in order to normalise them. 
+
+```{r boxplots_per_plate_log2, fig.width=7, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+
+
+#### Boxplots per plate of log2_transformed viability####
+inhibTable$log2V <- log2(inhibTable$viability)
+
+## Box plot per plate and well type
+boxplot(log2V ~ Plate + wellType, 
+        main = "log2-transformed viability",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "log2(V)", 
+        cex.axis = 0.5,
+        horizontal = TRUE)
+abline(v = seq(from = 12, to = max(inhibTable$log2V), by = 0.2), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 12, to = max(inhibTable$log2V), by = 1), col = "grey")
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.8)
+
+par(par.ori)
+
+```
+
+The barplots of log2-transformed viability measures show yet another potential plate bias: in   plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates. 
+
+**I (JvH) think this should be reported to the company that produces these plates**
+
+## Plate-wise standardisation
+
+Taking into account the above-reported results, we apply the following procedure to standardise the individual viability measures. 
+
+1. For each plate, we define two standard values: 
+
+    - $V_c$ is the median viability of the 8 cell controls (uninfected cells)
+    - $V_v$ is the median viability of the 6 virus controls (infected untreated cells)
+    
+    These two values are deliberately estimated with the median measurement of the control replicate, in order to avoid the effect of outliers as denoted for the virus control of plate 17. 
+
+2. A **relative viability index** $V_r$ is computed for each treatment as follows.
+
+$$V_r = \frac{V - V_c}{V_v - V_c} \cdot 100$$
+
+    - $V_r$ provides a viability measurement on a scale where 0 corresponds to the median of infected untreated cells, and 100 to the median of uninfected cells. 
+    - Note that $V_c$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from a cytotoxic effect of the drug, or from a plate bias.
+    - $V_c$ values can in principle also take values higher than 100, denoting a highly efficient treatment. 
+
+```{r relative_viability}
+#### Compute relative viability ####
 
 ```
 
 
 
 ## Inhibition index
+
+The inhibition index is derived from the raw viability measurement in the following way. 
+
+
 
 ### Descriptive stats
 
@@ -750,7 +838,7 @@ With an adjusted p-value of `r alpha`,  `r nrow(selected)` molecules are declare
 
 Indice d'inhibition: 
 
-$$v = A / (D + A)$$
+$$V = A / (D + A)$$
 
 
 
