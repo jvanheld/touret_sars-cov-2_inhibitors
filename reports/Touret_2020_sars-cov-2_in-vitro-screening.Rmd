@@ -276,7 +276,7 @@ kable(t(table(inhibTable$wellType)), caption = "Well types. cellCtl: no infectio
 ```
 
 
-The raw data contains `r nbPlates` plates with `r rowsPerPlate` rows (indiced  `r LETTERS[1]` to `r LETTERS[columnsPerPlate]`) and `r columnsPerPlate` columns (indiced from 1 to `r columnsPerPlate`. )
+The raw data contains `r nbPlates` plates with `r rowsPerPlate` rows (indiced  `r LETTERS[1]` to `r LETTERS[rowsPerPlate]`) and `r columnsPerPlate` columns (indiced from 1 to `r columnsPerPlate`. )
 
 The raw data consists of viability measurements in cell cultures. 
 
@@ -326,7 +326,7 @@ This probably reflects the presence of a mixture of distribution, comprising
 - controls: uninfected cells
 
 
-## Inhibitiion index
+## Inhibition index
 
 ### Descriptive stats
 
