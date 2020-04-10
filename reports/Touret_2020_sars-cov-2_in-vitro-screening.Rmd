@@ -214,9 +214,9 @@ for (i in 1:nbPlates) {
                  sprintf("%02d",1:columnsPerPlate))
     
     ## Compute the start index for the data table
-    startIndex <- (i - 1) * (rowsPerPlate * columnsPerPlate) + (r -1) * columnsPerPlate + 1
+    startIndex <- (i - 1) * (rowsPerPlate * columnsPerPlate) + (r - 1) * columnsPerPlate + 1
     # message(cat("\t\tIDs\t",  startIndex, id))
-    indices <- startIndex:(startIndex + columnsPerPlate -1)
+    indices <- startIndex:(startIndex + columnsPerPlate - 1)
     # length(indices)
     inhibTable[indices, "ID"] <- id
     inhibTable[indices, "Plate"] <- i
@@ -244,12 +244,34 @@ rownames(inhibTable) <- inhibTable$ID
 ## Check consistency between IDs in supplementary Touret Table 1
 ##  and those created here
 touretIDs <- unlist(supTable$ID)
+# length(touretIDs)
 inhibIDs <- inhibTable$ID
+# length(inhibIDs)
 setdiff(touretIDs, inhibIDs)
 setdiff(inhibIDs, touretIDs)
 
 ## Retrieve the molecule names from Table 1 of the bioRxiv workbook
-inhibTable$chemicalName[supTable$ID, "chemicalName"] <- supTable$Chemical.name
+
+length(chemicalName)
+inhibTable$chemicalName <- NA
+inhibTable[inhibTable$ID %in% touretIDs, "chemicalName"] <- 
+  as.vector(supTable$Chemical.name)
+
+## Cell control: uninfected cells
+cellControlIndices <- inhibTable$Column == 1
+inhibTable[cellControlIndices, "chemicalName"] <- "uninfected"
+
+## Virus control: infected cells, no treatment
+virusControlIndices <- (inhibTable$Column == 12) & (inhibTable$Row %in% LETTERS[3:8])
+# table(virusControlIndices)
+inhibTable[virusControlIndices, "chemicalName"] <- "infected no treatment"
+table(inhibTable$chemicalName)
+
+## All the other ones are treated with a given molecule
+inhibTable$type <- NA
+inhibTable[cellControlIndices, "type"] <- "cellCtl"
+inhibTable[virusControlIndices, "type"] <- "virusCtl"
+inhibTable[!(virusControlIndices | cellControlIndices), "type"] <- "treated"
 
 ```
 
@@ -261,18 +283,37 @@ The raw data consists of viability measurements in cell cultures.
 
 ### Distribution of raw viability measurements
 
-```{r raw_viab_distrib, fig.width=7, fig.height=5, out.width="60%"}
+```{r raw_viab_distrib, fig.width=7, fig.height=10, out.width="60%", fig.cap="Distributions of the raw viability measures. "}
 #### Distribution of raw measurements ####
 
+xmin <- floor(min(inhibTable$viability)/100) * 100
+xmax <- ceiling(max(inhibTable$viability)/100) * 100
+breaks = seq(from = xmin, to = xmax, by = 100)
+
 par(mfrow = c(3, 1))
+par(mar = c(2,5,3,1))
 hist(inhibTable$viability, 
      main = "Raw viability measures",
      xlab = "Viability",
      ylab = "Number of measures",
-     las = 1,
-     breaks = 100, col = "grey", border = "grey")
+     las = 1, 
+     breaks = breaks, col = "grey", border = "grey")
 
-par(mfrow = c(1, 1))
+hist(inhibTable[cellControlIndices, "viability"], 
+     main = "Cell control (uninfected)",
+     xlab = "Viability",
+     ylab = "Number of measures",
+     las = 1, 
+     breaks = breaks, col = "palegreen", border = "palegreen")
+
+hist(inhibTable[virusControlIndices, "viability"], 
+     main = "Virus control (infected, no treatment)",
+     xlab = "Viability",
+     ylab = "Number of measures",
+     las = 1, 
+     breaks = breaks, col = "orange", border = "orange")
+
+par(par.ori)
 
 ```
 
