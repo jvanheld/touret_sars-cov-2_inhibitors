@@ -24,5 +24,10 @@ Franck Touret, Magali Gilles, Karine Barral, Antoine Nougairede, Etienne Decroly
 | Web pages | <https://jvanheld.github.io/touret_sars-cov-2_inhibitors/> |
 | Report | [html](reports/Touret_2020_sars-cov-2_in-vitro-screening.html) [pdf](reports/Touret_2020_sars-cov-2_in-vitro-screening.pdf) [Rmd](https://raw.githubusercontent.com/jvanheld/touret_sars-cov-2_inhibitors/master/reports/Touret_2020_sars-cov-2_in-vitro-screening.Rmd) |
 
+********************************
 
-![[SARS-Cov-2 cracked](https://doi.org/10.5281/zenodo.3734643), by Alice van Helden](images/sars-cov-2_cracked_clear_300x200.png)
+![](images/sars-cov-2_cracked_clear_300x200.png)
+
+Alice van Helden. (2020). Covid-19 cracked. Zenodo. http://doi.org/10.5281/zenodo.3734643
+
+********************************
