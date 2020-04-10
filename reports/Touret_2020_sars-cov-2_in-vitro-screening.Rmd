@@ -61,7 +61,7 @@ transition: linear
 
 ```{r libraries, echo=FALSE, results=FALSE, warning=FALSE, message=FALSE}
 #### Install required packages ####
-required.packages <- c("xlsx", "knitr", "fitdistrplus")
+required.packages <- c("xlsx", "readxl", "knitr", "fitdistrplus")
 
 for (pkg in required.packages) {
   if (!require(pkg, character.only = TRUE)) {
@@ -79,7 +79,7 @@ library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
   fig.width = 7, fig.height = 5, 
-  fig.path = '../figures/touret_sars-cov-2_inhibitors',
+  fig.path = 'figures/touret_sars-cov-2_inhibitors',
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, eval = TRUE, 
@@ -102,7 +102,7 @@ message("Directories and files")
 
 dir <- c(data = "../data", 
          results = "../results",
-         figures = "../figures")
+         figures = "figures")
 dir.create(dir["results"], showWarnings = FALSE, recursive = TRUE)
 
 ## Data file
@@ -116,6 +116,7 @@ supTableFile <- file.path(dir["data"], "suppl-table_Touret-2020.xlsx")
 #### Load data from Excel workbook ####
 message("Loading data from excel workbook.")
 supTable <- read.xlsx(file = supTableFile, sheetIndex = 1)
+#supTable <- read_xlsx(path = supTableFile, sheet = 1, col_names = TRUE)
 # dim(supTable)
 # View(supTable)
 # names(supTable)
@@ -129,7 +130,6 @@ supTable <- supTable[!is.na(supTable$ID), ]
 # dim(supTable)
 
 ## Assign row names for convenience
-rownames(supTable) <- supTable[, 1]
 # View(supTable)
 
 
@@ -151,39 +151,136 @@ The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` mole
 
 ## Raw data
 
-```{r raw_data, eval=FALSE}
+```{r raw_data}
 #### Load raw data ####
 message("Loading raw data")
-nbPLates <- 19
+nbPlates <- 19
 rowsPerPlate <- 8
-colPerPlate <- 12
+columnsPerPlate <- 12
 
-i <- 1 ## for quick test
 dataPerPlate <- list()
 
-for (i in 1:nbPLates) {
+## Control 1: uninfected cells
+cellControl <- data.frame(matrix(ncol = 8, nrow = nbPlates))
+colnames(cellControl) <- LETTERS[1:rowsPerPlate]
+
+## Control 2: untreated infected cells
+virusControl <- data.frame(matrix(ncol = 6, nrow = nbPlates))
+colnames(virusControl) <- LETTERS[3:rowsPerPlate]
+
+## Prepare a table to store the raw data
+inhibTable <- data.frame(matrix(ncol = 8, nrow = nbPlates*rowsPerPlate * columnsPerPlate))
+colnames(inhibTable) <- c("ID", 
+                          "Plate", 
+                          "Row", 
+                          "Column", 
+                          "viability", 
+                          "cellControl", 
+                          "virusControl",
+                          "chemicalName")
+
+i <- 2 ## for quick test
+for (i in 1:nbPlates) {
   message("\tLoading data from plate ", i)
   sheetName <- paste0("Plate", i)
-  rawMeasures <- read.xlsx(file = supTableFile, 
-                           sheetName = sheetName, 
-                           rowIndex = 30:37,
-                           colIndex = 2:13, header = FALSE)
+  
+  ## Raw measures
+  # rawMeasures <- read.xlsx(file = supTableFile, 
+  #                          sheetName = sheetName, 
+  #                          rowIndex = 30:37,
+  #                          colIndex = 2:13, header = FALSE)
+  rawMeasures <- read_xlsx(path = supTableFile, col_names = FALSE, 
+                           sheet = sheetName, 
+                           range = "B30:M37", progress = FALSE)
+  rawMeasures <- as.data.frame(rawMeasures)
   rownames(rawMeasures) <- LETTERS[1:nrow(rawMeasures)]
   colnames(rawMeasures) <- 1:ncol(rawMeasures)
+  # dim(rawMeasures)
   # View(rawMeasures)
+
+  ## Extract control values
+  cellControl[i, ] <- as.vector(rawMeasures[,1])
+  virusControl[i, ] <- as.vector(rawMeasures[3:8,12])
+  plateVC <- mean(unlist(virusControl[i, ]))
+  plateCC <- mean(unlist(cellControl[i, ]))
+
+  ## Extract all values
+  r <- 1
+  for (r in 1:rowsPerPlate) {
+    currentRowName <- LETTERS[r]
+    currentValues <- unlist(rawMeasures[currentRowName,])
+    id <- paste0(sprintf("%02d",i),
+                 currentRowName, 
+                 sprintf("%02d",1:columnsPerPlate))
+    
+    ## Compute the start index for the data table
+    startIndex <- (i - 1) * (rowsPerPlate * columnsPerPlate) + (r -1) * columnsPerPlate + 1
+    # message(cat("\t\tIDs\t",  startIndex, id))
+    indices <- startIndex:(startIndex + columnsPerPlate -1)
+    # length(indices)
+    inhibTable[indices, "ID"] <- id
+    inhibTable[indices, "Plate"] <- i
+    inhibTable[indices, "Row"] <- currentRowName
+    inhibTable[indices, "Column"] <- 1:columnsPerPlate
+    inhibTable[indices, "viability"] <- currentValues
+    inhibTable[indices, "virusControl"] <- plateVC
+    inhibTable[indices, "cellControl"] <- plateCC
+  }
   
   dataPerPlate[[i]] <- list()
   dataPerPlate[[i]][["rawMeasures"]] <- rawMeasures
-  
 }
 
+# dim(inhibTable)
+# names(inhibTable)
+# View(inhibTable)
 # View(dataPerPlate)
 # View(dataPerPlate[[1]][["rawMeasures"]])
+# table(inhibTable$Row, inhibTable$Column) ## Check that there are 19 entries for each plate position
+
+## Use the plate well ID as rowname
+rownames(inhibTable) <- inhibTable$ID
+
+## Check consistency between IDs in supplementary Touret Table 1
+##  and those created here
+touretIDs <- unlist(supTable$ID)
+inhibIDs <- inhibTable$ID
+setdiff(touretIDs, inhibIDs)
+setdiff(inhibIDs, touretIDs)
+
+## Retrieve the molecule names from Table 1 of the bioRxiv workbook
+inhibTable$chemicalName[supTable$ID, "chemicalName"] <- supTable$Chemical.name
 
 ```
 
 
-The raw data consists of viability measurements in 
+The raw data contains `r nbPlates` plates with `r rowsPerPlate` rows (indiced  `r LETTERS[1]` to `r LETTERS[columnsPerPlate]`) and `r columnsPerPlate` columns (indiced from 1 to `r columnsPerPlate`. )
+
+The raw data consists of viability measurements in cell cultures. 
+
+
+### Distribution of raw viability measurements
+
+```{r raw_viab_distrib, fig.width=7, fig.height=5, out.width="60%"}
+#### Distribution of raw measurements ####
+
+par(mfrow = c(3, 1))
+hist(inhibTable$viability, 
+     main = "Raw viability measures",
+     xlab = "Viability",
+     ylab = "Number of measures",
+     las = 1,
+     breaks = 100, col = "grey", border = "grey")
+
+par(mfrow = c(1, 1))
+
+```
+
+The distribution is strongly asymmetrical, and seems bi- or multi-modal. 
+This probably reflects the presence of a mixture of distribution, comprising
+
+- controls: uninfected cells
+
 
 ## Inhibitiion index
 
