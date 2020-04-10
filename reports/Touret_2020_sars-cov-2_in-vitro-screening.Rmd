@@ -366,11 +366,20 @@ inhibTable$color <- plateColor[inhibTable$Plate]
 
 
 ```{r boxplots_per_plate, fig.width=10, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+#### Boxplots per plate  ####
 
 par(mfrow = c(2,2))
 
-#### Boxplots per plate  ####
 boxplot(viability ~ Plate, 
+        main = "Raw viability per plate",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "Viability (raw)", 
+        horizontal = TRUE)
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.8)
+
+vioplot(viability ~ Plate, 
         main = "Raw viability per plate",
         data = inhibTable, 
         las = 1, col = plateColor, 
