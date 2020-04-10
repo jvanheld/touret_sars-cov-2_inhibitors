@@ -61,7 +61,7 @@ transition: linear
 
 ```{r libraries, echo=FALSE, results=FALSE, warning=FALSE, message=FALSE}
 #### Install required packages ####
-required.packages <- c("xlsx", "readxl", "knitr", "fitdistrplus")
+required.packages <- c("xlsx", "readxl", "knitr", "fitdistrplus", "vioplot")
 
 for (pkg in required.packages) {
   if (!require(pkg, character.only = TRUE)) {
@@ -337,10 +337,50 @@ par(par.ori)
     
     - Note that each drug was tested on a single well (no replicates). Indeed, in order to face the COVID-19 emergency, the study attempted to test as fast as possible a wide range of molecules. This first screening was thus performed without replicates. This has to be taken into account for the normalisation, which should be done with no estimation of the variance for the individual drugs. 
 
-    - The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions
+    - The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions;
     
-        - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control)
+        - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control);
         - various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution) 
+
+## Distribution per plate
+
+```{r plate_colors}
+#### Plate-wise colors ####
+
+## Assign a color to each plate
+## A trick: we alternate the colors of the rainbow in order 
+## to see the contrast between successive plates
+platePalette <- rainbow(n = length(plateNumbers))
+plateColor <- vector(length = nbPlates)
+oddIndices <- seq(1, nbPlates, 2)
+evenIndices <- seq(2, nbPlates, 2)
+plateColor[oddIndices] <- platePalette[1:length(oddIndices)]
+plateColor[evenIndices] <- platePalette[(length(oddIndices) + 1):nbPlates]
+names(plateColor) <- 1:nbPlates
+
+## Assign a color to each result according to its plate
+inhibTable$color <- plateColor[inhibTable$Plate]
+# table(inhibTable$color) ## Check that each plate has 96 wells
+
+```
+
+
+```{r boxplots_per_plate, fig.width=10, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+
+par(mfrow = c(2,2))
+
+#### Boxplots per plate  ####
+boxplot(viability ~ Plate, 
+        main = "Raw viability per plate",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "Viability (raw)", 
+        horizontal = TRUE)
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.8)
+par(par.ori)
+
+```
 
 
 

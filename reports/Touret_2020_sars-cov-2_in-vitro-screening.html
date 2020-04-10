@@ -596,32 +596,69 @@ Distributions of the raw viability measures. Top: uninfected cells. Middle: infe
 <ul>
 <li><p>The bottom distribution (pale blue) shows the viability values for cells infected and treated with a given drug.</p></li>
 <li><p>Note that each drug was tested on a single well (no replicates). Indeed, in order to face the COVID-19 emergency, the study attempted to test as fast as possible a wide range of molecules. This first screening was thus performed without replicates. This has to be taken into account for the normalisation, which should be done with no estimation of the variance for the individual drugs.</p></li>
-<li><p>The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions</p>
+<li><p>The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions;</p>
 <ul>
-<li>all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control)</li>
+<li>all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control);</li>
 <li>various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution)</li>
 </ul></li>
 </ul></li>
 </ul>
 </div>
 </div>
+<div id="distribution-per-plate" class="section level2">
+<h2>Distribution per plate</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">#### Plate-wise colors ####</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">## Assign a color to each plate</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co">## A trick: we alternate the colors of the rainbow in order </span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="co">## to see the contrast between successive plates</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6">platePalette &lt;-<span class="st"> </span><span class="kw">rainbow</span>(<span class="dt">n =</span> <span class="kw">length</span>(plateNumbers))</a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">plateColor &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> nbPlates)</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">oddIndices &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, nbPlates, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">evenIndices &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">2</span>, nbPlates, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-10" data-line-number="10">plateColor[oddIndices] &lt;-<span class="st"> </span>platePalette[<span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(oddIndices)]</a>
+<a class="sourceLine" id="cb6-11" data-line-number="11">plateColor[evenIndices] &lt;-<span class="st"> </span>platePalette[(<span class="kw">length</span>(oddIndices) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>)<span class="op">:</span>nbPlates]</a>
+<a class="sourceLine" id="cb6-12" data-line-number="12"><span class="kw">names</span>(plateColor) &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span>nbPlates</a>
+<a class="sourceLine" id="cb6-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb6-14" data-line-number="14"><span class="co">## Assign a color to each result according to its plate</span></a>
+<a class="sourceLine" id="cb6-15" data-line-number="15">inhibTable<span class="op">$</span>color &lt;-<span class="st"> </span>plateColor[inhibTable<span class="op">$</span>Plate]</a>
+<a class="sourceLine" id="cb6-16" data-line-number="16"><span class="co"># table(inhibTable$color) ## Check that each plate has 96 wells</span></a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="co">#### Boxplots per plate  ####</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="kw">boxplot</span>(viability <span class="op">~</span><span class="st"> </span>Plate, </a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">        <span class="dt">main =</span> <span class="st">&quot;Raw viability per plate&quot;</span>,</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">        <span class="dt">data =</span> inhibTable, </a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">        <span class="dt">las =</span> <span class="dv">1</span>, <span class="dt">col =</span> plateColor, </a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">        <span class="dt">xlab =</span> <span class="st">&quot;Viability (raw)&quot;</span>, </a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">        <span class="dt">horizontal =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">       <span class="dt">title =</span> <span class="st">&quot;Plate&quot;</span>, <span class="dt">fill =</span> plateColor, <span class="dt">cex =</span> <span class="fl">0.8</span>)</a>
+<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="kw">par</span>(par.ori)</a></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="figures/touret_sars-cov-2_inhibitorsboxplots_per_plate-1.png" alt="Distribution of raw viability valyes per plate" width="80%" />
+<p class="caption">
+Distribution of raw viability valyes per plate
+</p>
+</div>
+</div>
 <div id="inhibition-index" class="section level2">
 <h2>Inhibition index</h2>
 <div id="descriptive-stats" class="section level3">
 <h3>Descriptive stats</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">ii &lt;-<span class="st"> </span>supTable<span class="op">$</span>Inhibition.Index</a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">iiStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb6-3" data-line-number="3">  <span class="dt">mean =</span> <span class="kw">mean</span>(ii),</a>
-<a class="sourceLine" id="cb6-4" data-line-number="4">  <span class="dt">sd =</span> <span class="kw">sd</span>(ii),</a>
-<a class="sourceLine" id="cb6-5" data-line-number="5">  <span class="dt">var =</span> <span class="kw">var</span>(ii),</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6">  <span class="dt">min =</span> <span class="kw">min</span>(ii),</a>
-<a class="sourceLine" id="cb6-7" data-line-number="7">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(ii, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
-<a class="sourceLine" id="cb6-8" data-line-number="8">  <span class="dt">median =</span> <span class="kw">median</span>(ii),</a>
-<a class="sourceLine" id="cb6-9" data-line-number="9">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(ii, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
-<a class="sourceLine" id="cb6-10" data-line-number="10">  <span class="dt">max =</span> <span class="kw">max</span>(ii)</a>
-<a class="sourceLine" id="cb6-11" data-line-number="11">)</a>
-<a class="sourceLine" id="cb6-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb6-13" data-line-number="13"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(iiStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">ii &lt;-<span class="st"> </span>supTable<span class="op">$</span>Inhibition.Index</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">iiStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">  <span class="dt">mean =</span> <span class="kw">mean</span>(ii),</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">  <span class="dt">sd =</span> <span class="kw">sd</span>(ii),</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">  <span class="dt">var =</span> <span class="kw">var</span>(ii),</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">  <span class="dt">min =</span> <span class="kw">min</span>(ii),</a>
+<a class="sourceLine" id="cb8-7" data-line-number="7">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(ii, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
+<a class="sourceLine" id="cb8-8" data-line-number="8">  <span class="dt">median =</span> <span class="kw">median</span>(ii),</a>
+<a class="sourceLine" id="cb8-9" data-line-number="9">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(ii, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
+<a class="sourceLine" id="cb8-10" data-line-number="10">  <span class="dt">max =</span> <span class="kw">max</span>(ii)</a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">)</a>
+<a class="sourceLine" id="cb8-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb8-13" data-line-number="13"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(iiStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>)</a></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -668,13 +705,13 @@ Distributions of the raw viability measures. Top: uninfected cells. Middle: infe
 <div id="distribution" class="section level3">
 <h3>Distribution</h3>
 <p>The distribution of inhibition index values is trongly asymmetrical. The mode is much lower than the mean and the median (robust estimator of central tendency). A normal fit will tuhs give a poor estimate of the p-values.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>Inhibition.Index, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>mean, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>median, <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>Inhibition.Index, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>mean, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> iiStat<span class="op">$</span>median, <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
+<a class="sourceLine" id="cb9-7" data-line-number="7">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsinhib_index_distribution-1.png" alt="Distribution of the inhibition index" width="60%" />
 <p class="caption">
@@ -688,27 +725,27 @@ Distribution of the inhibition index
 <div id="log-transform" class="section level3">
 <h3>Log transform</h3>
 <p>A classical method for normalisation is to take the log of the values. We first had to shift the data in order for all of them to take positive values.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># fit.gamma &lt;- fitdist(data = ii - iiStat$min + 1, distr = &quot;gamma&quot;, method = &quot;mge&quot;)</span></a>
-<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="co"># summary(fit.gamma)</span></a>
-<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co"># </span></a>
-<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co"># plot(fit.gamma)</span></a>
-<a class="sourceLine" id="cb8-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb8-6" data-line-number="6"><span class="co">#### Compute a normalised distribution from inhibition indices ####</span></a>
-<a class="sourceLine" id="cb8-7" data-line-number="7">iiPositive &lt;-<span class="st"> </span>ii <span class="op">-</span><span class="st"> </span>iiStat<span class="op">$</span>min <span class="op">+</span><span class="st"> </span><span class="dv">1</span> <span class="co">## shift the distrib to achieve non-negative numbers</span></a>
-<a class="sourceLine" id="cb8-8" data-line-number="8">logII &lt;-<span class="st"> </span><span class="kw">log</span>(iiPositive)</a>
-<a class="sourceLine" id="cb8-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb8-10" data-line-number="10">logIIStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb8-11" data-line-number="11">  <span class="dt">mean =</span> <span class="kw">mean</span>(logII),</a>
-<a class="sourceLine" id="cb8-12" data-line-number="12">  <span class="dt">sd =</span> <span class="kw">sd</span>(logII),</a>
-<a class="sourceLine" id="cb8-13" data-line-number="13">  <span class="dt">var =</span> <span class="kw">var</span>(logII),</a>
-<a class="sourceLine" id="cb8-14" data-line-number="14">  <span class="dt">min =</span> <span class="kw">min</span>(logII),</a>
-<a class="sourceLine" id="cb8-15" data-line-number="15">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(logII, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
-<a class="sourceLine" id="cb8-16" data-line-number="16">  <span class="dt">median =</span> <span class="kw">median</span>(logII),</a>
-<a class="sourceLine" id="cb8-17" data-line-number="17">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(logII, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
-<a class="sourceLine" id="cb8-18" data-line-number="18">  <span class="dt">max =</span> <span class="kw">max</span>(logII)</a>
-<a class="sourceLine" id="cb8-19" data-line-number="19">)</a>
-<a class="sourceLine" id="cb8-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb8-21" data-line-number="21"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(logIIStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Parameters of the log-normalised inhibition index distribution&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># fit.gamma &lt;- fitdist(data = ii - iiStat$min + 1, distr = &quot;gamma&quot;, method = &quot;mge&quot;)</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="co"># summary(fit.gamma)</span></a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="co"># </span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="co"># plot(fit.gamma)</span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="co">#### Compute a normalised distribution from inhibition indices ####</span></a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">iiPositive &lt;-<span class="st"> </span>ii <span class="op">-</span><span class="st"> </span>iiStat<span class="op">$</span>min <span class="op">+</span><span class="st"> </span><span class="dv">1</span> <span class="co">## shift the distrib to achieve non-negative numbers</span></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">logII &lt;-<span class="st"> </span><span class="kw">log</span>(iiPositive)</a>
+<a class="sourceLine" id="cb10-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10">logIIStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb10-11" data-line-number="11">  <span class="dt">mean =</span> <span class="kw">mean</span>(logII),</a>
+<a class="sourceLine" id="cb10-12" data-line-number="12">  <span class="dt">sd =</span> <span class="kw">sd</span>(logII),</a>
+<a class="sourceLine" id="cb10-13" data-line-number="13">  <span class="dt">var =</span> <span class="kw">var</span>(logII),</a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">  <span class="dt">min =</span> <span class="kw">min</span>(logII),</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(logII, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">  <span class="dt">median =</span> <span class="kw">median</span>(logII),</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(logII, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
+<a class="sourceLine" id="cb10-18" data-line-number="18">  <span class="dt">max =</span> <span class="kw">max</span>(logII)</a>
+<a class="sourceLine" id="cb10-19" data-line-number="19">)</a>
+<a class="sourceLine" id="cb10-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb10-21" data-line-number="21"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(logIIStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Parameters of the log-normalised inhibition index distribution&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Parameters of the log-normalised inhibition index distribution</caption>
 <thead>
@@ -753,14 +790,14 @@ Distribution of the inhibition index
 </tbody>
 </table>
 <p>However, even after log transformation the distribution remains highly asymmetrical, with a mode much smaller than the median and mean.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">#### Histogram of log-normalised values ####</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">hist</span>(logII, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">mean</span>(logII), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">median</span>(logII), <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
-<a class="sourceLine" id="cb9-7" data-line-number="7">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
-<a class="sourceLine" id="cb9-8" data-line-number="8">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co">#### Histogram of log-normalised values ####</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw">hist</span>(logII, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">mean</span>(logII), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">median</span>(logII), <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
+<a class="sourceLine" id="cb11-7" data-line-number="7">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
+<a class="sourceLine" id="cb11-8" data-line-number="8">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorslogII_distrib-1.png" alt="Distribution of the inhibition index" width="60%" />
 <p class="caption">
@@ -774,42 +811,42 @@ Distribution of the inhibition index
 <div id="ranked-values" class="section level3">
 <h3>Ranked values</h3>
 <p>We plot the inhibition index values ordered by plate and position number (top) or ranked by decreasing value (bottom). In both cases, the color denotes the plate number.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))</a>
-<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw">plot</span>(ii,</a>
-<a class="sourceLine" id="cb10-3" data-line-number="3">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Inhibition index values&quot;</span>,</a>
-<a class="sourceLine" id="cb10-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
-<a class="sourceLine" id="cb10-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb10-7" data-line-number="7">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
-<a class="sourceLine" id="cb10-8" data-line-number="8">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
-<a class="sourceLine" id="cb10-9" data-line-number="9">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(ii)<span class="op">*</span><span class="fl">1.05</span>)</a>
-<a class="sourceLine" id="cb10-10" data-line-number="10">     )</a>
-<a class="sourceLine" id="cb10-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
-<a class="sourceLine" id="cb10-12" data-line-number="12">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
-<a class="sourceLine" id="cb10-13" data-line-number="13">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
-<a class="sourceLine" id="cb10-14" data-line-number="14">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
-<a class="sourceLine" id="cb10-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb10-16" data-line-number="16">sortedTable &lt;-<span class="st"> </span>supTable[<span class="kw">order</span>(supTable<span class="op">$</span>Inhibition.Index, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), ]</a>
-<a class="sourceLine" id="cb10-17" data-line-number="17"><span class="kw">plot</span>(sortedTable<span class="op">$</span>Inhibition.Index,</a>
-<a class="sourceLine" id="cb10-18" data-line-number="18">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
-<a class="sourceLine" id="cb10-19" data-line-number="19">     <span class="dt">main =</span> <span class="st">&quot;Ranked inhibition index values&quot;</span>,</a>
-<a class="sourceLine" id="cb10-20" data-line-number="20">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
-<a class="sourceLine" id="cb10-21" data-line-number="21">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb10-22" data-line-number="22">     <span class="dt">col =</span> sortedTable<span class="op">$</span>color,</a>
-<a class="sourceLine" id="cb10-23" data-line-number="23">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
-<a class="sourceLine" id="cb10-24" data-line-number="24">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(ii)<span class="op">*</span><span class="fl">1.05</span>)</a>
-<a class="sourceLine" id="cb10-25" data-line-number="25">     )</a>
-<a class="sourceLine" id="cb10-26" data-line-number="26"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
-<a class="sourceLine" id="cb10-27" data-line-number="27">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
-<a class="sourceLine" id="cb10-28" data-line-number="28">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
-<a class="sourceLine" id="cb10-29" data-line-number="29">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw">plot</span>(ii,</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Inhibition index values&quot;</span>,</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb12-7" data-line-number="7">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb12-8" data-line-number="8">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb12-9" data-line-number="9">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(ii)<span class="op">*</span><span class="fl">1.05</span>)</a>
+<a class="sourceLine" id="cb12-10" data-line-number="10">     )</a>
+<a class="sourceLine" id="cb12-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
+<a class="sourceLine" id="cb12-12" data-line-number="12">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb12-13" data-line-number="13">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb12-14" data-line-number="14">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
+<a class="sourceLine" id="cb12-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb12-16" data-line-number="16">sortedTable &lt;-<span class="st"> </span>supTable[<span class="kw">order</span>(supTable<span class="op">$</span>Inhibition.Index, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), ]</a>
+<a class="sourceLine" id="cb12-17" data-line-number="17"><span class="kw">plot</span>(sortedTable<span class="op">$</span>Inhibition.Index,</a>
+<a class="sourceLine" id="cb12-18" data-line-number="18">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
+<a class="sourceLine" id="cb12-19" data-line-number="19">     <span class="dt">main =</span> <span class="st">&quot;Ranked inhibition index values&quot;</span>,</a>
+<a class="sourceLine" id="cb12-20" data-line-number="20">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
+<a class="sourceLine" id="cb12-21" data-line-number="21">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb12-22" data-line-number="22">     <span class="dt">col =</span> sortedTable<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb12-23" data-line-number="23">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb12-24" data-line-number="24">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(ii)<span class="op">*</span><span class="fl">1.05</span>)</a>
+<a class="sourceLine" id="cb12-25" data-line-number="25">     )</a>
+<a class="sourceLine" id="cb12-26" data-line-number="26"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
+<a class="sourceLine" id="cb12-27" data-line-number="27">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb12-28" data-line-number="28">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb12-29" data-line-number="29">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsinhib_index_ranked-1.png" alt="Values of the inhibition index for all the tested molecules. Molecules are colored according to the plate number. " width="60%" />
 <p class="caption">
 Values of the inhibition index for all the tested molecules. Molecules are colored according to the plate number.
 </p>
 </div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
 <p>The molecule-wised colored plots of inhibition index suggest a plate-wise effect.</p>
 </div>
 </div>
@@ -817,19 +854,19 @@ Values of the inhibition index for all the tested molecules. Molecules are color
 <h2>Plate-wise normalisation</h2>
 <p>We perform a plate-wise normalisation using robust estimators, in order to avoid the effect of outliers (in this case, the suspected outliers are the molecules having an actual inhibitory effect).</p>
 <p>To this purpose, we use: - plate-wise median to estimate the mean - plate-wise standardised inter-quantile range (IQR) to estimate the standard deviation</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co">#### Copute plate-wise statistics ####</span></a>
-<a class="sourceLine" id="cb12-2" data-line-number="2">plateStat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">  <span class="dt">plate =</span> plateNumbers,</a>
-<a class="sourceLine" id="cb12-4" data-line-number="4">  <span class="dt">mean =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> mean)),</a>
-<a class="sourceLine" id="cb12-5" data-line-number="5">  <span class="dt">sd =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> sd)),</a>
-<a class="sourceLine" id="cb12-6" data-line-number="6">  <span class="dt">median =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> median)),</a>
-<a class="sourceLine" id="cb12-7" data-line-number="7">  <span class="dt">min =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> min)),</a>
-<a class="sourceLine" id="cb12-8" data-line-number="8">  <span class="dt">max =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> max)),</a>
-<a class="sourceLine" id="cb12-9" data-line-number="9">  <span class="dt">IQR =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> IQR))</a>
-<a class="sourceLine" id="cb12-10" data-line-number="10">)</a>
-<a class="sourceLine" id="cb12-11" data-line-number="11"><span class="kw">rownames</span>(plateStat) &lt;-<span class="st"> </span>plateStat<span class="op">$</span>plate</a>
-<a class="sourceLine" id="cb12-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb12-13" data-line-number="13"><span class="kw">kable</span>(plateStat, <span class="dt">caption =</span> <span class="st">&quot;Plate-wise statistics&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co">#### Copute plate-wise statistics ####</span></a>
+<a class="sourceLine" id="cb14-2" data-line-number="2">plateStat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb14-3" data-line-number="3">  <span class="dt">plate =</span> plateNumbers,</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4">  <span class="dt">mean =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> mean)),</a>
+<a class="sourceLine" id="cb14-5" data-line-number="5">  <span class="dt">sd =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> sd)),</a>
+<a class="sourceLine" id="cb14-6" data-line-number="6">  <span class="dt">median =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> median)),</a>
+<a class="sourceLine" id="cb14-7" data-line-number="7">  <span class="dt">min =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> min)),</a>
+<a class="sourceLine" id="cb14-8" data-line-number="8">  <span class="dt">max =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> max)),</a>
+<a class="sourceLine" id="cb14-9" data-line-number="9">  <span class="dt">IQR =</span> <span class="kw">as.vector</span>(<span class="kw">by</span>(<span class="dt">data =</span> supTable<span class="op">$</span>Inhibition.Index, <span class="dt">INDICES =</span> supTable<span class="op">$</span>plateNumber, <span class="dt">FUN =</span> IQR))</a>
+<a class="sourceLine" id="cb14-10" data-line-number="10">)</a>
+<a class="sourceLine" id="cb14-11" data-line-number="11"><span class="kw">rownames</span>(plateStat) &lt;-<span class="st"> </span>plateStat<span class="op">$</span>plate</a>
+<a class="sourceLine" id="cb14-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb14-13" data-line-number="13"><span class="kw">kable</span>(plateStat, <span class="dt">caption =</span> <span class="st">&quot;Plate-wise statistics&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Plate-wise statistics</caption>
 <thead>
@@ -1017,33 +1054,33 @@ Values of the inhibition index for all the tested molecules. Molecules are color
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co">## Centering: substract the median</span></a>
-<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="co">## Scaling: divide by IQR</span></a>
-<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="co">## Standardise: multiply by IQR of the normal distribution</span></a>
-<a class="sourceLine" id="cb13-4" data-line-number="4">normII &lt;-<span class="st"> </span>(supTable<span class="op">$</span>Inhibition.Index <span class="op">-</span><span class="st"> </span>plateStat[supTable<span class="op">$</span>plateNumber, <span class="st">&quot;median&quot;</span>]) <span class="op">/</span><span class="st"> </span>plateStat[supTable<span class="op">$</span>plateNumber, <span class="st">&quot;IQR&quot;</span>]</a>
-<a class="sourceLine" id="cb13-5" data-line-number="5"><span class="co"># IQR(normII)</span></a>
-<a class="sourceLine" id="cb13-6" data-line-number="6"><span class="co"># IQR(rnorm(n = 1000000))</span></a>
-<a class="sourceLine" id="cb13-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb13-8" data-line-number="8">normIQR &lt;-<span class="st"> </span><span class="kw">qnorm</span>(<span class="dt">p =</span> <span class="fl">0.75</span>) <span class="op">-</span><span class="st"> </span><span class="kw">qnorm</span>(<span class="dt">p =</span> <span class="fl">0.25</span>)</a>
-<a class="sourceLine" id="cb13-9" data-line-number="9">normII &lt;-<span class="st"> </span>normII <span class="op">*</span><span class="st"> </span>normIQR</a>
-<a class="sourceLine" id="cb13-10" data-line-number="10"><span class="co"># sd(normII)</span></a>
-<a class="sourceLine" id="cb13-11" data-line-number="11"><span class="co"># IQR(normII)</span></a>
-<a class="sourceLine" id="cb13-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb13-13" data-line-number="13">supTable<span class="op">$</span>normInhibIndex &lt;-<span class="st"> </span>normII</a></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co">### Descriptive statistics on the normalised Inhibition Index ####</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2">normIIStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb14-3" data-line-number="3">  <span class="dt">mean =</span> <span class="kw">mean</span>(normII),</a>
-<a class="sourceLine" id="cb14-4" data-line-number="4">  <span class="dt">sd =</span> <span class="kw">sd</span>(normII),</a>
-<a class="sourceLine" id="cb14-5" data-line-number="5">  <span class="dt">IQR =</span> <span class="kw">IQR</span>(normII),</a>
-<a class="sourceLine" id="cb14-6" data-line-number="6">  <span class="dt">var =</span> <span class="kw">var</span>(normII),</a>
-<a class="sourceLine" id="cb14-7" data-line-number="7">  <span class="dt">min =</span> <span class="kw">min</span>(normII),</a>
-<a class="sourceLine" id="cb14-8" data-line-number="8">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(normII, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
-<a class="sourceLine" id="cb14-9" data-line-number="9">  <span class="dt">median =</span> <span class="kw">median</span>(normII),</a>
-<a class="sourceLine" id="cb14-10" data-line-number="10">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(normII, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
-<a class="sourceLine" id="cb14-11" data-line-number="11">  <span class="dt">max =</span> <span class="kw">max</span>(normII)</a>
-<a class="sourceLine" id="cb14-12" data-line-number="12">)</a>
-<a class="sourceLine" id="cb14-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb14-14" data-line-number="14"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(normIIStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Statistics of the plate-wise normalised inhibition index&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co">## Centering: substract the median</span></a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="co">## Scaling: divide by IQR</span></a>
+<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="co">## Standardise: multiply by IQR of the normal distribution</span></a>
+<a class="sourceLine" id="cb15-4" data-line-number="4">normII &lt;-<span class="st"> </span>(supTable<span class="op">$</span>Inhibition.Index <span class="op">-</span><span class="st"> </span>plateStat[supTable<span class="op">$</span>plateNumber, <span class="st">&quot;median&quot;</span>]) <span class="op">/</span><span class="st"> </span>plateStat[supTable<span class="op">$</span>plateNumber, <span class="st">&quot;IQR&quot;</span>]</a>
+<a class="sourceLine" id="cb15-5" data-line-number="5"><span class="co"># IQR(normII)</span></a>
+<a class="sourceLine" id="cb15-6" data-line-number="6"><span class="co"># IQR(rnorm(n = 1000000))</span></a>
+<a class="sourceLine" id="cb15-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb15-8" data-line-number="8">normIQR &lt;-<span class="st"> </span><span class="kw">qnorm</span>(<span class="dt">p =</span> <span class="fl">0.75</span>) <span class="op">-</span><span class="st"> </span><span class="kw">qnorm</span>(<span class="dt">p =</span> <span class="fl">0.25</span>)</a>
+<a class="sourceLine" id="cb15-9" data-line-number="9">normII &lt;-<span class="st"> </span>normII <span class="op">*</span><span class="st"> </span>normIQR</a>
+<a class="sourceLine" id="cb15-10" data-line-number="10"><span class="co"># sd(normII)</span></a>
+<a class="sourceLine" id="cb15-11" data-line-number="11"><span class="co"># IQR(normII)</span></a>
+<a class="sourceLine" id="cb15-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb15-13" data-line-number="13">supTable<span class="op">$</span>normInhibIndex &lt;-<span class="st"> </span>normII</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co">### Descriptive statistics on the normalised Inhibition Index ####</span></a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">normIIStat &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">  <span class="dt">mean =</span> <span class="kw">mean</span>(normII),</a>
+<a class="sourceLine" id="cb16-4" data-line-number="4">  <span class="dt">sd =</span> <span class="kw">sd</span>(normII),</a>
+<a class="sourceLine" id="cb16-5" data-line-number="5">  <span class="dt">IQR =</span> <span class="kw">IQR</span>(normII),</a>
+<a class="sourceLine" id="cb16-6" data-line-number="6">  <span class="dt">var =</span> <span class="kw">var</span>(normII),</a>
+<a class="sourceLine" id="cb16-7" data-line-number="7">  <span class="dt">min =</span> <span class="kw">min</span>(normII),</a>
+<a class="sourceLine" id="cb16-8" data-line-number="8">  <span class="dt">Q1 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(normII, <span class="dt">probs =</span> <span class="fl">0.25</span>)),</a>
+<a class="sourceLine" id="cb16-9" data-line-number="9">  <span class="dt">median =</span> <span class="kw">median</span>(normII),</a>
+<a class="sourceLine" id="cb16-10" data-line-number="10">  <span class="dt">Q3 =</span> <span class="kw">as.vector</span>(<span class="kw">quantile</span>(normII, <span class="dt">probs =</span> <span class="fl">0.75</span>)),</a>
+<a class="sourceLine" id="cb16-11" data-line-number="11">  <span class="dt">max =</span> <span class="kw">max</span>(normII)</a>
+<a class="sourceLine" id="cb16-12" data-line-number="12">)</a>
+<a class="sourceLine" id="cb16-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb16-14" data-line-number="14"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(normIIStat)), <span class="dt">col.names =</span> <span class="st">&quot;Stat&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Statistics of the plate-wise normalised inhibition index&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Statistics of the plate-wise normalised inhibition index</caption>
 <thead>
@@ -1092,13 +1129,13 @@ Values of the inhibition index for all the tested molecules. Molecules are color
 </tbody>
 </table>
 <p>The histogram of plate-wise normalised values shows a clear improvement : the median is much closer to the mode than with the raw or log-transformed II values.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">hist</span>(normII, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
-<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">mean</span>(normII), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">median</span>(normII), <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
-<a class="sourceLine" id="cb15-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb15-5" data-line-number="5"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
-<a class="sourceLine" id="cb15-6" data-line-number="6">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
-<a class="sourceLine" id="cb15-7" data-line-number="7">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">hist</span>(normII, <span class="dt">breaks =</span> <span class="dv">100</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;grey&quot;</span>)</a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">mean</span>(normII), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="kw">abline</span>(<span class="dt">v =</span> <span class="kw">median</span>(normII), <span class="dt">col =</span> <span class="st">&quot;darkgreen&quot;</span>)</a>
+<a class="sourceLine" id="cb17-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb17-5" data-line-number="5"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>),</a>
+<a class="sourceLine" id="cb17-6" data-line-number="6">       <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</a>
+<a class="sourceLine" id="cb17-7" data-line-number="7">       <span class="dt">lwd =</span> <span class="dv">2</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsnormII_distrib-1.png" alt="Distribution of the plate-wise normalised inhibition index" width="60%" />
 <p class="caption">
@@ -1108,74 +1145,74 @@ Distribution of the plate-wise normalised inhibition index
 <div id="normalised-ii-plots" class="section level3">
 <h3>Normalised II plots</h3>
 <p>The plot of normalised II values (top panel) clearly shows that the plate-wise normalisation suppressed the background bias.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))</a>
-<a class="sourceLine" id="cb16-2" data-line-number="2"><span class="kw">plot</span>(normII,</a>
-<a class="sourceLine" id="cb16-3" data-line-number="3">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
-<a class="sourceLine" id="cb16-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Inhibition index values&quot;</span>,</a>
-<a class="sourceLine" id="cb16-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
-<a class="sourceLine" id="cb16-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb16-7" data-line-number="7">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
-<a class="sourceLine" id="cb16-8" data-line-number="8">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
-<a class="sourceLine" id="cb16-9" data-line-number="9">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(normII)<span class="op">*</span><span class="fl">1.05</span>)</a>
-<a class="sourceLine" id="cb16-10" data-line-number="10">     )</a>
-<a class="sourceLine" id="cb16-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
-<a class="sourceLine" id="cb16-12" data-line-number="12">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
-<a class="sourceLine" id="cb16-13" data-line-number="13">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
-<a class="sourceLine" id="cb16-14" data-line-number="14">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
-<a class="sourceLine" id="cb16-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb16-16" data-line-number="16"><span class="co"># names(supTable)</span></a>
-<a class="sourceLine" id="cb16-17" data-line-number="17">normIIrank &lt;-<span class="st"> </span><span class="kw">order</span>(supTable<span class="op">$</span>normInhibIndex, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb16-18" data-line-number="18"><span class="kw">plot</span>(supTable[normIIrank, <span class="st">&quot;normInhibIndex&quot;</span>],</a>
-<a class="sourceLine" id="cb16-19" data-line-number="19">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
-<a class="sourceLine" id="cb16-20" data-line-number="20">     <span class="dt">main =</span> <span class="st">&quot;Ranked inhibition index values&quot;</span>,</a>
-<a class="sourceLine" id="cb16-21" data-line-number="21">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
-<a class="sourceLine" id="cb16-22" data-line-number="22">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb16-23" data-line-number="23">     <span class="dt">col =</span> supTable[normIIrank, <span class="st">&quot;color&quot;</span>],</a>
-<a class="sourceLine" id="cb16-24" data-line-number="24">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
-<a class="sourceLine" id="cb16-25" data-line-number="25">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(normII)<span class="op">*</span><span class="fl">1.05</span>)</a>
-<a class="sourceLine" id="cb16-26" data-line-number="26">     )</a>
-<a class="sourceLine" id="cb16-27" data-line-number="27"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
-<a class="sourceLine" id="cb16-28" data-line-number="28">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
-<a class="sourceLine" id="cb16-29" data-line-number="29">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
-<a class="sourceLine" id="cb16-30" data-line-number="30">       <span class="dt">cex =</span> <span class="fl">0.4</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb18-2" data-line-number="2"><span class="kw">plot</span>(normII,</a>
+<a class="sourceLine" id="cb18-3" data-line-number="3">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
+<a class="sourceLine" id="cb18-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Inhibition index values&quot;</span>,</a>
+<a class="sourceLine" id="cb18-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
+<a class="sourceLine" id="cb18-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb18-7" data-line-number="7">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb18-8" data-line-number="8">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb18-9" data-line-number="9">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(normII)<span class="op">*</span><span class="fl">1.05</span>)</a>
+<a class="sourceLine" id="cb18-10" data-line-number="10">     )</a>
+<a class="sourceLine" id="cb18-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
+<a class="sourceLine" id="cb18-12" data-line-number="12">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb18-13" data-line-number="13">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb18-14" data-line-number="14">       <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
+<a class="sourceLine" id="cb18-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb18-16" data-line-number="16"><span class="co"># names(supTable)</span></a>
+<a class="sourceLine" id="cb18-17" data-line-number="17">normIIrank &lt;-<span class="st"> </span><span class="kw">order</span>(supTable<span class="op">$</span>normInhibIndex, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb18-18" data-line-number="18"><span class="kw">plot</span>(supTable[normIIrank, <span class="st">&quot;normInhibIndex&quot;</span>],</a>
+<a class="sourceLine" id="cb18-19" data-line-number="19">     <span class="dt">panel.first =</span> <span class="kw">grid</span>(),</a>
+<a class="sourceLine" id="cb18-20" data-line-number="20">     <span class="dt">main =</span> <span class="st">&quot;Ranked inhibition index values&quot;</span>,</a>
+<a class="sourceLine" id="cb18-21" data-line-number="21">     <span class="dt">xlab =</span> <span class="st">&quot;Molecules (ranked by inhibition index)&quot;</span>,</a>
+<a class="sourceLine" id="cb18-22" data-line-number="22">     <span class="dt">ylab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb18-23" data-line-number="23">     <span class="dt">col =</span> supTable[normIIrank, <span class="st">&quot;color&quot;</span>],</a>
+<a class="sourceLine" id="cb18-24" data-line-number="24">     <span class="dt">cex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb18-25" data-line-number="25">     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="kw">length</span>(normII)<span class="op">*</span><span class="fl">1.05</span>)</a>
+<a class="sourceLine" id="cb18-26" data-line-number="26">     )</a>
+<a class="sourceLine" id="cb18-27" data-line-number="27"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
+<a class="sourceLine" id="cb18-28" data-line-number="28">       <span class="dt">legend =</span> <span class="kw">names</span>(plateColor), </a>
+<a class="sourceLine" id="cb18-29" data-line-number="29">       <span class="dt">col =</span> plateColor, <span class="dt">pch =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb18-30" data-line-number="30">       <span class="dt">cex =</span> <span class="fl">0.4</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsnormII_ranked-1.png" alt="Values of the plate-wise normalised inhibition index for all the tested molecules. Molecules are colored according to the plate number. " width="60%" />
 <p class="caption">
 Values of the plate-wise normalised inhibition index for all the tested molecules. Molecules are colored according to the plate number.
 </p>
 </div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</a></code></pre></div>
 </div>
 </div>
 <div id="p-value-computation" class="section level2">
 <h2>P-value computation</h2>
 <p>We compute the p-value as the upper tail of the normal distribution (rigth-side test) in order to detect significantly high values of the plate-wise normalised index.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co">#### Compute P-value for the inhibition index ####</span></a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">supTable<span class="op">$</span>p.value &lt;-<span class="st"> </span><span class="kw">pnorm</span>(normII, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">supTable<span class="op">$</span>log10Pval &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>p.value)</a>
-<a class="sourceLine" id="cb18-4" data-line-number="4">supTable<span class="op">$</span>e.value &lt;-<span class="st"> </span>supTable<span class="op">$</span>p.value <span class="op">*</span><span class="st"> </span><span class="kw">length</span>(normII)</a>
-<a class="sourceLine" id="cb18-5" data-line-number="5">supTable<span class="op">$</span>padj &lt;-<span class="st"> </span><span class="kw">p.adjust</span>(supTable<span class="op">$</span>p.value, <span class="dt">method =</span> <span class="st">&quot;fdr&quot;</span>)</a>
-<a class="sourceLine" id="cb18-6" data-line-number="6">supTable<span class="op">$</span>log10Padj &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>padj)</a></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>p.value, <span class="dt">breaks =</span> <span class="dv">20</span>, </a>
-<a class="sourceLine" id="cb19-2" data-line-number="2">     <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>,</a>
-<a class="sourceLine" id="cb19-3" data-line-number="3">     <span class="dt">main =</span> <span class="st">&quot;P-value histogram after plate-wise normalisation&quot;</span>,</a>
-<a class="sourceLine" id="cb19-4" data-line-number="4">     <span class="dt">xlab =</span> <span class="st">&quot;Nominal P-value (unadjusted)&quot;</span>,</a>
-<a class="sourceLine" id="cb19-5" data-line-number="5">     <span class="dt">ylab =</span> <span class="st">&quot;Frequency&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co">#### Compute P-value for the inhibition index ####</span></a>
+<a class="sourceLine" id="cb20-2" data-line-number="2">supTable<span class="op">$</span>p.value &lt;-<span class="st"> </span><span class="kw">pnorm</span>(normII, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb20-3" data-line-number="3">supTable<span class="op">$</span>log10Pval &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>p.value)</a>
+<a class="sourceLine" id="cb20-4" data-line-number="4">supTable<span class="op">$</span>e.value &lt;-<span class="st"> </span>supTable<span class="op">$</span>p.value <span class="op">*</span><span class="st"> </span><span class="kw">length</span>(normII)</a>
+<a class="sourceLine" id="cb20-5" data-line-number="5">supTable<span class="op">$</span>padj &lt;-<span class="st"> </span><span class="kw">p.adjust</span>(supTable<span class="op">$</span>p.value, <span class="dt">method =</span> <span class="st">&quot;fdr&quot;</span>)</a>
+<a class="sourceLine" id="cb20-6" data-line-number="6">supTable<span class="op">$</span>log10Padj &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>padj)</a></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>p.value, <span class="dt">breaks =</span> <span class="dv">20</span>, </a>
+<a class="sourceLine" id="cb21-2" data-line-number="2">     <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>,</a>
+<a class="sourceLine" id="cb21-3" data-line-number="3">     <span class="dt">main =</span> <span class="st">&quot;P-value histogram after plate-wise normalisation&quot;</span>,</a>
+<a class="sourceLine" id="cb21-4" data-line-number="4">     <span class="dt">xlab =</span> <span class="st">&quot;Nominal P-value (unadjusted)&quot;</span>,</a>
+<a class="sourceLine" id="cb21-5" data-line-number="5">     <span class="dt">ylab =</span> <span class="st">&quot;Frequency&quot;</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorspval_histogram-1.png" alt="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index. " width="60%" />
 <p class="caption">
 Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index.
 </p>
 </div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co">#### Volcano plot ####</span></a>
-<a class="sourceLine" id="cb20-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="kw">plot</span>(<span class="dt">x =</span> supTable<span class="op">$</span>normInhibIndex,</a>
-<a class="sourceLine" id="cb20-4" data-line-number="4">     <span class="dt">y =</span> <span class="op">-</span>supTable<span class="op">$</span>log10Padj, </a>
-<a class="sourceLine" id="cb20-5" data-line-number="5">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
-<a class="sourceLine" id="cb20-6" data-line-number="6">     <span class="dt">main =</span> <span class="st">&quot;Volcano plot&quot;</span>,</a>
-<a class="sourceLine" id="cb20-7" data-line-number="7">     <span class="dt">xlab =</span> <span class="st">&quot;Normalised inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb20-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>)</a>
-<a class="sourceLine" id="cb20-9" data-line-number="9"><span class="kw">grid</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="co">#### Volcano plot ####</span></a>
+<a class="sourceLine" id="cb22-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb22-3" data-line-number="3"><span class="kw">plot</span>(<span class="dt">x =</span> supTable<span class="op">$</span>normInhibIndex,</a>
+<a class="sourceLine" id="cb22-4" data-line-number="4">     <span class="dt">y =</span> <span class="op">-</span>supTable<span class="op">$</span>log10Padj, </a>
+<a class="sourceLine" id="cb22-5" data-line-number="5">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb22-6" data-line-number="6">     <span class="dt">main =</span> <span class="st">&quot;Volcano plot&quot;</span>,</a>
+<a class="sourceLine" id="cb22-7" data-line-number="7">     <span class="dt">xlab =</span> <span class="st">&quot;Normalised inhibition index&quot;</span>,</a>
+<a class="sourceLine" id="cb22-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>)</a>
+<a class="sourceLine" id="cb22-9" data-line-number="9"><span class="kw">grid</span>()</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/touret_sars-cov-2_inhibitorsvolcano_plot-1.png" alt="Volcano plot. " width="60%" />
 <p class="caption">
@@ -1185,20 +1222,20 @@ Volcano plot.
 </div>
 <div id="selection-of-candidate-molecules" class="section level2">
 <h2>Selection of candidate molecules</h2>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="co">#### Select significant normalised II values ####</span></a>
-<a class="sourceLine" id="cb21-2" data-line-number="2">alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></a>
-<a class="sourceLine" id="cb21-3" data-line-number="3"><span class="co"># table(supTable$padj &lt; alpha)</span></a>
-<a class="sourceLine" id="cb21-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
-<a class="sourceLine" id="cb21-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb21-6" data-line-number="6"><span class="co">## Sort by decreasing adjusted p-value</span></a>
-<a class="sourceLine" id="cb21-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
-<a class="sourceLine" id="cb21-8" data-line-number="8"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
-<a class="sourceLine" id="cb21-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb21-10" data-line-number="10"><span class="co">## Print selected molecules</span></a>
-<a class="sourceLine" id="cb21-11" data-line-number="11"><span class="kw">kable</span>(selected[ , <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">:</span><span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>)], </a>
-<a class="sourceLine" id="cb21-12" data-line-number="12">      <span class="dt">row.names =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb21-13" data-line-number="13">      <span class="dt">digits =</span> <span class="dv">4</span>,</a>
-<a class="sourceLine" id="cb21-14" data-line-number="14">      <span class="dt">caption =</span> <span class="st">&quot;Candidate moecules sorted by significance after plate-wise normalisation. &quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="co">#### Select significant normalised II values ####</span></a>
+<a class="sourceLine" id="cb23-2" data-line-number="2">alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></a>
+<a class="sourceLine" id="cb23-3" data-line-number="3"><span class="co"># table(supTable$padj &lt; alpha)</span></a>
+<a class="sourceLine" id="cb23-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
+<a class="sourceLine" id="cb23-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb23-6" data-line-number="6"><span class="co">## Sort by decreasing adjusted p-value</span></a>
+<a class="sourceLine" id="cb23-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
+<a class="sourceLine" id="cb23-8" data-line-number="8"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
+<a class="sourceLine" id="cb23-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb23-10" data-line-number="10"><span class="co">## Print selected molecules</span></a>
+<a class="sourceLine" id="cb23-11" data-line-number="11"><span class="kw">kable</span>(selected[ , <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">:</span><span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>)], </a>
+<a class="sourceLine" id="cb23-12" data-line-number="12">      <span class="dt">row.names =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb23-13" data-line-number="13">      <span class="dt">digits =</span> <span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb23-14" data-line-number="14">      <span class="dt">caption =</span> <span class="st">&quot;Candidate moecules sorted by significance after plate-wise normalisation. &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Candidate moecules sorted by significance after plate-wise normalisation.</caption>
 <thead>
