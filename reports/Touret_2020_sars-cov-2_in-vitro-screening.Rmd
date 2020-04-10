@@ -247,12 +247,8 @@ touretIDs <- unlist(supTable$ID)
 # length(touretIDs)
 inhibIDs <- inhibTable$ID
 # length(inhibIDs)
-setdiff(touretIDs, inhibIDs)
-setdiff(inhibIDs, touretIDs)
 
 ## Retrieve the molecule names from Table 1 of the bioRxiv workbook
-
-length(chemicalName)
 inhibTable$chemicalName <- NA
 inhibTable[inhibTable$ID %in% touretIDs, "chemicalName"] <- 
   as.vector(supTable$Chemical.name)
@@ -265,13 +261,17 @@ inhibTable[cellControlIndices, "chemicalName"] <- "uninfected"
 virusControlIndices <- (inhibTable$Column == 12) & (inhibTable$Row %in% LETTERS[3:8])
 # table(virusControlIndices)
 inhibTable[virusControlIndices, "chemicalName"] <- "infected no treatment"
-table(inhibTable$chemicalName)
+
+## Define the treatment type
+wellType <- NA
+wellType[cellControlIndices] <- "cellCtl"
+wellType[virusControlIndices] <- "virusCtl"
 
 ## All the other ones are treated with a given molecule
-inhibTable$type <- NA
-inhibTable[cellControlIndices, "type"] <- "cellCtl"
-inhibTable[virusControlIndices, "type"] <- "virusCtl"
-inhibTable[!(virusControlIndices | cellControlIndices), "type"] <- "treated"
+wellType[!(virusControlIndices | cellControlIndices)] <- "treated"
+
+inhibTable[, "wellType"] <- wellType
+kable(t(table(inhibTable$wellType)), caption = "Well types. cellCtl: no infection; virusCtl: infection without treatment; treated: inhected and treated with one molecule", )
 
 ```
 
@@ -283,33 +283,36 @@ The raw data consists of viability measurements in cell cultures.
 
 ### Distribution of raw viability measurements
 
-```{r raw_viab_distrib, fig.width=7, fig.height=10, out.width="60%", fig.cap="Distributions of the raw viability measures. "}
-#### Distribution of raw measurements ####
+```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the raw viability measures. "}
 
-xmin <- floor(min(inhibTable$viability)/100) * 100
-xmax <- ceiling(max(inhibTable$viability)/100) * 100
-breaks = seq(from = xmin, to = xmax, by = 100)
+#### Distribution of raw measurements ####
+classInterval <- 500
+# xmin <- floor(min(inhibTable$viability)/classInterval) * classInterval
+xmin <- 0 ## Intently start the scale at0 to show the remnant viability
+xmax <- ceiling(max(inhibTable$viability)/classInterval) * classInterval
+breaks = seq(from = xmin, to = xmax, by = classInterval)
+# range(inhibTable$viability)
 
 par(mfrow = c(3, 1))
 par(mar = c(2,5,3,1))
-hist(inhibTable$viability, 
-     main = "Raw viability measures",
+hist(inhibTable[wellType == "treated", "viability"], 
+     main = "Treated cells",
      xlab = "Viability",
-     ylab = "Number of measures",
+     ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "grey", border = "grey")
 
-hist(inhibTable[cellControlIndices, "viability"], 
+hist(inhibTable[wellType == "cellCtl", "viability"], 
      main = "Cell control (uninfected)",
      xlab = "Viability",
-     ylab = "Number of measures",
+     ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "palegreen", border = "palegreen")
 
-hist(inhibTable[virusControlIndices, "viability"], 
+hist(inhibTable[wellType == "virusCtl", "viability"], 
      main = "Virus control (infected, no treatment)",
      xlab = "Viability",
-     ylab = "Number of measures",
+     ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "orange", border = "orange")
 
