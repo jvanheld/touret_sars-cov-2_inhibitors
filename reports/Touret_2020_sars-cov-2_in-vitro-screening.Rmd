@@ -93,6 +93,9 @@ par.ori <- par(no.readonly = TRUE)
 
 ```
 
+# Introduction
+
+# Data
 
 ## Supplementary data tables
 
@@ -149,7 +152,7 @@ message("\tLoaded main table with ", nrow(supTable), " rows ")
 The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` molecules. 
 
 
-## Raw data
+# Raw viability measurements
 
 ```{r raw_data}
 #### Load raw data ####
@@ -281,7 +284,7 @@ The raw data contains `r nbPlates` plates with `r rowsPerPlate` rows (indiced  `
 The raw data consists of viability measurements in cell cultures. 
 
 
-### Distribution of raw viability measurements
+## Distribution of raw viability values
 
 ```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the raw viability measures. Top: uninfected cells. Middle: infected cells without treatment. Bottom: infected cells treated with a specific molecule. "}
 
@@ -342,9 +345,8 @@ par(par.ori)
         - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control);
         - various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution) 
 
-## Distribution per plate
 
-
+## Raw viability boxplots
 
 ```{r plate_colors}
 #### Plate-wise colors ####
@@ -367,7 +369,7 @@ inhibTable$color <- plateColor[inhibTable$Plate]
 ```
 
 
-```{r boxplots_per_plate, fig.width=7, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+```{r boxplots_per_plate, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of raw viability values per plate"}
 #### Boxplots per plate  ####
 
 # par(mfrow = c(1,2))
@@ -420,14 +422,13 @@ The boxplot of the raw viability measurements highlights a plate effect, for the
 
 Importantly, there is a consistency between the inter-plate differences observed for virus control, treated cells and cell control, respectively. For example, plate 2 whose consistently higher value than the other plates for the three types of wells. This highlights the importances to perform a plate-wise standardisation. 
     
-## Log2-transformed values
+## Log2 viability boxplots
 
 We performed a log2 transformation of the raw viability measures in order to normalise them. 
 
-```{r boxplots_per_plate_log2, fig.width=7, fig.height=12, out.width="80%", fig.cap="Distribution of raw viability valyes per plate"}
+```{r boxplots_per_plate_log2, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of log2-transformed viability values per plate"}
 
-
-#### Boxplots per plate of log2_transformed viability####
+#### Boxplots of log2_transformed viability per plate ####
 inhibTable$log2V <- log2(inhibTable$viability)
 
 ## Box plot per plate and well type
@@ -449,9 +450,11 @@ par(par.ori)
 
 The barplots of log2-transformed viability measures show yet another potential plate bias: in   plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates. 
 
-**I (JvH) think this should be reported to the company that produces these plates**
+**Note: I (JvH) think this should be reported to the company that produces these plates**
 
-## Plate-wise standardisation
+# Plate-wise standardisation
+
+## Relative viability
 
 Taking into account the above-reported results, we apply the following procedure to standardise the individual viability measures. 
 
@@ -464,7 +467,7 @@ Taking into account the above-reported results, we apply the following procedure
 
 2. A **relative viability index** $V_r$ is computed for each treatment as follows.
 
-$$V_r = \frac{V - V_c}{V_v - V_c} \cdot 100$$
+    $$V_r = \frac{V - V_c}{V_v - V_c} \cdot 100$$
 
     - $V_r$ provides a viability measurement on a scale where 0 corresponds to the median of infected untreated cells, and 100 to the median of uninfected cells. 
     - Note that $V_c$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from a cytotoxic effect of the drug, or from a plate bias.
@@ -473,9 +476,55 @@ $$V_r = \frac{V - V_c}{V_v - V_c} \cdot 100$$
 ```{r relative_viability}
 #### Compute relative viability ####
 
+## Plate-wise virus control
+vcMed <- as.vector(by(data = inhibTable[wellType == "virusCtl", "viability"], 
+                               INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
+                               FUN = median))
+names(vcMed) <- 1:nbPlates
+
+## Plate-wise cell control
+ccMed <- as.vector(by(data = inhibTable[wellType == "cellCtl", "viability"], 
+                               INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
+                               FUN = median))
+names(ccMed) <- 1:nbPlates
+
+## Relative viability
+inhibTable$vcMed <- vcMed[inhibTable$Plate]
+inhibTable$ccMed <- ccMed[inhibTable$Plate]
+inhibTable$Vr <- 100 * (inhibTable$viability - inhibTable$vcMed) / 
+  (inhibTable$ccMed - inhibTable$vcMed)
+
 ```
 
+## Relative viability boxplots
 
+```{r boxplots_per_plate_Vr, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of relative viability (Vr) values per plate"}
+
+#### Boxplots of relative viability per plate ####
+
+## Box plot per plate and well type
+boxplot(Vr ~ Plate + wellType, 
+        main = "Relative viability",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "Vr", 
+        cex.axis = 0.5,
+        horizontal = TRUE)
+abline(v = seq(from = 0, to = max(inhibTable$Vr), by = 5), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 0, to = max(inhibTable$Vr), by = 25), col = "grey")
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.8)
+
+par(par.ori)
+
+```
+
+The box plots show that the relative viability 
+
+
+********************************************************************
+
+# Analysis of Touret's original Inhibition Index (II)
 
 ## Inhibition index
 
