@@ -610,7 +610,7 @@ par(mfrow = c(1,1))
 
 The dot plot 
 
-## Variance correction
+## Inter-quartile standardisation
 
 ### Plate-wise normalised viability
 
@@ -865,6 +865,10 @@ par(mfrow = c(1,1))
 The plot of normalised viability values (top panel) clearly shows that the plate-wise normalisation suppressed the background bias. However it denotes a new problem: the cell controls show striking differences depending on the plates. Noticeably,they show very high values in plates 1 and 3, and very low values in plates 11 to 19, as well as in plate 4.
 
 ## Three-points normalisation with arbidol
+
+So far we tried two types of plate-wise normalisation, with a specific drawback for teach of them. 
+
+- relative viability ($V_r$) performs a
 
 ```{r}
 #### Select arbidol as plate-wise milestone ####
