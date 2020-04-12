@@ -369,7 +369,7 @@ inhibTable$color <- plateColor[inhibTable$Plate]
 ```
 
 
-```{r boxplots_per_plate, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of raw viability values per plate"}
+```{r boxplots_per_plate_raw, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of raw viability values per plate"}
 #### Boxplots per plate  ####
 
 boxplot(viability ~ Plate + wellType, 
@@ -523,11 +523,7 @@ We thus need a way to perform a between-plates standardisation of the variance.
 
 ### Relative viability plots
 
-### Normalised viability plots
-
-
-
-```{r normV_plot, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise relative viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
+```{r iqNormV_plot, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise relative viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
 yRange <- c(floor(min(inhibTable$Vr)), ceiling(max(inhibTable$Vr)))
 
 par(mfrow = c(4,1))
@@ -608,7 +604,6 @@ par(mfrow = c(1,1))
 ```
 
 
-The dot plot 
 
 ## Inter-quartile standardisation
 
@@ -721,15 +716,15 @@ kable(statPerPlate, caption = "Plate-wise statistics of treated cells. Column pr
 
 
 
-```{r plate_wise_normV}
+```{r plate_wise_iqNormV}
 #### Compute plate-wise normalised viability ####
 
 ## Centering: substract the median
 ## Scaling: divide by IQR
 ## Standardise: multiply by IQR of the normal distribution
 plate <- as.vector(inhibTable$Plate)
-inhibTable$normV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) * statPerPlate[plate, "scaling"]
-# IQR(inhibTable$normV)
+inhibTable$iqNormV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) * statPerPlate[plate, "scaling"]
+# IQR(inhibTable$iqNormV)
 # IQR(rnorm(n = 1000000))
 
 # normIQR <- 2 * (qnorm(p = 0.5) - qnorm(p = 0.25))
@@ -743,66 +738,105 @@ inhibTable$normV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) * s
 
 
 
-```{r normV_stat}
+```{r iqNormV_stat}
 ### Descriptive statistics on the normalised viability ####
-normVstat <- data.frame(
-  mean = mean(inhibTable$normV),
-  sd = sd(inhibTable$normV),
-  IQR = IQR(inhibTable$normV),
-  var = var(inhibTable$normV),
-  min = min(inhibTable$normV),
-  Q1 = as.vector(quantile(inhibTable$normV, probs = 0.25)),
-  median = median(inhibTable$normV),
-  Q3 = as.vector(quantile(inhibTable$normV, probs = 0.75)),
-  max = max(inhibTable$normV)
+iqNormVstat <- data.frame(
+  mean = mean(inhibTable$iqNormV),
+  sd = sd(inhibTable$iqNormV),
+  IQR = IQR(inhibTable$iqNormV),
+  var = var(inhibTable$iqNormV),
+  min = min(inhibTable$iqNormV),
+  Q1 = as.vector(quantile(inhibTable$iqNormV, probs = 0.25)),
+  median = median(inhibTable$iqNormV),
+  Q3 = as.vector(quantile(inhibTable$iqNormV, probs = 0.75)),
+  max = max(inhibTable$iqNormV)
 )
 
-kable(t(normVstat), 
+kable(t(iqNormVstat), 
       col.names = "Stat", 
       caption = "Statistics of the plate-wise normalised viability")
 
 ```
 
 
+### Histograms of inter-quartile standardised viability
+
 The histogram of plate-wise normalised viability shows a clear improvement : the median is much closer to the mode than with the raw or log-transformed II values.
 
-```{r normV_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the plate-wise normalised viability. Top: virus control (infected, untreated); middle: treated; bottom: cell control (untreated)"}
+```{r iqNormV_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the plate-wise normalised viability. Top: virus control (infected, untreated); middle: treated; bottom: cell control (untreated)"}
 #### Histograms of normalised viability ####
-histBreaks = seq(from = floor(min(inhibTable$normV)), 
-                 to = ceiling(max(inhibTable$normV)), by = 0.1)
+histBreaks = seq(from = floor(min(inhibTable$iqNormV)), 
+                 to = ceiling(max(inhibTable$iqNormV)), by = 0.1)
 
 par(mfrow = c(3,1))
-hist(inhibTable[wellType == "virusCtl", "normV"], 
-     main = "Virus control – normalised viability",
+hist(inhibTable[wellType == "virusCtl", "iqNormV"], 
+     main = "Virus control – IQR standardised viability",
      breaks = histBreaks, xlab = "Normalised viability", 
      col = "orange", border = "orange")
-hist(inhibTable[wellType == "treated", "normV"], 
-     main = "Treated cells – normalised viability",
+hist(inhibTable[wellType == "treated", "iqNormV"], 
+     main = "Treated cells – IQR standardised viability",
      breaks = histBreaks, xlab = "Normalised viability", 
      col = "grey", border = "grey")
-abline(v = mean(inhibTable[wellType == "treated", "normV"]), col = "blue")
-abline(v = median(inhibTable[wellType == "treated", "normV"]), col = "darkgreen")
+abline(v = mean(inhibTable[wellType == "treated", "iqNormV"]), col = "blue")
+abline(v = median(inhibTable[wellType == "treated", "iqNormV"]), col = "darkgreen")
 legend("topright", legend = c("mean", "median"),
        col = c("blue", "darkgreen"),
        lwd = 2)
-hist(inhibTable[wellType == "cellCtl", "normV"], 
-     main = "Cell control (untreated) – normalised viability",
+hist(inhibTable[wellType == "cellCtl", "iqNormV"], 
+     main = "Cell control (untreated) – IQR standardised viability",
      breaks = histBreaks, xlab = "Normalised viability", 
      col = "palegreen", border = "palegreen")
 par(par.ori)
 ```
 
-### Normalized viability plots
 
-```{r normV_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise normalised viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
-yRange <- c(floor(min(inhibTable$normV)), ceiling(max(inhibTable$normV)))
+### Boxplots: inter-quartile standardised viability
+
+```{r boxplots_per_plate_iqNormV, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of inter-quartile standardised viability (iqNormV) values per plate"}
+
+#### Boxplots of relative viability per plate ####
+
+## Box plot per plate and well type
+boxplot(iqNormV ~ Plate + wellType, 
+        main = "Inter-quartile standardized viability",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "iqNormV", 
+        cex.axis = 0.5, cex = 0.5,
+        horizontal = TRUE)
+abline(v = seq(from = 0, to = max(inhibTable$iqNormV), by = 1), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 0, to = max(inhibTable$iqNormV), by = 5), col = "grey")
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.8)
+
+par(par.ori)
+
+```
+
+The above boxplots show that the inter-quartile standardization efficiently corrects for the over-dispersion of the plates 11 to 19. However we may expect a lot of sensitivity for these plates. There are however still some weaknesses. 
+
+- The vurus control show good properties: in absence of treatment, infected cells have sligtly negative values, except for 2 outliers in plate 17. 
+
+- The cell control box plots show wide variation in their medians and dispersion: 
+
+    - Uninfected cells (cell control)  have much lower values in some plates (plates 4 and 11-19) than in other ones. This is not expected, since these cells should by definition have the same viability values. 
+    
+    - Even for the plates where the cell controls have a high viability after IQR-based standardisation, there are strong between-plates variations. 
+
+This standardisation seems thus efficient to correct the apparent over-dispersion of plates 11 to 19, and thereby reduce the rate of likely false positives, but the wide between-plate variability of the untreated cells suggest that the resulting z-scores should not be interpreted as indicators of viability.
+
+
+### Dot plots: inter-quartile standardised viability
+
+```{r iqNormV_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise normalised viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
+yRange <- c(floor(min(inhibTable$iqNormV)), ceiling(max(inhibTable$iqNormV)))
 
 par(mfrow = c(4,1))
-plot(inhibTable[wellType == "virusCtl", "normV"],
+plot(inhibTable[wellType == "virusCtl", "iqNormV"],
      panel.first = grid(),
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
-     ylab = "normV",
+     ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "virusCtl", "color"],
      cex = 0.5, las = 1
@@ -812,26 +846,26 @@ legend("topright",
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
-plot(inhibTable[wellType == "treated", "normV"],
+plot(inhibTable[wellType == "treated", "iqNormV"],
      panel.first = grid(),
-     main = "Normalised viability (normV)",
+     main = "Normalised viability (iqNormV)",
      xlab = "Molecules",
-     ylab = "normV",
+     ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "treated", "color"],
      cex = 0.5, las = 1,
-     xlim = c(0, length(inhibTable[wellType == "treated", "normV"])*1.05)
+     xlim = c(0, length(inhibTable[wellType == "treated", "iqNormV"])*1.05)
      )
 abline(h = 0)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
-plot(inhibTable[wellType == "cellCtl", "normV"],
+plot(inhibTable[wellType == "cellCtl", "iqNormV"],
      panel.first = grid(),
      main = "Cell control (uninfected)",
      xlab = "Replicates, sorted per plate",
-     ylab = "normV",
+     ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "cellCtl", "color"],
      cex = 0.5, las = 1
@@ -842,15 +876,15 @@ legend("topright",
        col = plateColor, pch = 1, 
        cex = 0.7)
 # names(supTable)
-normVrank <- order(inhibTable$normV, decreasing = TRUE)
-plot(inhibTable[normVrank, "normV"],
+iqNormVrank <- order(inhibTable$iqNormV, decreasing = TRUE)
+plot(inhibTable[iqNormVrank, "iqNormV"],
      main = "Ranked normalised viability values",
-     xlab = "Molecules (ranked by normV index)",
-     ylab = "normV",
-     col = inhibTable[normVrank, "color"],
+     xlab = "Molecules (ranked by iqNormV index)",
+     ylab = "iqNormV",
+     col = inhibTable[iqNormVrank, "color"],
      cex = 0.5, las = 1,
      panel.first = grid(),
-     xlim = c(0, length(normVrank) * 1.05)
+     xlim = c(0, length(iqNormVrank) * 1.05)
      )
 abline(h = 0)
 legend("topright", 
@@ -886,9 +920,9 @@ inhibTable[arbidolPlates, c("ID", "chemicalName")]
 
 We compute the p-value as the upper tail of the normal distribution (rigth-side test) in order to detect significantly high values of the plate-wise normalised index.
 
-```{r normVpval}
+```{r iqNormVpval}
 #### Compute P-value for the inhibition index ####
-inhibTable$p.value <- pnorm(inhibTable$normV, mean = 0, sd = 1, lower.tail = FALSE)
+inhibTable$p.value <- pnorm(inhibTable$iqNormV, mean = 0, sd = 1, lower.tail = FALSE)
 inhibTable$log10Pval <- log10(inhibTable$p.value)
 inhibTable$e.value <- inhibTable$p.value * sum(wellType == "treated")
 inhibTable$padj <- NA
@@ -899,7 +933,7 @@ inhibTable$log10Padj <- log10(inhibTable$padj)
 
 ```
 
-```{r normVpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index. "}
+```{r iqNormVpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index. "}
 hist(inhibTable[wellType == "treated", "p.value"], 
      breaks = 20, 
      col = "grey",
@@ -918,7 +952,7 @@ hist(inhibTable[wellType == "treated", "p.value"],
 # 
 ```
 
-```{r normV_manhattan_plot, fig.width=7, fig.height=4, out.width="80%", fig.cap="Volcano plot. "}
+```{r iqNormV_manhattan_plot, fig.width=7, fig.height=4, out.width="80%", fig.cap="Volcano plot. "}
 #### Manhattan plot ####
 plot(x = -inhibTable[wellType == "treated", "log10Padj"], 
      col = inhibTable[wellType == "treated", "color"],
@@ -940,7 +974,7 @@ legend("topright",
 ```
 
 
-```{r normV_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
+```{r iqNormV_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
 #### Volcano plot ####
 plot(x = inhibTable[wellType == "treated", "Vr"],
      y = -inhibTable[wellType == "treated", "log10Padj"], 
@@ -955,7 +989,7 @@ grid()
 
 ## Selection of candidate molecules
 
-```{r normV_candidates}
+```{r iqNormV_candidates}
 
 #### Select significant normalised II values ####
 alpha <- 0.05
