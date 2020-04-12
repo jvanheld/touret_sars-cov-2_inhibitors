@@ -614,10 +614,17 @@ The dot plot
 
 ### Plate-wise normalised viability
 
-We perform a plate-wise normalisation with a centering on the median and a scaling to compensate for the plate-wise variance effect denoted above.  To this purpose, we compute z-scores from the original value: 
+We perform a plate-wise normalisation with a centering on the median and a scaling to compensate for the plate-wise variance effect denoted above. To this purpose, we compute z-scores from the original value. 
 
-- centering: substract an estimator of the plate-wise mean
-- scaling: divide by an estimator of the plate-wise standard deviation
+- centering: substract an estimator of the plate-wise mean ;
+- scaling: divide by an estimator of the plate-wise standard deviation ($\hat{\sigma_i}$)
+
+$$z_{c,i} = \frac{V_c - \hat{\mu_i}}{\hat{\sigma_i}}$$
+where 
+
+- $V_c$ is the viability for molecule $c$;
+- $\hat{\mu_i}$ is the estimate for the mean viability of all the treated cells in plate $i$;
+- $\hat{\sigma_i}$ is the estimate for the standard deviation of all the treated cells in plate $i$;
 
 In classical statistics, the estimators of centrality and dispersion are derived from the sample mean and standard deviation, respectively:
 
@@ -631,11 +638,12 @@ One possibility would be to use the standard deviation of the virus control to t
 Another strategy is to consider that the variance (and standard deviation) can be estimated from the bulk of treated cell viability measures themselves, and to use **robust estimators** of the central tendency (i.e. the plate-wise median) and dispersion (i.e. the plate-wise interquartile range).  
 
 
-This relies on the assumption that, *in each plate*, the number of active molecule (statistical outliers). Since teach plate contains tests of 80 molecules, there are 19 molecules above the third quartile ($Q3$). However, we know that the plates were manufactured with some grouping of molecules of the same structural family.  It is not impossible that some plate contains more than 19 molecules having an inhibitory effect. Such a situation would result in a loss of sensitivity, since the presence of active molecules in the inter-quartile range would lead to over-estimate the dispersion. 
+This approach relies on the assumption that, *in each plate*, the number of active molecule (statistical outliers). Since teach plate contains tests of 80 molecules, there are 19 molecules above the third quartile ($Q3$). However, it has to be noted that the plates were manufactured with some grouping of molecules of the same structural family.  It might thus happen that some plates contain more than 19 molecules having an inhibitory effect. Such a situation would result in a loss of sensitivity, since the presence of active molecules in the inter-quartile range would lead to over-estimate the dispersion. 
 
 An alternative is to estimate the dispersion based on the range between the first quartile ($Q1$) and the median ($\tilde{x}$) of each plate. 
 
 In summary, we compute robust estimators, in order to avoid the effect of outliers (in this case, the suspected outliers are the molecules having an actual inhibitory effect). To this purpose, we use:
+
 - plate-wise median viability ($\tilde{v}$) to estimate the mean
 - plate-wise standardised inter-quantile range (IQR) to estimate the standard deviation
 
@@ -685,12 +693,29 @@ statPerPlate <- data.frame(
 )
 rownames(statPerPlate) <- statPerPlate$Plate
 
+
+```
+
+
+We define a plate-wise scaling factor from the interquantile range, standardized by the inter-quartile range of a Gaussian distribution. 
+
+$$S_i = \frac{Q3_N - Q1_N}{Q3_i - Q3_i} = \frac{`r round(digits=3, qnorm(0.75) - qnorm(0.25))`}{Q3_i - Q3_i}$$
+
+Where $Q1$ and $Q3$ denote the first and third quartile, $N$ the Normal distribution, and $i$ is the plate number. 
+
+The viability measures of each plate are then multiplied by the corresponding scaling factor to obtain standardized values, which will have the same inter-quartile range as the normal distribution. 
+
+The table below indicates the plate-wise statistics and scaling factor. 
+
+```{r scaling_factor}
 ## Compute the scaling factor as the difference between median and Q1
 ## standardised relative to the same difference in a normal distribution.
-statPerPlate$scaling <- (statPerPlate$TrMedian - statPerPlate$TrQ1) / 
-   (qnorm(p = 0.5) - qnorm(p = 0.25))
+statPerPlate$scaling <- (qnorm(p = 0.5) - qnorm(p = 0.25)) / (statPerPlate$TrMedian - statPerPlate$TrQ1)
 
-kable(statPerPlate, caption = "Plate-wise statistics of treated cells")
+## Compute scaling factor based on the standardized inter-quartile range.
+statPerPlate$scaling <- (qnorm(p = 0.75) - qnorm(p = 0.25)) / (statPerPlate$TrQ3 - statPerPlate$TrQ1) 
+
+kable(statPerPlate, caption = "Plate-wise statistics of treated cells. Column prefixes: Tr = treated cells; CC = cell control (uninfected cells); VC = virus control (infected, untreated cells). ")
 
 ```
 
@@ -703,7 +728,7 @@ kable(statPerPlate, caption = "Plate-wise statistics of treated cells")
 ## Scaling: divide by IQR
 ## Standardise: multiply by IQR of the normal distribution
 plate <- as.vector(inhibTable$Plate)
-inhibTable$normV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) / statPerPlate[plate, "scaling"]
+inhibTable$normV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) * statPerPlate[plate, "scaling"]
 # IQR(inhibTable$normV)
 # IQR(rnorm(n = 1000000))
 
@@ -767,10 +792,10 @@ hist(inhibTable[wellType == "cellCtl", "normV"],
 par(par.ori)
 ```
 
-### Normalised viability plots
+### Normalized viability plots
 
 ```{r normV_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise normalised viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
-yRange <- c(floor(inhibTable$normV), floor(inhibTable$normV))
+yRange <- c(floor(min(inhibTable$normV)), ceiling(max(inhibTable$normV)))
 
 par(mfrow = c(4,1))
 plot(inhibTable[wellType == "virusCtl", "normV"],
@@ -778,9 +803,11 @@ plot(inhibTable[wellType == "virusCtl", "normV"],
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
      ylab = "normV",
+     ylim = yRange,
      col = inhibTable[wellType == "virusCtl", "color"],
-     cex = 0.3
+     cex = 0.5, las = 1
      )
+abline(h = 0)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -790,10 +817,12 @@ plot(inhibTable[wellType == "treated", "normV"],
      main = "Normalised viability (normV)",
      xlab = "Molecules",
      ylab = "normV",
+     ylim = yRange,
      col = inhibTable[wellType == "treated", "color"],
-     cex = 0.3,
+     cex = 0.5, las = 1,
      xlim = c(0, length(inhibTable[wellType == "treated", "normV"])*1.05)
      )
+abline(h = 0)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -803,9 +832,11 @@ plot(inhibTable[wellType == "cellCtl", "normV"],
      main = "Cell control (uninfected)",
      xlab = "Replicates, sorted per plate",
      ylab = "normV",
+     ylim = yRange,
      col = inhibTable[wellType == "cellCtl", "color"],
-     cex = 0.3
+     cex = 0.5, las = 1
      )
+abline(h = 0)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -817,10 +848,11 @@ plot(inhibTable[normVrank, "normV"],
      xlab = "Molecules (ranked by normV index)",
      ylab = "normV",
      col = inhibTable[normVrank, "color"],
-     cex = 0.3,
+     cex = 0.5, las = 1,
      panel.first = grid(),
      xlim = c(0, length(normVrank) * 1.05)
      )
+abline(h = 0)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -830,7 +862,20 @@ par(mfrow = c(1,1))
 ```
 
 
-The plot of normalised viability values (top panel) clearly shows that the plate-wise normalisation suppressed the background bias. 
+The plot of normalised viability values (top panel) clearly shows that the plate-wise normalisation suppressed the background bias. However it denotes a new problem: the cell controls show striking differences depending on the plates. Noticeably,they show very high values in plates 1 and 3, and very low values in plates 11 to 19, as well as in plate 4.
+
+## Three-points normalisation with arbidol
+
+```{r}
+#### Select arbidol as plate-wise milestone ####
+
+# names(inhibTable)
+arbidolPlates <- (inhibTable$Column == 12) & (inhibTable$Row %in% c("A", "B"))
+inhibTable[arbidolPlates, "chemicalName"] <- "Arbidol"
+inhibTable[arbidolPlates, c("ID", "chemicalName")]
+# View(table(inhibTable$chemicalName))
+
+```
 
 
 ## P-value computation
@@ -846,6 +891,8 @@ inhibTable$padj <- NA
 inhibTable[wellType == "treated", "padj"] <- 
   p.adjust(inhibTable[wellType == "treated", "p.value"], method = "fdr")
 inhibTable$log10Padj <- log10(inhibTable$padj)
+
+
 ```
 
 ```{r normVpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalised inhibition index. "}
@@ -908,6 +955,10 @@ grid()
 
 #### Select significant normalised II values ####
 alpha <- 0.05
+
+kable(table(inhibTable$padj < alpha))
+
+
 # table(inhibTable$padj < alpha)
 selected <- subset(inhibTable, inhibTable$padj < alpha)
 
