@@ -1,6 +1,6 @@
 ---
 title: "Statistical analysis of *in vitro* screening for inhibitors of viral infection "
-author: "Touret et al. (2020). "
+author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire1, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -54,7 +54,7 @@ output:
     toc: yes
     toc_depth: 3
 font-import: http://fonts.googleapis.com/css?family=Risque
-subtitle:  Exploration of the results
+subtitle:  Normalisation and target selection methods
 font-family: Garamond
 transition: linear
 ---
@@ -348,21 +348,6 @@ par(par.ori)
         - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control);
         - various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution) 
 
-### Arbidol treatment
-
-A treatment with 10µM Arbidol -- a broad-spectrum antiviral -- was used as control, with duplicate test in 2 wells per plate. 
-
-
-```{r arbidol_wells}
-#### Select arbidol duplicates as plate-wise milestones ####
-arbidolWells <- (inhibTable$Column == 12) & (inhibTable$Row %in% c("A", "B"))
-inhibTable[arbidolWells, "chemicalName"] <- "Arbidol"
-# inhibTable[arbidolWells, c("ID", "chemicalName")]
-```
-
-
-
-## Raw viability boxplots
 
 ```{r plate_colors}
 #### Plate-wise colors ####
@@ -380,17 +365,40 @@ names(plateColor) <- 1:nbPlates
 
 ## Assign a color to each result according to its plate
 inhibTable$color <- plateColor[inhibTable$Plate]
+inhibTable$pch <- 1 # point type for dot plots
+inhibTable[inhibTable$wellType == "cellCtl", "pch"] <- 5 
+inhibTable[inhibTable$wellType == "virusCtl", "pch"] <- 17
 # table(inhibTable$color) ## Check that each plate has 96 wells
+# table(inhibTable$pch)
 
 ```
 
-```{r arbidol_raw}
+
+### Arbidol treatment
+
+A treatment with 10µM Arbidol -- a broad-spectrum antiviral -- was used as control, with duplicate test in 2 wells per plate. 
+
+
+```{r arbidol_wells}
+#### Select arbidol duplicates as plate-wise milestones ####
+arbidolWells <- (inhibTable$Column == 12) & (inhibTable$Row %in% c("A", "B"))
+inhibTable[arbidolWells, "chemicalName"] <- "Arbidol"
+# inhibTable[arbidolWells, c("ID", "chemicalName")]
+
 #### Extract raw viability measures per plate for arbidol ####
-
 arbidoltV <- inhibTable[arbidolWells, c("Plate", "viability")]
+arbidolColor <- "black"
+arbidolPch <- 19
+inhibTable[arbidolWells, "color"] <- arbidolColor
+inhibTable[arbidolWells, "pch"] <- arbidolPch
 
+# table(inhibTable$color)
 
 ```
+
+
+
+## Raw viability boxplots
 
 
 ```{r boxplots_per_plate_raw, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of raw viability values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Orange dots denote the arbidol control duplicates. "  }
@@ -409,8 +417,10 @@ abline(v = seq(from = 0, to = max(inhibTable$viability), by = 10000), col = "gre
 # View(rawBoxPlot)
 
 ## Add points to denote the arbidol controls
-stripchart(viability ~ Plate, vertical = FALSE, data = inhibTable[arbidolWells, ],
-    method = "jitter", add = TRUE, pch = 20, cex = 0.7, col = 'orange')
+stripchart(viability ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = arbidolColor, pch = arbidolPch)
 
 
 legend("topright", legend = names(plateColor), 
@@ -462,8 +472,10 @@ legend("topright", legend = names(plateColor),
        title = "Plate", fill = plateColor, cex = 0.8)
 
 ## Add points to denote the arbidol controls
-stripchart(log2V ~ Plate, vertical = FALSE, data = inhibTable[arbidolWells, ],
-    method = "jitter", add = TRUE, pch = 20, cex = 0.7, col = 'orange')
+stripchart(log2V ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = arbidolColor, pch = arbidolPch)
 
 par(par.ori)
 
@@ -537,8 +549,10 @@ legend("topright", legend = names(plateColor),
        title = "Plate", fill = plateColor, cex = 0.8)
 
 ## Add points to denote the arbidol controls
-stripchart(Vr ~ Plate, vertical = FALSE, data = inhibTable[arbidolWells, ],
-    method = "jitter", add = TRUE, pch = 20, cex = 0.7, col = 'orange')
+stripchart(Vr ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = arbidolColor, pch = arbidolPch)
 
 par(par.ori)
 
@@ -562,12 +576,14 @@ We thus need a way to perform a between-plates standardisation of the variance.
 ```{r iqNormV_plot, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise relative viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
 yRange <- c(floor(min(inhibTable$Vr)), ceiling(max(inhibTable$Vr)))
 
+## Virus control plots
 par(mfrow = c(4,1))
 plot(inhibTable[wellType == "virusCtl", "Vr"],
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
      ylab = "relative viability",
      col = inhibTable[wellType == "virusCtl", "color"],
+     pch = inhibTable[wellType == "virusCtl", "pch"],
      ylim = yRange,
      xlim = c(0, (nbPlates * 6 * 1.05)),
      panel.first = c(abline(h = 0), 
@@ -582,11 +598,14 @@ legend("topright",
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
+
+## Treated cells
 plot(inhibTable[wellType == "treated", "Vr"],
      main = "Relative viability (Vr)",
      xlab = "Molecules",
      ylab = "relative viability",
      col = inhibTable[wellType == "treated", "color"],
+     pch = inhibTable[wellType == "treated", "pch"],
      ylim = yRange,
      xlim = c(0, (nbPlates * 80 * 1.05)),
      panel.first = c(abline(h = 0), 
@@ -601,11 +620,14 @@ legend("topright",
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
+
+## Cell control
 plot(inhibTable[wellType == "cellCtl", "Vr"],
      main = "Cell control (uninfected)",
      xlab = "Replicates, sorted per plate",
      ylab = "relative viability",
      col = inhibTable[wellType == "cellCtl", "color"],
+     pch = inhibTable[wellType == "cellCtl", "pch"],
      ylim = yRange,
      xlim = c(0, (nbPlates * 8 * 1.05)),
      panel.first = c(abline(h = 0), 
@@ -621,12 +643,15 @@ legend("topright",
        col = plateColor, pch = 1, 
        cex = 0.7)
 # names(supTable)
+
+## Rank plot
 VrRank <- order(inhibTable$Vr, decreasing = TRUE)
 plot(inhibTable[VrRank, "Vr"],
      main = "Ranked relative viability values",
      xlab = "Molecules (ranked by relative viability)",
      ylab = "relative viability",
      col = inhibTable[VrRank, "color"],
+     pch = inhibTable[VrRank, "pch"],
      cex = 0.5,
      panel.first = grid(),
      xlim = c(0, length(VrRank) * 1.05)
@@ -849,8 +874,10 @@ legend("topright", legend = names(plateColor),
        title = "Plate", fill = plateColor, cex = 0.8)
 
 ## Add points to denote the arbidol controls
-stripchart(iqNormV ~ Plate, vertical = FALSE, data = inhibTable[arbidolWells, ],
-    method = "jitter", add = TRUE, pch = 20, cex = 0.7, col = 'orange')
+stripchart(iqNormV ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = arbidolColor, pch = arbidolPch)
 
 par(par.ori)
 
@@ -874,6 +901,7 @@ This standardisation seems thus efficient to correct the apparent over-dispersio
 ```{r iqNormV_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise IQR-standardised viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types)"}
 yRange <- c(floor(min(inhibTable$iqNormV)), ceiling(max(inhibTable$iqNormV)))
 
+## Virus control
 par(mfrow = c(4,1))
 plot(inhibTable[wellType == "virusCtl", "iqNormV"],
      panel.first = grid(),
@@ -882,6 +910,7 @@ plot(inhibTable[wellType == "virusCtl", "iqNormV"],
      ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "virusCtl", "color"],
+     pch = inhibTable[wellType == "virusCtl", "pch"],
      cex = 0.5, las = 1
      )
 abline(h = 0)
@@ -889,6 +918,8 @@ legend("topright",
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
+
+## Treated cells
 plot(inhibTable[wellType == "treated", "iqNormV"],
      panel.first = grid(),
      main = "IQR-standardised viability (iqNormV)",
@@ -896,6 +927,7 @@ plot(inhibTable[wellType == "treated", "iqNormV"],
      ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "treated", "color"],
+     pch = inhibTable[wellType == "treated", "pch"],
      cex = 0.5, las = 1,
      xlim = c(0, length(inhibTable[wellType == "treated", "iqNormV"])*1.05)
      )
@@ -904,6 +936,8 @@ legend("topright",
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
+
+## Cell control
 plot(inhibTable[wellType == "cellCtl", "iqNormV"],
      panel.first = grid(),
      main = "Cell control (uninfected)",
@@ -911,6 +945,7 @@ plot(inhibTable[wellType == "cellCtl", "iqNormV"],
      ylab = "iqNormV",
      ylim = yRange,
      col = inhibTable[wellType == "cellCtl", "color"],
+     pch = inhibTable[wellType == "cellCtl", "pch"],
      cex = 0.5, las = 1
      )
 abline(h = 0)
@@ -919,12 +954,15 @@ legend("topright",
        col = plateColor, pch = 1, 
        cex = 0.7)
 # names(supTable)
+
+## Rank plot
 iqNormVrank <- order(inhibTable$iqNormV, decreasing = TRUE)
 plot(inhibTable[iqNormVrank, "iqNormV"],
      main = "Ranked IQR-standardised viability values",
      xlab = "Molecules (ranked by iqNormV index)",
      ylab = "iqNormV",
      col = inhibTable[iqNormVrank, "color"],
+     pch = inhibTable[iqNormVrank, "pch"],
      cex = 0.5, las = 1,
      panel.first = grid(),
      xlim = c(0, length(iqNormVrank) * 1.05)
@@ -983,6 +1021,7 @@ hist(inhibTable[wellType == "treated", "p.value"],
 #### Manhattan plot ####
 plot(x = -inhibTable[wellType == "treated", "log10Padj"], 
      col = inhibTable[wellType == "treated", "color"],
+     pch = inhibTable[wellType == "treated", "pch"],
      main = "Significance plot",
      xlab = "Relative viability",
      ylab = "Significance = -log10(Padj)",
@@ -1006,10 +1045,16 @@ legend("topright",
 plot(x = inhibTable[wellType == "treated", "Vr"],
      y = -inhibTable[wellType == "treated", "log10Padj"], 
      col = inhibTable[wellType == "treated", "color"],
+     pch = inhibTable[wellType == "treated", "pch"],
      main = "Volcano plot",
      xlab = "Relative viability",
      ylab = "Significance = -log10(Padj)")
 grid()
+
+legend("topright", 
+       legend = names(plateColor), 
+       col = plateColor, pch = 1, 
+       cex = 0.7)
 
 ```
 
@@ -1049,6 +1094,81 @@ kable(selected[ , c(1:3, 5:7, 10, 12, 15)],
 
 ```
 
+# Comparison between viability scores
+
+## Dot plots
+
+```{r compa_viability_scores_dotplots, fig.width=12, fig.height=11, out.width="100%", fig.cap="Comparison between viability scores. "  }
+
+#### Dot plots to compare viability scores ####
+
+# names(inhibTable)
+par(mfrow = c(2,2))
+
+## Dot plot: raw versus relative viability
+plot(inhibTable[, c("viability", "Vr")],
+     main = "Relative vs raw viability",
+     xlab = "Cells per plate", 
+     ylab = "Relative viability (Vr)", 
+     col = inhibTable$color,
+     pch = inhibTable$pch,
+     xlim = c(0, max(inhibTable$viability)),
+     cex = 0.5,
+     las = 1)
+## Mark arbidol controls
+points(inhibTable[arbidolWells, c("viability", "Vr")], 
+       col = arbidolColor, pch = arbidolPch, cex = 0.7)
+## Mark milestones for the selected metrics
+abline(h = seq(from = 0, to = 100, by = 10), col = "#DDDDDD")
+abline(h = 0, col = "red")
+abline(h = 100, col = "#00BB00")
+abline(v = seq(from = 0, to = max(inhibTable$viability), by = 10000), col = "#DDDDDD")
+abline(v = 0)
+
+## Dot plot: IQR-standardised versus relative viability
+plot(inhibTable[, c("Vr", "iqNormV")],
+     main = "Relative vs IQR-standardized viability",
+     xlab = "Relative viability",
+     ylab = "IQR-standardized viability",
+     col = inhibTable$color,
+     cex = 0.5,
+     panel.first = grid(),
+     las = 1)
+## Mark arbidol controls
+points(inhibTable[arbidolWells, c("Vr", "iqNormV")], 
+       col = arbidolColor, pch = arbidolPch, cex = 0.7)
+## Mark milestones for the selected metrics
+abline(v = 0, col = "red")
+abline(v = 100, col = "#00BB00")
+abline(h = 0)
+abline(h = c(-1, 1), col = "#BBBBBB")
+
+## Dot plot: FDR versus relative viability
+plot(x = inhibTable$Vr,
+     y = -inhibTable$log10Padj,
+     main = "Relative viability vs FDR from iqrNormV",
+     xlab = "Relative viability",
+     ylab = "-log10(FDR)",
+     col = inhibTable$color,
+     cex = 0.5,
+     panel.first = grid(),
+     las = 1)
+## Mark arbidol controls
+points(x = inhibTable[arbidolWells, "Vr"],
+       y = -inhibTable[arbidolWells, "log10Padj"], 
+       col = arbidolColor, pch = arbidolPch, cex = 0.7)
+## Mark milestones for the selected metrics
+abline(v = 0, col = "red")
+abline(v = 100, col = "#00BB00")
+abline(h = 0)
+abline(h = c(-1, 1), col = "#BBBBBB")
+
+
+par(par.ori)
+```
+
+
+## Selected candidate molecules
 
 
 
