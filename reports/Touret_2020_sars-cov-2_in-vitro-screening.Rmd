@@ -61,7 +61,14 @@ transition: linear
 
 ```{r libraries, echo=FALSE, results=FALSE, warning=FALSE, message=FALSE}
 #### Install required packages ####
-required.packages <- c("xlsx", "readxl", "knitr", "fitdistrplus", "vioplot")
+required.packages <- c(
+  "xlsx", 
+  "readxl", 
+  "knitr", 
+  "VennDiagram",
+  "limma",
+  "fitdistrplus", 
+  "vioplot")
 
 for (pkg in required.packages) {
   if (!require(pkg, character.only = TRUE)) {
@@ -97,7 +104,10 @@ par.ori <- par(no.readonly = TRUE)
 
 
 ```{r parameters}
-#### Define colors and pch to highlight specific points on the plots ####
+#### Parameters ####
+
+## Significance threshold
+alpha <- 0.05
 
 ## Highlight colors
 markColor <- c(
@@ -105,7 +115,7 @@ markColor <- c(
   virusCtl = "red",
   treated = "blue",
   Arbidol = "black",
-  Hydroxychloroquite = "orange"
+  Hydroxychloroquine = "orange"
 )
 
 ## Highlight point shaapes
@@ -114,7 +124,7 @@ markPCh <- c(
   virusCtl = 17,
   treated = 1,
   Arbidol = 19,
-  Hydroxychloroquite = 13
+  Hydroxychloroquine = 13
 )
 ```
 
@@ -1129,7 +1139,6 @@ kable(inhibTable[arbidolWells, c("Vr", "iqNormV", "log10Padj")], caption = "Viab
 ```{r iqNormV_candidates}
 
 #### Select significant normalized II values ####
-alpha <- 0.05
 
 kable(table(inhibTable$padj < alpha))
 
@@ -1154,28 +1163,13 @@ kable(selected[ , c(1:3, 5:7, 10, 12, 15)],
 
 ## Dot plots
 
-```{r compa_viability_scores_dotplots, fig.width=10, fig.height=10, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
+```{r compa_viability_scores_dotplots, fig.width=10, fig.height=12, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
 
 #### Dot plots to compare viability scores ####
 
 
 # names(inhibTable)
 # par(mfrow = c(2,2))
-
-markColor <- c(
-  cellCtl = "grey",
-  virusCtl = "red",
-  treated = "blue",
-  Arbidol = "black",
-  Hydroxychloroquite = "orange"
-)
-markPCh <- c(
-  cellCtl = 5,
-  virusCtl = 17,
-  treated = 1,
-  Arbidol = 19,
-  Hydroxychloroquite = 13
-)
 
 #### Dot plot: raw versus relative viability ####
 plot(inhibTable[, c("viability", "Vr")],
@@ -1193,22 +1187,29 @@ points(inhibTable[wellType == "cellCtl", c("viability", "Vr")],
        col = markColor["cellCtl"], pch = markPCh["cellCtl"], cex = 0.5)
 ## Mark virus controls
 points(inhibTable[wellType == "virusCtl", c("viability", "Vr")], 
-       col = markColor["virusCtl"], pch = markPCh["virusCtl"], cex = 0.7)
+       col = markColor["virusCtl"], pch = markPCh["virusCtl"], cex = 0.5)
 ## Mark arbidol controls
 points(inhibTable[arbidolWells, c("viability", "Vr")], 
-       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.7)
+       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.5)
 ## Mark Hydroxychloroquine
 points(inhibTable[HOClSindex, c("viability", "Vr")], 
-       col = markColor["Hydroxychloroquine"], pch = markPCh["Hydroxychloroquine"], cex = 0.7)
+       col = markColor["Hydroxychloroquine"], pch = markPCh["Hydroxychloroquine"], cex = 0.5)
 
 ## Grid + specific values for the selected metrics
-abline(h = seq(from = 0, to = 100, by = 10), col = "#DDDDDD")
+abline(h = seq(from = -40, to = 150, by = 10), col = "#DDDDDD")
 abline(h = 0, col = "red")
 abline(h = 100, col = "#00BB00")
 abline(v = seq(from = 0, to = max(inhibTable$viability), by = 10000), col = "#DDDDDD")
 abline(v = 0)
+
+## Legends
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
+legend("topleft", legend = names(markColor), 
+       title = "Markers", 
+       col = markColor, 
+       pch = markPCh,
+       cex = 0.8)
 
 
 #### Dot plot: IQR-standardized versus relative viability ####
@@ -1226,24 +1227,32 @@ plot(inhibTable[, c("Vr", "iqNormV")],
 points(inhibTable[wellType == "cellCtl", c("Vr", "iqNormV")], 
        col = markColor["cellCtl"], pch = markPCh["cellCtl"], cex = 0.5)
 ## Mark virus controls
-points(inhibTable[wellType == "virusCtl", c("viability", "Vr")], 
-       col = markColor["virusCtl"], pch = markPCh["virusCtl"], cex = 0.7)
+points(inhibTable[wellType == "virusCtl", c("Vr", "iqNormV")], 
+       col = markColor["virusCtl"], pch = markPCh["virusCtl"], cex = 0.5)
 ## Mark arbidol controls
-points(inhibTable[arbidolWells, c("viability", "Vr")], 
-       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.7)
+points(inhibTable[arbidolWells, c("Vr", "iqNormV")], 
+       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.5)
 ## Mark Hydroxychloroquine
-points(inhibTable[HOClSindex, c("viability", "Vr")], 
-       col = markColor["Hydroxychloroquine"], pch = markPCh["Hydroxychloroquine"], cex = 0.7)
+points(inhibTable[HOClSindex, c("Vr", "iqNormV")], 
+       col = markColor["Hydroxychloroquine"], pch = markPCh["Hydroxychloroquine"], cex = 0.5)
 
 ## Mark milestones for the selected metrics
 abline(v = 0, col = "red")
 abline(v = 100, col = "#00BB00")
 abline(h = 0)
 abline(h = c(-1, 1), col = "#BBBBBB")
+
+## Legends
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
+legend("topleft", legend = names(markColor), 
+       title = "Markers", 
+       col = markColor, 
+       pch = markPCh,
+       cex = 0.8)
 
-## Dot plot: FDR versus relative viability
+
+#### Dot plot: FDR versus relative viability ####
 plot(x = inhibTable[, "Vr"],
      y = -inhibTable[, "log10Padj"],
      main = "Relative viability vs FDR from iqrNormV",
@@ -1257,44 +1266,101 @@ plot(x = inhibTable[, "Vr"],
 ## Mark arbidol controls
 points(x = inhibTable[arbidolWells, "Vr"],
        y = -inhibTable[arbidolWells, "log10Padj"], 
-       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.7)
+       col = markColor["Arbidol"], 
+       pch = markPCh["Arbidol"], cex = 0.7)
+## Mark Hydroxychloroquine
+points(x = inhibTable[HOClSindex, "Vr"],
+       y = -inhibTable[HOClSindex, "log10Padj"], 
+       col = markColor["Hydroxychloroquine"], 
+       pch = markPCh["Hydroxychloroquine"], cex = 0.7)
+
 ## Grid + specific values for the selected metrics
 abline(v = 0, col = "red")
 abline(v = 100, col = "#00BB00")
 abline(h = 0)
-abline(h = c(-1, 1), col = "#BBBBBB")
+abline(h = -log10(alpha), col = "blue", lwd = 2)
+
+## Legends
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
+legend("topleft", legend = names(markColor), 
+       title = "Markers", 
+       col = markColor, 
+       pch = markPCh,
+       cex = 0.8)
 
-#### Dot plot: inhibition index versus relative viability ####
-plot(x = inhibTable[, "Vr"],
-     y = -inhibTable[, "Inhibition.Index"],
+#### Dot plot: FDR versus inhibition index ####
+plot(x = inhibTable[, "Inhibition.Index"],
+     y = -inhibTable[, "log10Padj"],
      main = "Relative viability vs FDR from iqrNormV",
-     xlab = "Relative viability",
+     xlab = "Inhibition index",
      ylab = "-log10(FDR)",
      col = inhibTable[, "color"],
      pch = inhibTable[, "pch"],
      cex = 0.5,
      panel.first = grid(),
      las = 1)
-## Mark arbidol controls
-points(x = inhibTable[arbidolWells, "Vr"],
-       y = -inhibTable[arbidolWells, "Inhibition.Index"], 
-       col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.7)
+## Mark Hydroxychloroquine
+points(x = inhibTable[HOClSindex, "Inhibition.Index"],
+       y = -inhibTable[HOClSindex, "log10Padj"], 
+       col = markColor["Hydroxychloroquine"], 
+       pch = markPCh["Hydroxychloroquine"], cex = 0.7)
+
 ## Grid + specific values for the selected metrics
-abline(v = 0, col = "red")
-abline(v = 100, col = "#00BB00")
+abline(v = seq(-0.5, 2, 0.5), col = "#BBBBBB")
+abline(v = 1, col = "blue", lwd = 2)
 abline(h = 0)
-abline(h = c(-1, 1), col = "#BBBBBB")
+abline(h = -log10(alpha), col = "blue", lwd = 2)
+
+## Legends
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
-
+legend("topleft", 
+       title = "Markers", 
+       legend = "Hydroxychloroquine", 
+       col = markColor["Hydroxychloroquine"], 
+       pch = markPCh["Hydroxychloroquine"],
+       cex = 0.8)
 
 par(par.ori)
 ```
 
 
-## Selected candidate molecules
+## Candidate molecules selected by the different criteria
+
+```{r candidate_selection}
+
+#### Select candidate molecules accordint to different criteria ####
+
+## False Discovery Rate computed from the IQR-standardized viabilities
+inhibTable$selected.FDR <- as.numeric(inhibTable$padj < alpha)
+# table(inhibTable$selected.FDR)
+# sum(inhibTable$selected.FDR, na.rm = TRUE)
+
+## Inhibition index above 1 (Arbidol)
+inhibTable$selected.ii <- as.numeric(inhibTable$Inhibition.Index >= 1)
+# table(inhibTable$selected.ii)
+# sum(inhibTable$selected.ii, na.rm = TRUE)
+
+
+kable(table(inhibTable[, c("selected.FDR", "selected.ii")]), 
+      caption = "Contingency table of the molecules selected by different criteria. Columns: inhibition index >= 1. Rows: FDR < 0.05. ")
+
+```
+
+```{r Venn_candidate_molecules, fig.width=7, fig.height=5, out.width="60%", fig.cap="Venn diagram of the molecules selected by different criteria. "}
+#### Draw a Venn diagram of the selected molecules ####
+
+## Venn diagram
+vennTable <- na.omit(inhibTable[, c("selected.FDR", "selected.ii")])
+vennDiagram(object = vennTable, 
+            names = c(paste("FDR <", alpha), 
+                      paste("ii >=", 1)), 
+            circle.col = c("#00BB00", "blue"), mar = c(0,0,0,0)
+            )
+
+```
+
 
 
 ## Result tables
