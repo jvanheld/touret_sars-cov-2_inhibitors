@@ -1,6 +1,6 @@
 ---
 title: "Statistical analysis of *in vitro* screening for inhibitors of viral infection "
-author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire1, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden"
+author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden. "
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -1075,13 +1075,15 @@ We compute the p-value as the upper tail of the normal distribution (rigth-side 
 inhibTable$p.value <- pnorm(inhibTable$iqNormV, mean = 0, sd = 1, lower.tail = FALSE)
 inhibTable$log10Pval <- log10(inhibTable$p.value)
 inhibTable$e.value <- inhibTable$p.value * sum(wellType == "treated")
-inhibTable$padj <- NA
-inhibTable[wellType == "treated", "padj"] <- 
+inhibTable$FDR <- NA
+inhibTable[wellType == "treated", "FDR"] <- 
   p.adjust(inhibTable[wellType == "treated", "p.value"], method = "fdr")
-inhibTable$log10Padj <- log10(inhibTable$padj)
+inhibTable$log10FDR <- log10(inhibTable$FDR)
 
 
 ```
+
+### P-value histogram
 
 ```{r iqNormVpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise IQR-standardized viability index. "}
 hist(inhibTable[wellType == "treated", "p.value"], 
@@ -1102,17 +1104,19 @@ hist(inhibTable[wellType == "treated", "p.value"],
 # 
 ```
 
+### Significance plot
+
 ```{r iqNormV_manhattan_plot, fig.width=7, fig.height=4, out.width="80%", fig.cap="Volcano plot. "}
 #### Manhattan plot ####
-plot(x = -inhibTable[wellType == "treated", "log10Padj"], 
+plot(x = -inhibTable[wellType == "treated", "log10FDR"], 
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
      main = "Significance plot",
      xlab = "Relative viability",
-     ylab = "Significance = -log10(Padj)",
+     ylab = "Significance = -log10(FDR)",
      panel.first = c(
        abline(h = 0), 
-       abline(h = seq(0, -min(inhibTable[wellType == "treated", "log10Padj"]), 20), lty = "dotted", col = "grey"),
+       abline(h = seq(0, -min(inhibTable[wellType == "treated", "log10FDR"]), 20), lty = "dotted", col = "grey"),
        abline(v = (1:19) * 80, col = "grey")
      ),
      las = 1,
@@ -1124,16 +1128,17 @@ legend("topright",
 
 ```
 
+### Volcano plot
 
 ```{r iqNormV_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
 #### Volcano plot ####
 plot(x = inhibTable[wellType == "treated", "Vr"],
-     y = -inhibTable[wellType == "treated", "log10Padj"], 
+     y = -inhibTable[wellType == "treated", "log10FDR"], 
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
      main = "Volcano plot",
      xlab = "Relative viability",
-     ylab = "Significance = -log10(Padj)")
+     ylab = "Significance = -log10(FDR)")
 grid()
 
 legend("topright", 
@@ -1143,12 +1148,17 @@ legend("topright",
 
 ```
 
-## Three-points normalization with arbidol
+
+
+
+
+## Significance of Arbidol after IQR-based standardisation
+
 
 ```{r arbidol_viability_indices}
 #### Viability indices for the arbidol contron ####
 # sum(arbidolWells)
-kable(inhibTable[arbidolWells, c("Vr", "iqNormV", "log10Padj")], caption = "Viability indices for the arbidol controls (2 replicates per plate) ")
+kable(inhibTable[arbidolWells, c("Plate", "viability", "Vr", "iqNormV", "log10FDR")], caption = "Viability indices for the arbidol controls (2 replicates per plate) ")
 ```
 
 
@@ -1159,14 +1169,14 @@ kable(inhibTable[arbidolWells, c("Vr", "iqNormV", "log10Padj")], caption = "Viab
 
 #### Select significant normalized II values ####
 
-kable(table(inhibTable$padj < alpha))
+kable(table(inhibTable$FDR < alpha))
 
 
-# table(inhibTable$padj < alpha)
-selected <- subset(inhibTable, inhibTable$padj < alpha)
+# table(inhibTable$FDR < alpha)
+selected <- subset(inhibTable, inhibTable$FDR < alpha)
 
 ## Sort by decreasing adjusted p-value
-selected <- selected[order(selected$padj, decreasing = FALSE), ]
+selected <- selected[order(selected$FDR, decreasing = FALSE), ]
 # kable(names(selected), row.names=TRUE)
 
 ## Print selected molecules
@@ -1180,9 +1190,10 @@ kable(selected[ , c(1:3, 5:7, 10, 12, 15)],
 
 # Comparison between viability scores
 
-## Dot plots
+## Relative versus raw viability
 
-```{r compa_viability_scores_dotplots, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
+
+```{r compa_dotplot_V_vs_Vr, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
 
 #### Dot plots to compare viability scores ####
 
@@ -1230,6 +1241,14 @@ legend("topleft", legend = names(markColor),
        pch = markPCh,
        cex = 0.8)
 
+```
+
+
+## Relative versus IQR-standardised viability
+
+
+```{r compa_dotplot_Vr_vs_IQRnormV, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
+
 
 #### Dot plot: IQR-standardized versus relative viability ####
 plot(inhibTable[, c("Vr", "iqNormV")],
@@ -1271,9 +1290,18 @@ legend("topleft", legend = names(markColor),
        cex = 0.8)
 
 
+```
+
+
+## FDR versus relative viability
+
+
+```{r compa_dotplot_Vr_vs_FDR, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
+
+
 #### Dot plot: FDR versus relative viability ####
 plot(x = inhibTable[, "Vr"],
-     y = -inhibTable[, "log10Padj"],
+     y = -inhibTable[, "log10FDR"],
      main = "Relative viability vs FDR from iqrNormV",
      xlab = "Relative viability",
      ylab = "-log10(FDR)",
@@ -1284,12 +1312,12 @@ plot(x = inhibTable[, "Vr"],
      las = 1)
 ## Mark arbidol controls
 points(x = inhibTable[arbidolWells, "Vr"],
-       y = -inhibTable[arbidolWells, "log10Padj"], 
+       y = -inhibTable[arbidolWells, "log10FDR"], 
        col = markColor["Arbidol"], 
        pch = markPCh["Arbidol"], cex = 0.7)
 ## Mark Hydroxychloroquine
 points(x = inhibTable[HOClSindex, "Vr"],
-       y = -inhibTable[HOClSindex, "log10Padj"], 
+       y = -inhibTable[HOClSindex, "log10FDR"], 
        col = markColor["Hydroxychloroquine"], 
        pch = markPCh["Hydroxychloroquine"], cex = 0.7)
 
@@ -1307,10 +1335,17 @@ legend("topleft", legend = names(markColor),
        col = markColor, 
        pch = markPCh,
        cex = 0.8)
+```
+
+
+## FDR versus inhibition index
+
+
+```{r compa_dotplot_ii_vs_FDR, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
 
 #### Dot plot: FDR versus inhibition index ####
 plot(x = inhibTable[, "Inhibition.Index"],
-     y = -inhibTable[, "log10Padj"],
+     y = -inhibTable[, "log10FDR"],
      main = "Relative viability vs FDR from iqrNormV",
      xlab = "Inhibition index",
      ylab = "-log10(FDR)",
@@ -1321,7 +1356,7 @@ plot(x = inhibTable[, "Inhibition.Index"],
      las = 1)
 ## Mark Hydroxychloroquine
 points(x = inhibTable[HOClSindex, "Inhibition.Index"],
-       y = -inhibTable[HOClSindex, "log10Padj"], 
+       y = -inhibTable[HOClSindex, "log10FDR"], 
        col = markColor["Hydroxychloroquine"], 
        pch = markPCh["Hydroxychloroquine"], cex = 0.7)
 
@@ -1352,7 +1387,7 @@ par(par.ori)
 #### Select candidate molecules accordint to different criteria ####
 
 ## False Discovery Rate computed from the IQR-standardized viabilities
-inhibTable$selected.FDR <- as.numeric(inhibTable$padj < alpha)
+inhibTable$selected.FDR <- as.numeric(inhibTable$FDR < alpha)
 # table(inhibTable$selected.FDR)
 # sum(inhibTable$selected.FDR, na.rm = TRUE)
 
@@ -1361,7 +1396,9 @@ inhibTable$selected.ii <- as.numeric(inhibTable$Inhibition.Index >= 1)
 # table(inhibTable$selected.ii)
 # sum(inhibTable$selected.ii, na.rm = TRUE)
 
-inhibTable$selected.arbidolMean <- as.numeric(inhibTable$viability > statPerPlate[inhibTable$Plate, "arbidolMean"])
+inhibTable[wellType == "treated", "selected.arbidolMean"] <- as.numeric(
+  inhibTable[wellType == "treated", "viability"] > 
+    statPerPlate[inhibTable[wellType == "treated", "Plate"], "arbidolMean"])
 
 
 kable(table(inhibTable[, c("selected.FDR", "selected.ii")]), 
@@ -1389,16 +1426,24 @@ vennDiagram(object = vennTable,
 ```{r candidates_per_plate}
 
 #### Compute the number of candidates per plate depending on the criterion ####
-inhibTable$selected.onlyFDR <- inhibTable$selected.FDR & !inhibTable$selected.ii
-inhibTable$selected.onlyii <- !inhibTable$selected.FDR & inhibTable$selected.ii
-inhibTable$selected.both <- inhibTable$selected.FDR & inhibTable$selected.ii
-inhibTable$selected.either <- inhibTable$selected.FDR | inhibTable$selected.ii
+inhibTable$selected.FDRandArbidol <- 
+  inhibTable$selected.FDR & inhibTable$selected.arbidolMean
+inhibTable$selected.FDRorArbidol <- 
+  inhibTable$selected.FDR | inhibTable$selected.arbidolMean
+inhibTable$selected.FDRonly <- 
+  inhibTable$selected.FDR & !inhibTable$selected.arbidolMean
+inhibTable$selected.ArbidolOnly <- 
+  !inhibTable$selected.FDR & inhibTable$selected.arbidolMean
 
-criteria <- c("FDR", "ii", "both", "either", "onlyFDR", "onlyii", "arbidolMean")
+
+## Count the number of candidates per plate for the different criteria
+criteria <- c("ii", "arbidolMean", "FDR", "FDRandArbidol", "FDRorArbidol", "FDRonly", "ArbidolOnly")
 
 # table(inhibTable$selected.ii, inhibTable$selected.arbidolMean)
 
-candidatesPerPlate <- data.frame(matrix(nrow = nbPlates, ncol = length(criteria), 0))
+candidatesPerPlate <- data.frame(matrix(
+  nrow = nbPlates, 
+  ncol = length(criteria), 0))
 row.names(candidatesPerPlate) <- 1:nbPlates
 names(candidatesPerPlate) <- criteria
 for (criterion in criteria) {
@@ -1529,7 +1574,7 @@ legend("topright", legend = c("mean", "median"),
 A classical method for normalization is to take the log of the values. We first had to shift the data in order for all of them to take positive values. 
 
 
-```{r ii_normalization}
+```{r ii_log2_transform}
 
 # fit.gamma <- fitdist(data = ii - iiStat$min + 1, distr = "gamma", method = "mge")
 # summary(fit.gamma)
@@ -1624,7 +1669,7 @@ To this purpose, we use:
 - plate-wise median to estimate the mean
 - plate-wise standardized inter-quantile range (IQR) to estimate the standard deviation
 
-```{r plate_wise_stat}
+```{r ii_plate_wise_stat}
 #### Copute plate-wise statistics ####
 plateStat <- data.frame(
   plate = plateNumbers,
@@ -1641,7 +1686,7 @@ kable(plateStat, caption = "Plate-wise statistics")
 
 ```
 
-```{r plate_wise_normalization}
+```{r normII_computation}
 
 ## Centering: substract the median
 ## Scaling: divide by IQR
@@ -1746,11 +1791,14 @@ We compute the p-value as the upper tail of the normal distribution (rigth-side 
 supTable$p.value <- pnorm(normII, mean = 0, sd = 1, lower.tail = FALSE)
 supTable$log10Pval <- log10(supTable$p.value)
 supTable$e.value <- supTable$p.value * length(normII)
-supTable$padj <- p.adjust(supTable$p.value, method = "fdr")
-supTable$log10Padj <- log10(supTable$padj)
+supTable$FDR <- p.adjust(supTable$p.value, method = "fdr")
+supTable$log10FDR <- log10(supTable$FDR)
 ```
 
-```{r pval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index. "}
+
+### P-value histogram
+
+```{r normII_pval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index. "}
 hist(supTable$p.value, breaks = 20, 
      col = "grey",
      main = "P-value histogram after plate-wise normalization",
@@ -1758,17 +1806,17 @@ hist(supTable$p.value, breaks = 20,
      ylab = "Frequency")
 ```
 
+### Volcano plot
 
-
-```{r volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
+```{r normII_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
 #### Volcano plot ####
 
 plot(x = supTable$normInhibIndex,
-     y = -supTable$log10Padj, 
+     y = -supTable$log10FDR, 
      col = supTable$color,
      main = "Volcano plot",
      xlab = "Normalized inhibition index",
-     ylab = "Significance = -log10(Padj)")
+     ylab = "Significance = -log10(FDR)")
 grid()
 
 ```
@@ -1776,15 +1824,15 @@ grid()
 
 ## Selection of candidate molecules
 
-```{r candidated}
+```{r normII_selected}
 
 #### Select significant normalized II values ####
 alpha <- 0.05
-# table(supTable$padj < alpha)
-selected <- subset(supTable, supTable$padj < alpha)
+# table(supTable$FDR < alpha)
+selected <- subset(supTable, supTable$FDR < alpha)
 
 ## Sort by decreasing adjusted p-value
-selected <- selected[order(selected$padj, decreasing = FALSE), ]
+selected <- selected[order(selected$FDR, decreasing = FALSE), ]
 # kable(names(selected), row.names=TRUE)
 
 ## Print selected molecules
@@ -1822,8 +1870,8 @@ sessionInfo()
 
 ## To do
 
+- log2 transformatio before standardizing (and comparison of the targets)
 - Add the formula of the inhibition index
-- comptage des positifs par plaque avec les différentes méthodes + plots
 - distribution de valeurs plaque par plaque --> vérifier si certaines plaques ont l'air d'avoir plus de 20 cibles (percentile75)
 
 

@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire1, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden" />
+<meta name="author" content="Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden." />
 
 <meta name="date" content="2020-04-14" />
 
@@ -350,7 +350,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Statistical analysis of <em>in vitro</em> screening for inhibitors of viral infection</h1>
 <h3 class="subtitle">Normalization and target selection methods</h3>
-<h4 class="author">Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire1, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden</h4>
+<h4 class="author">Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden.</h4>
 <h4 class="date">2020-04-14</h4>
 
 </div>
@@ -1615,10 +1615,13 @@ Values of the plate-wise IQR-standardized viability index for all the tested mol
 <a class="sourceLine" id="cb28-2" data-line-number="2">inhibTable<span class="op">$</span>p.value &lt;-<span class="st"> </span><span class="kw">pnorm</span>(inhibTable<span class="op">$</span>iqNormV, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb28-3" data-line-number="3">inhibTable<span class="op">$</span>log10Pval &lt;-<span class="st"> </span><span class="kw">log10</span>(inhibTable<span class="op">$</span>p.value)</a>
 <a class="sourceLine" id="cb28-4" data-line-number="4">inhibTable<span class="op">$</span>e.value &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>p.value <span class="op">*</span><span class="st"> </span><span class="kw">sum</span>(wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>)</a>
-<a class="sourceLine" id="cb28-5" data-line-number="5">inhibTable<span class="op">$</span>padj &lt;-<span class="st"> </span><span class="ot">NA</span></a>
-<a class="sourceLine" id="cb28-6" data-line-number="6">inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;padj&quot;</span>] &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb28-5" data-line-number="5">inhibTable<span class="op">$</span>FDR &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb28-6" data-line-number="6">inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;FDR&quot;</span>] &lt;-<span class="st"> </span></a>
 <a class="sourceLine" id="cb28-7" data-line-number="7"><span class="st">  </span><span class="kw">p.adjust</span>(inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;p.value&quot;</span>], <span class="dt">method =</span> <span class="st">&quot;fdr&quot;</span>)</a>
-<a class="sourceLine" id="cb28-8" data-line-number="8">inhibTable<span class="op">$</span>log10Padj &lt;-<span class="st"> </span><span class="kw">log10</span>(inhibTable<span class="op">$</span>padj)</a></code></pre></div>
+<a class="sourceLine" id="cb28-8" data-line-number="8">inhibTable<span class="op">$</span>log10FDR &lt;-<span class="st"> </span><span class="kw">log10</span>(inhibTable<span class="op">$</span>FDR)</a></code></pre></div>
+</div>
+<div id="p-value-histogram" class="section level3">
+<h3>P-value histogram</h3>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1"><span class="kw">hist</span>(inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;p.value&quot;</span>], </a>
 <a class="sourceLine" id="cb29-2" data-line-number="2">     <span class="dt">breaks =</span> <span class="dv">20</span>, </a>
 <a class="sourceLine" id="cb29-3" data-line-number="3">     <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>,</a>
@@ -1640,16 +1643,19 @@ Histogram of the nominal (unadjusted) p-values derived from the plate-wise IQR-s
 <a class="sourceLine" id="cb30-7" data-line-number="7"><span class="co"># print(m0)</span></a>
 <a class="sourceLine" id="cb30-8" data-line-number="8"><span class="co"># print(m1)</span></a>
 <a class="sourceLine" id="cb30-9" data-line-number="9"><span class="co"># </span></a></code></pre></div>
+</div>
+<div id="significance-plot" class="section level3">
+<h3>Significance plot</h3>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1"><span class="co">#### Manhattan plot ####</span></a>
-<a class="sourceLine" id="cb31-2" data-line-number="2"><span class="kw">plot</span>(<span class="dt">x =</span> <span class="op">-</span>inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10Padj&quot;</span>], </a>
+<a class="sourceLine" id="cb31-2" data-line-number="2"><span class="kw">plot</span>(<span class="dt">x =</span> <span class="op">-</span>inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10FDR&quot;</span>], </a>
 <a class="sourceLine" id="cb31-3" data-line-number="3">     <span class="dt">col =</span> inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;color&quot;</span>],</a>
 <a class="sourceLine" id="cb31-4" data-line-number="4">     <span class="dt">pch =</span> inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;pch&quot;</span>],</a>
 <a class="sourceLine" id="cb31-5" data-line-number="5">     <span class="dt">main =</span> <span class="st">&quot;Significance plot&quot;</span>,</a>
 <a class="sourceLine" id="cb31-6" data-line-number="6">     <span class="dt">xlab =</span> <span class="st">&quot;Relative viability&quot;</span>,</a>
-<a class="sourceLine" id="cb31-7" data-line-number="7">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>,</a>
+<a class="sourceLine" id="cb31-7" data-line-number="7">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(FDR)&quot;</span>,</a>
 <a class="sourceLine" id="cb31-8" data-line-number="8">     <span class="dt">panel.first =</span> <span class="kw">c</span>(</a>
 <a class="sourceLine" id="cb31-9" data-line-number="9">       <span class="kw">abline</span>(<span class="dt">h =</span> <span class="dv">0</span>), </a>
-<a class="sourceLine" id="cb31-10" data-line-number="10">       <span class="kw">abline</span>(<span class="dt">h =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="op">-</span><span class="kw">min</span>(inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10Padj&quot;</span>]), <span class="dv">20</span>), <span class="dt">lty =</span> <span class="st">&quot;dotted&quot;</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>),</a>
+<a class="sourceLine" id="cb31-10" data-line-number="10">       <span class="kw">abline</span>(<span class="dt">h =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="op">-</span><span class="kw">min</span>(inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10FDR&quot;</span>]), <span class="dv">20</span>), <span class="dt">lty =</span> <span class="st">&quot;dotted&quot;</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>),</a>
 <a class="sourceLine" id="cb31-11" data-line-number="11">       <span class="kw">abline</span>(<span class="dt">v =</span> (<span class="dv">1</span><span class="op">:</span><span class="dv">19</span>) <span class="op">*</span><span class="st"> </span><span class="dv">80</span>, <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>)</a>
 <a class="sourceLine" id="cb31-12" data-line-number="12">     ),</a>
 <a class="sourceLine" id="cb31-13" data-line-number="13">     <span class="dt">las =</span> <span class="dv">1</span>,</a>
@@ -1664,14 +1670,17 @@ Histogram of the nominal (unadjusted) p-values derived from the plate-wise IQR-s
 Volcano plot.
 </p>
 </div>
+</div>
+<div id="volcano-plot" class="section level3">
+<h3>Volcano plot</h3>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="co">#### Volcano plot ####</span></a>
 <a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw">plot</span>(<span class="dt">x =</span> inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;Vr&quot;</span>],</a>
-<a class="sourceLine" id="cb32-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10Padj&quot;</span>], </a>
+<a class="sourceLine" id="cb32-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;log10FDR&quot;</span>], </a>
 <a class="sourceLine" id="cb32-4" data-line-number="4">     <span class="dt">col =</span> inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;color&quot;</span>],</a>
 <a class="sourceLine" id="cb32-5" data-line-number="5">     <span class="dt">pch =</span> inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;pch&quot;</span>],</a>
 <a class="sourceLine" id="cb32-6" data-line-number="6">     <span class="dt">main =</span> <span class="st">&quot;Volcano plot&quot;</span>,</a>
 <a class="sourceLine" id="cb32-7" data-line-number="7">     <span class="dt">xlab =</span> <span class="st">&quot;Relative viability&quot;</span>,</a>
-<a class="sourceLine" id="cb32-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>)</a>
+<a class="sourceLine" id="cb32-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(FDR)&quot;</span>)</a>
 <a class="sourceLine" id="cb32-9" data-line-number="9"><span class="kw">grid</span>()</a>
 <a class="sourceLine" id="cb32-10" data-line-number="10"></a>
 <a class="sourceLine" id="cb32-11" data-line-number="11"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, </a>
@@ -1686,246 +1695,324 @@ Volcano plot.
 </div>
 </div>
 </div>
-<div id="three-points-normalization-with-arbidol" class="section level2">
-<h2>Three-points normalization with arbidol</h2>
+<div id="significance-of-arbidol-after-iqr-based-standardisation" class="section level2">
+<h2>Significance of Arbidol after IQR-based standardisation</h2>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1"><span class="co">#### Viability indices for the arbidol contron ####</span></a>
 <a class="sourceLine" id="cb33-2" data-line-number="2"><span class="co"># sum(arbidolWells)</span></a>
-<a class="sourceLine" id="cb33-3" data-line-number="3"><span class="kw">kable</span>(inhibTable[arbidolWells, <span class="kw">c</span>(<span class="st">&quot;Vr&quot;</span>, <span class="st">&quot;iqNormV&quot;</span>, <span class="st">&quot;log10Padj&quot;</span>)], <span class="dt">caption =</span> <span class="st">&quot;Viability indices for the arbidol controls (2 replicates per plate) &quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb33-3" data-line-number="3"><span class="kw">kable</span>(inhibTable[arbidolWells, <span class="kw">c</span>(<span class="st">&quot;Plate&quot;</span>, <span class="st">&quot;viability&quot;</span>, <span class="st">&quot;Vr&quot;</span>, <span class="st">&quot;iqNormV&quot;</span>, <span class="st">&quot;log10FDR&quot;</span>)], <span class="dt">caption =</span> <span class="st">&quot;Viability indices for the arbidol controls (2 replicates per plate) &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Viability indices for the arbidol controls (2 replicates per plate)</caption>
 <thead>
 <tr class="header">
 <th></th>
+<th align="right">Plate</th>
+<th align="right">viability</th>
 <th align="right">Vr</th>
 <th align="right">iqNormV</th>
-<th align="right">log10Padj</th>
+<th align="right">log10FDR</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>01A12</td>
+<td align="right">1</td>
+<td align="right">30140</td>
 <td align="right">73.85675</td>
 <td align="right">12.4275490</td>
 <td align="right">-32.3178798</td>
 </tr>
 <tr class="even">
 <td>01B12</td>
+<td align="right">1</td>
+<td align="right">32753</td>
 <td align="right">83.53614</td>
 <td align="right">14.0851476</td>
 <td align="right">-41.7386174</td>
 </tr>
 <tr class="odd">
 <td>02A12</td>
+<td align="right">2</td>
+<td align="right">43022</td>
 <td align="right">76.42084</td>
 <td align="right">5.8018695</td>
 <td align="right">-6.8937539</td>
 </tr>
 <tr class="even">
 <td>02B12</td>
+<td align="right">2</td>
+<td align="right">40310</td>
 <td align="right">69.27516</td>
 <td align="right">5.1900660</td>
 <td align="right">-5.4705606</td>
 </tr>
 <tr class="odd">
 <td>03A12</td>
+<td align="right">3</td>
+<td align="right">27158</td>
 <td align="right">56.46374</td>
 <td align="right">7.7389641</td>
 <td align="right">-12.4691925</td>
 </tr>
 <tr class="even">
 <td>03B12</td>
+<td align="right">3</td>
+<td align="right">30240</td>
 <td align="right">66.89917</td>
 <td align="right">9.3346482</td>
 <td align="right">-18.2166799</td>
 </tr>
 <tr class="odd">
 <td>04A12</td>
+<td align="right">4</td>
+<td align="right">28768</td>
 <td align="right">51.48438</td>
 <td align="right">1.5981130</td>
 <td align="right">-0.4177311</td>
 </tr>
 <tr class="even">
 <td>04B12</td>
+<td align="right">4</td>
+<td align="right">35882</td>
 <td align="right">73.64568</td>
 <td align="right">2.4627726</td>
 <td align="right">-1.0961060</td>
 </tr>
 <tr class="odd">
 <td>05A12</td>
+<td align="right">5</td>
+<td align="right">29898</td>
 <td align="right">62.30337</td>
 <td align="right">3.6787294</td>
 <td align="right">-2.6575853</td>
 </tr>
 <tr class="even">
 <td>05B12</td>
+<td align="right">5</td>
+<td align="right">31018</td>
 <td align="right">65.78861</td>
 <td align="right">3.9296920</td>
 <td align="right">-3.0420868</td>
 </tr>
 <tr class="odd">
 <td>06A12</td>
+<td align="right">6</td>
+<td align="right">32760</td>
 <td align="right">80.01683</td>
 <td align="right">5.0026843</td>
 <td align="right">-5.0885199</td>
 </tr>
 <tr class="even">
 <td>06B12</td>
+<td align="right">6</td>
+<td align="right">34579</td>
 <td align="right">86.39560</td>
 <td align="right">5.4223335</td>
 <td align="right">-5.9921058</td>
 </tr>
 <tr class="odd">
 <td>07A12</td>
+<td align="right">7</td>
+<td align="right">31481</td>
 <td align="right">72.54165</td>
 <td align="right">5.9595684</td>
 <td align="right">-7.2737070</td>
 </tr>
 <tr class="even">
 <td>07B12</td>
+<td align="right">7</td>
+<td align="right">28998</td>
 <td align="right">63.90483</td>
 <td align="right">5.1867667</td>
 <td align="right">-5.4705606</td>
 </tr>
 <tr class="odd">
 <td>08A12</td>
+<td align="right">8</td>
+<td align="right">32999</td>
 <td align="right">80.86412</td>
 <td align="right">5.9986444</td>
 <td align="right">-7.3537397</td>
 </tr>
 <tr class="even">
 <td>08B12</td>
+<td align="right">8</td>
+<td align="right">34338</td>
 <td align="right">85.82788</td>
 <td align="right">6.3799583</td>
 <td align="right">-8.3653050</td>
 </tr>
 <tr class="odd">
 <td>09A12</td>
+<td align="right">9</td>
+<td align="right">34990</td>
 <td align="right">71.29170</td>
 <td align="right">9.2955227</td>
 <td align="right">-18.0887986</td>
 </tr>
 <tr class="even">
 <td>09B12</td>
+<td align="right">9</td>
+<td align="right">38983</td>
 <td align="right">84.15078</td>
 <td align="right">11.0769118</td>
 <td align="right">-25.7430361</td>
 </tr>
 <tr class="odd">
 <td>10A12</td>
+<td align="right">10</td>
+<td align="right">36991</td>
 <td align="right">82.45403</td>
 <td align="right">7.3529630</td>
 <td align="right">-11.2189130</td>
 </tr>
 <tr class="even">
 <td>10B12</td>
+<td align="right">10</td>
+<td align="right">35605</td>
 <td align="right">77.88241</td>
 <td align="right">6.9002820</td>
 <td align="right">-9.8404583</td>
 </tr>
 <tr class="odd">
 <td>11A12</td>
+<td align="right">11</td>
+<td align="right">40557</td>
 <td align="right">99.33480</td>
 <td align="right">2.5390102</td>
 <td align="right">-1.1699219</td>
 </tr>
 <tr class="even">
 <td>11B12</td>
+<td align="right">11</td>
+<td align="right">37285</td>
 <td align="right">87.60153</td>
 <td align="right">2.1491448</td>
 <td align="right">-0.8285687</td>
 </tr>
 <tr class="odd">
 <td>12A12</td>
+<td align="right">12</td>
+<td align="right">38378</td>
 <td align="right">93.84649</td>
 <td align="right">2.5169971</td>
 <td align="right">-1.1591100</td>
 </tr>
 <tr class="even">
 <td>12B12</td>
+<td align="right">12</td>
+<td align="right">36268</td>
 <td align="right">86.67109</td>
 <td align="right">2.2378820</td>
 <td align="right">-0.9018416</td>
 </tr>
 <tr class="odd">
 <td>13A12</td>
+<td align="right">13</td>
+<td align="right">37554</td>
 <td align="right">92.60218</td>
 <td align="right">1.3741071</td>
 <td align="right">-0.2871946</td>
 </tr>
 <tr class="even">
 <td>13B12</td>
+<td align="right">13</td>
+<td align="right">34465</td>
 <td align="right">81.41401</td>
 <td align="right">1.0761451</td>
 <td align="right">-0.1553551</td>
 </tr>
 <tr class="odd">
 <td>14A12</td>
+<td align="right">14</td>
+<td align="right">29114</td>
 <td align="right">68.51040</td>
 <td align="right">0.7624782</td>
 <td align="right">-0.0762164</td>
 </tr>
 <tr class="even">
 <td>14B12</td>
+<td align="right">14</td>
+<td align="right">31633</td>
 <td align="right">78.64355</td>
 <td align="right">1.0959011</td>
 <td align="right">-0.1634674</td>
 </tr>
 <tr class="odd">
 <td>15A12</td>
+<td align="right">15</td>
+<td align="right">33124</td>
 <td align="right">78.50016</td>
 <td align="right">0.8600007</td>
 <td align="right">-0.0957624</td>
 </tr>
 <tr class="even">
 <td>15B12</td>
+<td align="right">15</td>
+<td align="right">32180</td>
 <td align="right">75.04348</td>
 <td align="right">0.7781248</td>
 <td align="right">-0.0791430</td>
 </tr>
 <tr class="odd">
 <td>16A12</td>
+<td align="right">16</td>
+<td align="right">28576</td>
 <td align="right">75.66461</td>
 <td align="right">1.0445889</td>
 <td align="right">-0.1460609</td>
 </tr>
 <tr class="even">
 <td>16B12</td>
+<td align="right">16</td>
+<td align="right">25385</td>
 <td align="right">62.60361</td>
 <td align="right">0.6733992</td>
 <td align="right">-0.0552944</td>
 </tr>
 <tr class="odd">
 <td>17A12</td>
+<td align="right">17</td>
+<td align="right">30476</td>
 <td align="right">75.26367</td>
 <td align="right">2.0282082</td>
 <td align="right">-0.7396688</td>
 </tr>
 <tr class="even">
 <td>17B12</td>
+<td align="right">17</td>
+<td align="right">29380</td>
 <td align="right">70.72170</td>
 <td align="right">1.8658983</td>
 <td align="right">-0.6123467</td>
 </tr>
 <tr class="odd">
 <td>18A12</td>
+<td align="right">18</td>
+<td align="right">37191</td>
 <td align="right">87.37619</td>
 <td align="right">2.6284873</td>
 <td align="right">-1.2650548</td>
 </tr>
 <tr class="even">
 <td>18B12</td>
+<td align="right">18</td>
+<td align="right">39189</td>
 <td align="right">94.48208</td>
 <td align="right">2.9140930</td>
 <td align="right">-1.5917678</td>
 </tr>
 <tr class="odd">
 <td>19A12</td>
+<td align="right">19</td>
+<td align="right">32305</td>
 <td align="right">81.17518</td>
 <td align="right">2.2361983</td>
 <td align="right">-0.9018416</td>
 </tr>
 <tr class="even">
 <td>19B12</td>
+<td align="right">19</td>
+<td align="right">31816</td>
 <td align="right">79.35432</td>
 <td align="right">2.1726282</td>
 <td align="right">-0.8489690</td>
@@ -1937,7 +2024,7 @@ Volcano plot.
 <h2>Selection of candidate molecules</h2>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="co">#### Select significant normalized II values ####</span></a>
 <a class="sourceLine" id="cb34-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb34-3" data-line-number="3"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha))</a></code></pre></div>
+<a class="sourceLine" id="cb34-3" data-line-number="3"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable<span class="op">$</span>FDR <span class="op">&lt;</span><span class="st"> </span>alpha))</a></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1956,11 +2043,11 @@ Volcano plot.
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="co"># table(inhibTable$padj &lt; alpha)</span></a>
-<a class="sourceLine" id="cb35-2" data-line-number="2">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(inhibTable, inhibTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="co"># table(inhibTable$FDR &lt; alpha)</span></a>
+<a class="sourceLine" id="cb35-2" data-line-number="2">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(inhibTable, inhibTable<span class="op">$</span>FDR <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
 <a class="sourceLine" id="cb35-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb35-4" data-line-number="4"><span class="co">## Sort by decreasing adjusted p-value</span></a>
-<a class="sourceLine" id="cb35-5" data-line-number="5">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
+<a class="sourceLine" id="cb35-5" data-line-number="5">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>FDR, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
 <a class="sourceLine" id="cb35-6" data-line-number="6"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
 <a class="sourceLine" id="cb35-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb35-8" data-line-number="8"><span class="co">## Print selected molecules</span></a>
@@ -3299,8 +3386,8 @@ Volcano plot.
 </div>
 <div id="comparison-between-viability-scores" class="section level1">
 <h1>Comparison between viability scores</h1>
-<div id="dot-plots" class="section level2">
-<h2>Dot plots</h2>
+<div id="relative-versus-raw-viability" class="section level2">
+<h2>Relative versus raw viability</h2>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="co">#### Dot plots to compare viability scores ####</span></a>
 <a class="sourceLine" id="cb36-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb36-3" data-line-number="3"></a>
@@ -3347,11 +3434,14 @@ Volcano plot.
 <a class="sourceLine" id="cb36-44" data-line-number="44">       <span class="dt">pch =</span> markPCh,</a>
 <a class="sourceLine" id="cb36-45" data-line-number="45">       <span class="dt">cex =</span> <span class="fl">0.8</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorscompa_viability_scores_dotplots-1.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
+<img src="figures/touret_sars-cov-2_inhibitorscompa_dotplot_V_vs_Vr-1.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
 <p class="caption">
 Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate.
 </p>
 </div>
+</div>
+<div id="relative-versus-iqr-standardised-viability" class="section level2">
+<h2>Relative versus IQR-standardised viability</h2>
 <div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="co">#### Dot plot: IQR-standardized versus relative viability ####</span></a>
 <a class="sourceLine" id="cb37-2" data-line-number="2"><span class="kw">plot</span>(inhibTable[, <span class="kw">c</span>(<span class="st">&quot;Vr&quot;</span>, <span class="st">&quot;iqNormV&quot;</span>)],</a>
 <a class="sourceLine" id="cb37-3" data-line-number="3">     <span class="dt">main =</span> <span class="st">&quot;Relative vs IQR-standardized viability&quot;</span>,</a>
@@ -3391,14 +3481,17 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb37-37" data-line-number="37">       <span class="dt">pch =</span> markPCh,</a>
 <a class="sourceLine" id="cb37-38" data-line-number="38">       <span class="dt">cex =</span> <span class="fl">0.8</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorscompa_viability_scores_dotplots-2.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
+<img src="figures/touret_sars-cov-2_inhibitorscompa_dotplot_Vr_vs_IQRnormV-1.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
 <p class="caption">
 Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate.
 </p>
 </div>
+</div>
+<div id="fdr-versus-relative-viability" class="section level2">
+<h2>FDR versus relative viability</h2>
 <div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="co">#### Dot plot: FDR versus relative viability ####</span></a>
 <a class="sourceLine" id="cb38-2" data-line-number="2"><span class="kw">plot</span>(<span class="dt">x =</span> inhibTable[, <span class="st">&quot;Vr&quot;</span>],</a>
-<a class="sourceLine" id="cb38-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[, <span class="st">&quot;log10Padj&quot;</span>],</a>
+<a class="sourceLine" id="cb38-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[, <span class="st">&quot;log10FDR&quot;</span>],</a>
 <a class="sourceLine" id="cb38-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Relative viability vs FDR from iqrNormV&quot;</span>,</a>
 <a class="sourceLine" id="cb38-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Relative viability&quot;</span>,</a>
 <a class="sourceLine" id="cb38-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;-log10(FDR)&quot;</span>,</a>
@@ -3409,12 +3502,12 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb38-11" data-line-number="11">     <span class="dt">las =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb38-12" data-line-number="12"><span class="co">## Mark arbidol controls</span></a>
 <a class="sourceLine" id="cb38-13" data-line-number="13"><span class="kw">points</span>(<span class="dt">x =</span> inhibTable[arbidolWells, <span class="st">&quot;Vr&quot;</span>],</a>
-<a class="sourceLine" id="cb38-14" data-line-number="14">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[arbidolWells, <span class="st">&quot;log10Padj&quot;</span>], </a>
+<a class="sourceLine" id="cb38-14" data-line-number="14">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[arbidolWells, <span class="st">&quot;log10FDR&quot;</span>], </a>
 <a class="sourceLine" id="cb38-15" data-line-number="15">       <span class="dt">col =</span> markColor[<span class="st">&quot;Arbidol&quot;</span>], </a>
 <a class="sourceLine" id="cb38-16" data-line-number="16">       <span class="dt">pch =</span> markPCh[<span class="st">&quot;Arbidol&quot;</span>], <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
 <a class="sourceLine" id="cb38-17" data-line-number="17"><span class="co">## Mark Hydroxychloroquine</span></a>
 <a class="sourceLine" id="cb38-18" data-line-number="18"><span class="kw">points</span>(<span class="dt">x =</span> inhibTable[HOClSindex, <span class="st">&quot;Vr&quot;</span>],</a>
-<a class="sourceLine" id="cb38-19" data-line-number="19">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[HOClSindex, <span class="st">&quot;log10Padj&quot;</span>], </a>
+<a class="sourceLine" id="cb38-19" data-line-number="19">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[HOClSindex, <span class="st">&quot;log10FDR&quot;</span>], </a>
 <a class="sourceLine" id="cb38-20" data-line-number="20">       <span class="dt">col =</span> markColor[<span class="st">&quot;Hydroxychloroquine&quot;</span>], </a>
 <a class="sourceLine" id="cb38-21" data-line-number="21">       <span class="dt">pch =</span> markPCh[<span class="st">&quot;Hydroxychloroquine&quot;</span>], <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
 <a class="sourceLine" id="cb38-22" data-line-number="22"></a>
@@ -3433,14 +3526,17 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb38-35" data-line-number="35">       <span class="dt">pch =</span> markPCh,</a>
 <a class="sourceLine" id="cb38-36" data-line-number="36">       <span class="dt">cex =</span> <span class="fl">0.8</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorscompa_viability_scores_dotplots-3.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
+<img src="figures/touret_sars-cov-2_inhibitorscompa_dotplot_Vr_vs_FDR-1.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
 <p class="caption">
 Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate.
 </p>
 </div>
+</div>
+<div id="fdr-versus-inhibition-index" class="section level2">
+<h2>FDR versus inhibition index</h2>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1"><span class="co">#### Dot plot: FDR versus inhibition index ####</span></a>
 <a class="sourceLine" id="cb39-2" data-line-number="2"><span class="kw">plot</span>(<span class="dt">x =</span> inhibTable[, <span class="st">&quot;Inhibition.Index&quot;</span>],</a>
-<a class="sourceLine" id="cb39-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[, <span class="st">&quot;log10Padj&quot;</span>],</a>
+<a class="sourceLine" id="cb39-3" data-line-number="3">     <span class="dt">y =</span> <span class="op">-</span>inhibTable[, <span class="st">&quot;log10FDR&quot;</span>],</a>
 <a class="sourceLine" id="cb39-4" data-line-number="4">     <span class="dt">main =</span> <span class="st">&quot;Relative viability vs FDR from iqrNormV&quot;</span>,</a>
 <a class="sourceLine" id="cb39-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="st">&quot;Inhibition index&quot;</span>,</a>
 <a class="sourceLine" id="cb39-6" data-line-number="6">     <span class="dt">ylab =</span> <span class="st">&quot;-log10(FDR)&quot;</span>,</a>
@@ -3451,7 +3547,7 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb39-11" data-line-number="11">     <span class="dt">las =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb39-12" data-line-number="12"><span class="co">## Mark Hydroxychloroquine</span></a>
 <a class="sourceLine" id="cb39-13" data-line-number="13"><span class="kw">points</span>(<span class="dt">x =</span> inhibTable[HOClSindex, <span class="st">&quot;Inhibition.Index&quot;</span>],</a>
-<a class="sourceLine" id="cb39-14" data-line-number="14">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[HOClSindex, <span class="st">&quot;log10Padj&quot;</span>], </a>
+<a class="sourceLine" id="cb39-14" data-line-number="14">       <span class="dt">y =</span> <span class="op">-</span>inhibTable[HOClSindex, <span class="st">&quot;log10FDR&quot;</span>], </a>
 <a class="sourceLine" id="cb39-15" data-line-number="15">       <span class="dt">col =</span> markColor[<span class="st">&quot;Hydroxychloroquine&quot;</span>], </a>
 <a class="sourceLine" id="cb39-16" data-line-number="16">       <span class="dt">pch =</span> markPCh[<span class="st">&quot;Hydroxychloroquine&quot;</span>], <span class="dt">cex =</span> <span class="fl">0.7</span>)</a>
 <a class="sourceLine" id="cb39-17" data-line-number="17"></a>
@@ -3471,7 +3567,7 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb39-31" data-line-number="31">       <span class="dt">pch =</span> markPCh[<span class="st">&quot;Hydroxychloroquine&quot;</span>],</a>
 <a class="sourceLine" id="cb39-32" data-line-number="32">       <span class="dt">cex =</span> <span class="fl">0.8</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorscompa_viability_scores_dotplots-4.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
+<img src="figures/touret_sars-cov-2_inhibitorscompa_dotplot_ii_vs_FDR-1.png" alt="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. " width="100%" />
 <p class="caption">
 Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate.
 </p>
@@ -3483,7 +3579,7 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1"><span class="co">#### Select candidate molecules accordint to different criteria ####</span></a>
 <a class="sourceLine" id="cb41-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb41-3" data-line-number="3"><span class="co">## False Discovery Rate computed from the IQR-standardized viabilities</span></a>
-<a class="sourceLine" id="cb41-4" data-line-number="4">inhibTable<span class="op">$</span>selected.FDR &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(inhibTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
+<a class="sourceLine" id="cb41-4" data-line-number="4">inhibTable<span class="op">$</span>selected.FDR &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(inhibTable<span class="op">$</span>FDR <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
 <a class="sourceLine" id="cb41-5" data-line-number="5"><span class="co"># table(inhibTable$selected.FDR)</span></a>
 <a class="sourceLine" id="cb41-6" data-line-number="6"><span class="co"># sum(inhibTable$selected.FDR, na.rm = TRUE)</span></a>
 <a class="sourceLine" id="cb41-7" data-line-number="7"></a>
@@ -3492,11 +3588,13 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb41-10" data-line-number="10"><span class="co"># table(inhibTable$selected.ii)</span></a>
 <a class="sourceLine" id="cb41-11" data-line-number="11"><span class="co"># sum(inhibTable$selected.ii, na.rm = TRUE)</span></a>
 <a class="sourceLine" id="cb41-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb41-13" data-line-number="13">inhibTable<span class="op">$</span>selected.arbidolMean &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(inhibTable<span class="op">$</span>viability <span class="op">&gt;</span><span class="st"> </span>statPerPlate[inhibTable<span class="op">$</span>Plate, <span class="st">&quot;arbidolMean&quot;</span>])</a>
-<a class="sourceLine" id="cb41-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb41-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb41-16" data-line-number="16"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable[, <span class="kw">c</span>(<span class="st">&quot;selected.FDR&quot;</span>, <span class="st">&quot;selected.ii&quot;</span>)]), </a>
-<a class="sourceLine" id="cb41-17" data-line-number="17">      <span class="dt">caption =</span> <span class="st">&quot;Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05. &quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb41-13" data-line-number="13">inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;selected.arbidolMean&quot;</span>] &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(</a>
+<a class="sourceLine" id="cb41-14" data-line-number="14">  inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;viability&quot;</span>] <span class="op">&gt;</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb41-15" data-line-number="15"><span class="st">    </span>statPerPlate[inhibTable[wellType <span class="op">==</span><span class="st"> &quot;treated&quot;</span>, <span class="st">&quot;Plate&quot;</span>], <span class="st">&quot;arbidolMean&quot;</span>])</a>
+<a class="sourceLine" id="cb41-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb41-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb41-18" data-line-number="18"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable[, <span class="kw">c</span>(<span class="st">&quot;selected.FDR&quot;</span>, <span class="st">&quot;selected.ii&quot;</span>)]), </a>
+<a class="sourceLine" id="cb41-19" data-line-number="19">      <span class="dt">caption =</span> <span class="st">&quot;Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05. &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05.</caption>
 <thead>
@@ -3540,245 +3638,253 @@ Venn diagram of the molecules selected by different criteria.
 <div id="candidates-per-plate" class="section level3">
 <h3>Candidates per plate</h3>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="co">#### Compute the number of candidates per plate depending on the criterion ####</span></a>
-<a class="sourceLine" id="cb43-2" data-line-number="2">inhibTable<span class="op">$</span>selected.onlyFDR &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span>inhibTable<span class="op">$</span>selected.ii</a>
-<a class="sourceLine" id="cb43-3" data-line-number="3">inhibTable<span class="op">$</span>selected.onlyii &lt;-<span class="st"> </span><span class="op">!</span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.ii</a>
-<a class="sourceLine" id="cb43-4" data-line-number="4">inhibTable<span class="op">$</span>selected.both &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.ii</a>
-<a class="sourceLine" id="cb43-5" data-line-number="5">inhibTable<span class="op">$</span>selected.either &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">|</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.ii</a>
-<a class="sourceLine" id="cb43-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb43-7" data-line-number="7">criteria &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;FDR&quot;</span>, <span class="st">&quot;ii&quot;</span>, <span class="st">&quot;both&quot;</span>, <span class="st">&quot;either&quot;</span>, <span class="st">&quot;onlyFDR&quot;</span>, <span class="st">&quot;onlyii&quot;</span>, <span class="st">&quot;arbidolMean&quot;</span>)</a>
-<a class="sourceLine" id="cb43-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb43-9" data-line-number="9"><span class="co"># table(inhibTable$selected.ii, inhibTable$selected.arbidolMean)</span></a>
+<a class="sourceLine" id="cb43-2" data-line-number="2">inhibTable<span class="op">$</span>selected.FDRandArbidol &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb43-3" data-line-number="3"><span class="st">  </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.arbidolMean</a>
+<a class="sourceLine" id="cb43-4" data-line-number="4">inhibTable<span class="op">$</span>selected.FDRorArbidol &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb43-5" data-line-number="5"><span class="st">  </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">|</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.arbidolMean</a>
+<a class="sourceLine" id="cb43-6" data-line-number="6">inhibTable<span class="op">$</span>selected.FDRonly &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb43-7" data-line-number="7"><span class="st">  </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span>inhibTable<span class="op">$</span>selected.arbidolMean</a>
+<a class="sourceLine" id="cb43-8" data-line-number="8">inhibTable<span class="op">$</span>selected.ArbidolOnly &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb43-9" data-line-number="9"><span class="st">  </span><span class="op">!</span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.arbidolMean</a>
 <a class="sourceLine" id="cb43-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb43-11" data-line-number="11">candidatesPerPlate &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="dt">nrow =</span> nbPlates, <span class="dt">ncol =</span> <span class="kw">length</span>(criteria), <span class="dv">0</span>))</a>
-<a class="sourceLine" id="cb43-12" data-line-number="12"><span class="kw">row.names</span>(candidatesPerPlate) &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span>nbPlates</a>
-<a class="sourceLine" id="cb43-13" data-line-number="13"><span class="kw">names</span>(candidatesPerPlate) &lt;-<span class="st"> </span>criteria</a>
-<a class="sourceLine" id="cb43-14" data-line-number="14"><span class="cf">for</span> (criterion <span class="cf">in</span> criteria) {</a>
-<a class="sourceLine" id="cb43-15" data-line-number="15">  candidates &lt;-<span class="st"> </span><span class="kw">as.data.frame.table</span>(</a>
-<a class="sourceLine" id="cb43-16" data-line-number="16">    <span class="kw">table</span>(</a>
-<a class="sourceLine" id="cb43-17" data-line-number="17">    <span class="kw">subset</span>(<span class="dt">x =</span> inhibTable, </a>
-<a class="sourceLine" id="cb43-18" data-line-number="18">           <span class="dt">subset =</span> inhibTable[<span class="kw">paste0</span>(<span class="st">&quot;selected.&quot;</span>, criterion)] <span class="op">==</span><span class="st"> </span><span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb43-19" data-line-number="19">           <span class="dt">select =</span> <span class="st">&quot;Plate&quot;</span>)))</a>
-<a class="sourceLine" id="cb43-20" data-line-number="20">  <span class="kw">names</span>(candidates) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Plate&quot;</span>, <span class="st">&quot;n&quot;</span>)</a>
-<a class="sourceLine" id="cb43-21" data-line-number="21">  candidatesPerPlate[<span class="kw">as.vector</span>(candidates<span class="op">$</span>Plate), criterion] &lt;-<span class="st"> </span>candidates<span class="op">$</span>n</a>
-<a class="sourceLine" id="cb43-22" data-line-number="22">}</a>
-<a class="sourceLine" id="cb43-23" data-line-number="23"><span class="co"># apply(candidatesPerPlate, 2, sum)</span></a>
-<a class="sourceLine" id="cb43-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb43-25" data-line-number="25">ccpp &lt;-<span class="st"> </span>candidatesPerPlate</a>
-<a class="sourceLine" id="cb43-26" data-line-number="26">ccpp[<span class="st">&quot;Total&quot;</span>, ] &lt;-<span class="st"> </span><span class="kw">apply</span>(ccpp, <span class="dv">2</span>, sum)</a>
-<a class="sourceLine" id="cb43-27" data-line-number="27"><span class="kw">kable</span>(ccpp, <span class="dt">row.names =</span> <span class="ot">TRUE</span>, <span class="dt">ccaption =</span> <span class="st">&quot;Candidates per plate depending on the selection criteria&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb43-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb43-12" data-line-number="12"><span class="co">## Count the number of candidates per plate for the different criteria</span></a>
+<a class="sourceLine" id="cb43-13" data-line-number="13">criteria &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;ii&quot;</span>, <span class="st">&quot;arbidolMean&quot;</span>, <span class="st">&quot;FDR&quot;</span>, <span class="st">&quot;FDRandArbidol&quot;</span>, <span class="st">&quot;FDRorArbidol&quot;</span>, <span class="st">&quot;FDRonly&quot;</span>, <span class="st">&quot;ArbidolOnly&quot;</span>)</a>
+<a class="sourceLine" id="cb43-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb43-15" data-line-number="15"><span class="co"># table(inhibTable$selected.ii, inhibTable$selected.arbidolMean)</span></a>
+<a class="sourceLine" id="cb43-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb43-17" data-line-number="17">candidatesPerPlate &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(</a>
+<a class="sourceLine" id="cb43-18" data-line-number="18">  <span class="dt">nrow =</span> nbPlates, </a>
+<a class="sourceLine" id="cb43-19" data-line-number="19">  <span class="dt">ncol =</span> <span class="kw">length</span>(criteria), <span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb43-20" data-line-number="20"><span class="kw">row.names</span>(candidatesPerPlate) &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span>nbPlates</a>
+<a class="sourceLine" id="cb43-21" data-line-number="21"><span class="kw">names</span>(candidatesPerPlate) &lt;-<span class="st"> </span>criteria</a>
+<a class="sourceLine" id="cb43-22" data-line-number="22"><span class="cf">for</span> (criterion <span class="cf">in</span> criteria) {</a>
+<a class="sourceLine" id="cb43-23" data-line-number="23">  candidates &lt;-<span class="st"> </span><span class="kw">as.data.frame.table</span>(</a>
+<a class="sourceLine" id="cb43-24" data-line-number="24">    <span class="kw">table</span>(</a>
+<a class="sourceLine" id="cb43-25" data-line-number="25">    <span class="kw">subset</span>(<span class="dt">x =</span> inhibTable, </a>
+<a class="sourceLine" id="cb43-26" data-line-number="26">           <span class="dt">subset =</span> inhibTable[<span class="kw">paste0</span>(<span class="st">&quot;selected.&quot;</span>, criterion)] <span class="op">==</span><span class="st"> </span><span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb43-27" data-line-number="27">           <span class="dt">select =</span> <span class="st">&quot;Plate&quot;</span>)))</a>
+<a class="sourceLine" id="cb43-28" data-line-number="28">  <span class="kw">names</span>(candidates) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Plate&quot;</span>, <span class="st">&quot;n&quot;</span>)</a>
+<a class="sourceLine" id="cb43-29" data-line-number="29">  candidatesPerPlate[<span class="kw">as.vector</span>(candidates<span class="op">$</span>Plate), criterion] &lt;-<span class="st"> </span>candidates<span class="op">$</span>n</a>
+<a class="sourceLine" id="cb43-30" data-line-number="30">}</a>
+<a class="sourceLine" id="cb43-31" data-line-number="31"><span class="co"># apply(candidatesPerPlate, 2, sum)</span></a>
+<a class="sourceLine" id="cb43-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb43-33" data-line-number="33">ccpp &lt;-<span class="st"> </span>candidatesPerPlate</a>
+<a class="sourceLine" id="cb43-34" data-line-number="34">ccpp[<span class="st">&quot;Total&quot;</span>, ] &lt;-<span class="st"> </span><span class="kw">apply</span>(ccpp, <span class="dv">2</span>, sum)</a>
+<a class="sourceLine" id="cb43-35" data-line-number="35"><span class="kw">kable</span>(ccpp, <span class="dt">row.names =</span> <span class="ot">TRUE</span>, <span class="dt">ccaption =</span> <span class="st">&quot;Candidates per plate depending on the selection criteria&quot;</span>)</a></code></pre></div>
 <table>
 <thead>
 <tr class="header">
 <th></th>
-<th align="right">FDR</th>
 <th align="right">ii</th>
-<th align="right">both</th>
-<th align="right">either</th>
-<th align="right">onlyFDR</th>
-<th align="right">onlyii</th>
 <th align="right">arbidolMean</th>
+<th align="right">FDR</th>
+<th align="right">FDRandArbidol</th>
+<th align="right">FDRorArbidol</th>
+<th align="right">FDRonly</th>
+<th align="right">ArbidolOnly</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td align="right">14</td>
 <td align="right">1</td>
-<td align="right">1</td>
+<td align="right">2</td>
 <td align="right">14</td>
-<td align="right">11</td>
+<td align="right">2</td>
+<td align="right">14</td>
+<td align="right">12</td>
 <td align="right">0</td>
-<td align="right">10</td>
 </tr>
 <tr class="even">
 <td>2</td>
+<td align="right">0</td>
+<td align="right">1</td>
 <td align="right">10</td>
-<td align="right">0</td>
-<td align="right">0</td>
+<td align="right">1</td>
 <td align="right">10</td>
-<td align="right">8</td>
+<td align="right">9</td>
 <td align="right">0</td>
-<td align="right">8</td>
 </tr>
 <tr class="odd">
 <td>3</td>
-<td align="right">9</td>
 <td align="right">1</td>
-<td align="right">1</td>
+<td align="right">2</td>
 <td align="right">9</td>
-<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">9</td>
+<td align="right">7</td>
 <td align="right">0</td>
-<td align="right">10</td>
 </tr>
 <tr class="even">
 <td>4</td>
-<td align="right">2</td>
 <td align="right">7</td>
+<td align="right">8</td>
 <td align="right">2</td>
-<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">8</td>
 <td align="right">0</td>
-<td align="right">5</td>
-<td align="right">16</td>
+<td align="right">6</td>
 </tr>
 <tr class="odd">
 <td>5</td>
-<td align="right">9</td>
 <td align="right">3</td>
-<td align="right">3</td>
+<td align="right">4</td>
 <td align="right">9</td>
 <td align="right">4</td>
+<td align="right">9</td>
+<td align="right">5</td>
 <td align="right">0</td>
-<td align="right">12</td>
 </tr>
 <tr class="even">
 <td>6</td>
-<td align="right">10</td>
 <td align="right">1</td>
-<td align="right">1</td>
+<td align="right">2</td>
 <td align="right">10</td>
-<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">10</td>
+<td align="right">8</td>
 <td align="right">0</td>
-<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td>7</td>
-<td align="right">15</td>
 <td align="right">4</td>
-<td align="right">4</td>
+<td align="right">5</td>
 <td align="right">15</td>
-<td align="right">9</td>
+<td align="right">5</td>
+<td align="right">15</td>
+<td align="right">10</td>
 <td align="right">0</td>
-<td align="right">13</td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td align="right">12</td>
 <td align="right">3</td>
-<td align="right">3</td>
+<td align="right">4</td>
 <td align="right">12</td>
-<td align="right">7</td>
+<td align="right">4</td>
+<td align="right">12</td>
+<td align="right">8</td>
 <td align="right">0</td>
-<td align="right">12</td>
 </tr>
 <tr class="odd">
 <td>9</td>
-<td align="right">12</td>
 <td align="right">2</td>
-<td align="right">2</td>
+<td align="right">3</td>
 <td align="right">12</td>
-<td align="right">8</td>
+<td align="right">3</td>
+<td align="right">12</td>
+<td align="right">9</td>
 <td align="right">0</td>
-<td align="right">11</td>
 </tr>
 <tr class="even">
 <td>10</td>
-<td align="right">11</td>
 <td align="right">1</td>
-<td align="right">1</td>
+<td align="right">2</td>
 <td align="right">11</td>
-<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">11</td>
+<td align="right">9</td>
 <td align="right">0</td>
-<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td>11</td>
 <td align="right">3</td>
+<td align="right">4</td>
 <td align="right">3</td>
 <td align="right">3</td>
-<td align="right">3</td>
+<td align="right">4</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">11</td>
+<td align="right">1</td>
 </tr>
 <tr class="even">
 <td>12</td>
-<td align="right">1</td>
 <td align="right">2</td>
+<td align="right">3</td>
 <td align="right">1</td>
-<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
 <td align="right">0</td>
-<td align="right">1</td>
-<td align="right">11</td>
+<td align="right">2</td>
 </tr>
 <tr class="odd">
 <td>13</td>
-<td align="right">0</td>
 <td align="right">9</td>
+<td align="right">10</td>
 <td align="right">0</td>
-<td align="right">9</td>
 <td align="right">0</td>
-<td align="right">9</td>
-<td align="right">18</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">10</td>
 </tr>
 <tr class="even">
 <td>14</td>
-<td align="right">0</td>
 <td align="right">14</td>
+<td align="right">15</td>
 <td align="right">0</td>
-<td align="right">14</td>
 <td align="right">0</td>
-<td align="right">14</td>
-<td align="right">23</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">15</td>
 </tr>
 <tr class="odd">
 <td>15</td>
-<td align="right">0</td>
 <td align="right">16</td>
-<td align="right">0</td>
-<td align="right">16</td>
-<td align="right">0</td>
-<td align="right">16</td>
-<td align="right">25</td>
-</tr>
-<tr class="even">
-<td>16</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">8</td>
-<td align="right">18</td>
-</tr>
-<tr class="odd">
-<td>17</td>
-<td align="right">1</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">3</td>
-<td align="right">0</td>
-<td align="right">2</td>
-<td align="right">14</td>
-</tr>
-<tr class="even">
-<td>18</td>
-<td align="right">4</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">4</td>
+<td align="right">17</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">11</td>
-</tr>
-<tr class="odd">
-<td>19</td>
-<td align="right">5</td>
-<td align="right">8</td>
-<td align="right">5</td>
-<td align="right">8</td>
+<td align="right">17</td>
 <td align="right">0</td>
-<td align="right">3</td>
 <td align="right">17</td>
 </tr>
 <tr class="even">
+<td>16</td>
+<td align="right">9</td>
+<td align="right">10</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td align="right">8</td>
+<td align="right">9</td>
+<td align="right">5</td>
+<td align="right">5</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
 <td>Total</td>
-<td align="right">119</td>
 <td align="right">90</td>
-<td align="right">32</td>
-<td align="right">177</td>
-<td align="right">68</td>
-<td align="right">58</td>
-<td align="right">260</td>
+<td align="right">109</td>
+<td align="right">119</td>
+<td align="right">42</td>
+<td align="right">186</td>
+<td align="right">77</td>
+<td align="right">67</td>
 </tr>
 </tbody>
 </table>
@@ -4409,44 +4515,50 @@ Values of the plate-wise normalized inhibition index for all the tested molecule
 <a class="sourceLine" id="cb58-2" data-line-number="2">supTable<span class="op">$</span>p.value &lt;-<span class="st"> </span><span class="kw">pnorm</span>(normII, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb58-3" data-line-number="3">supTable<span class="op">$</span>log10Pval &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>p.value)</a>
 <a class="sourceLine" id="cb58-4" data-line-number="4">supTable<span class="op">$</span>e.value &lt;-<span class="st"> </span>supTable<span class="op">$</span>p.value <span class="op">*</span><span class="st"> </span><span class="kw">length</span>(normII)</a>
-<a class="sourceLine" id="cb58-5" data-line-number="5">supTable<span class="op">$</span>padj &lt;-<span class="st"> </span><span class="kw">p.adjust</span>(supTable<span class="op">$</span>p.value, <span class="dt">method =</span> <span class="st">&quot;fdr&quot;</span>)</a>
-<a class="sourceLine" id="cb58-6" data-line-number="6">supTable<span class="op">$</span>log10Padj &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>padj)</a></code></pre></div>
+<a class="sourceLine" id="cb58-5" data-line-number="5">supTable<span class="op">$</span>FDR &lt;-<span class="st"> </span><span class="kw">p.adjust</span>(supTable<span class="op">$</span>p.value, <span class="dt">method =</span> <span class="st">&quot;fdr&quot;</span>)</a>
+<a class="sourceLine" id="cb58-6" data-line-number="6">supTable<span class="op">$</span>log10FDR &lt;-<span class="st"> </span><span class="kw">log10</span>(supTable<span class="op">$</span>FDR)</a></code></pre></div>
+<div id="p-value-histogram-1" class="section level3">
+<h3>P-value histogram</h3>
 <div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" data-line-number="1"><span class="kw">hist</span>(supTable<span class="op">$</span>p.value, <span class="dt">breaks =</span> <span class="dv">20</span>, </a>
 <a class="sourceLine" id="cb59-2" data-line-number="2">     <span class="dt">col =</span> <span class="st">&quot;grey&quot;</span>,</a>
 <a class="sourceLine" id="cb59-3" data-line-number="3">     <span class="dt">main =</span> <span class="st">&quot;P-value histogram after plate-wise normalization&quot;</span>,</a>
 <a class="sourceLine" id="cb59-4" data-line-number="4">     <span class="dt">xlab =</span> <span class="st">&quot;Nominal P-value (unadjusted)&quot;</span>,</a>
 <a class="sourceLine" id="cb59-5" data-line-number="5">     <span class="dt">ylab =</span> <span class="st">&quot;Frequency&quot;</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorspval_histogram-1.png" alt="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index. " width="60%" />
+<img src="figures/touret_sars-cov-2_inhibitorsnormII_pval_histogram-1.png" alt="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index. " width="60%" />
 <p class="caption">
 Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index.
 </p>
 </div>
+</div>
+<div id="volcano-plot-1" class="section level3">
+<h3>Volcano plot</h3>
 <div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" data-line-number="1"><span class="co">#### Volcano plot ####</span></a>
 <a class="sourceLine" id="cb60-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb60-3" data-line-number="3"><span class="kw">plot</span>(<span class="dt">x =</span> supTable<span class="op">$</span>normInhibIndex,</a>
-<a class="sourceLine" id="cb60-4" data-line-number="4">     <span class="dt">y =</span> <span class="op">-</span>supTable<span class="op">$</span>log10Padj, </a>
+<a class="sourceLine" id="cb60-4" data-line-number="4">     <span class="dt">y =</span> <span class="op">-</span>supTable<span class="op">$</span>log10FDR, </a>
 <a class="sourceLine" id="cb60-5" data-line-number="5">     <span class="dt">col =</span> supTable<span class="op">$</span>color,</a>
 <a class="sourceLine" id="cb60-6" data-line-number="6">     <span class="dt">main =</span> <span class="st">&quot;Volcano plot&quot;</span>,</a>
 <a class="sourceLine" id="cb60-7" data-line-number="7">     <span class="dt">xlab =</span> <span class="st">&quot;Normalized inhibition index&quot;</span>,</a>
-<a class="sourceLine" id="cb60-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(Padj)&quot;</span>)</a>
+<a class="sourceLine" id="cb60-8" data-line-number="8">     <span class="dt">ylab =</span> <span class="st">&quot;Significance = -log10(FDR)&quot;</span>)</a>
 <a class="sourceLine" id="cb60-9" data-line-number="9"><span class="kw">grid</span>()</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/touret_sars-cov-2_inhibitorsvolcano_plot-1.png" alt="Volcano plot. " width="60%" />
+<img src="figures/touret_sars-cov-2_inhibitorsnormII_volcano_plot-1.png" alt="Volcano plot. " width="60%" />
 <p class="caption">
 Volcano plot.
 </p>
+</div>
 </div>
 </div>
 <div id="selection-of-candidate-molecules-1" class="section level2">
 <h2>Selection of candidate molecules</h2>
 <div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1"><span class="co">#### Select significant normalized II values ####</span></a>
 <a class="sourceLine" id="cb61-2" data-line-number="2">alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></a>
-<a class="sourceLine" id="cb61-3" data-line-number="3"><span class="co"># table(supTable$padj &lt; alpha)</span></a>
-<a class="sourceLine" id="cb61-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
+<a class="sourceLine" id="cb61-3" data-line-number="3"><span class="co"># table(supTable$FDR &lt; alpha)</span></a>
+<a class="sourceLine" id="cb61-4" data-line-number="4">selected &lt;-<span class="st"> </span><span class="kw">subset</span>(supTable, supTable<span class="op">$</span>FDR <span class="op">&lt;</span><span class="st"> </span>alpha)</a>
 <a class="sourceLine" id="cb61-5" data-line-number="5"></a>
 <a class="sourceLine" id="cb61-6" data-line-number="6"><span class="co">## Sort by decreasing adjusted p-value</span></a>
-<a class="sourceLine" id="cb61-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>padj, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
+<a class="sourceLine" id="cb61-7" data-line-number="7">selected &lt;-<span class="st"> </span>selected[<span class="kw">order</span>(selected<span class="op">$</span>FDR, <span class="dt">decreasing =</span> <span class="ot">FALSE</span>), ]</a>
 <a class="sourceLine" id="cb61-8" data-line-number="8"><span class="co"># kable(names(selected), row.names=TRUE)</span></a>
 <a class="sourceLine" id="cb61-9" data-line-number="9"></a>
 <a class="sourceLine" id="cb61-10" data-line-number="10"><span class="co">## Print selected molecules</span></a>
@@ -4466,7 +4578,7 @@ Volcano plot.
 <th align="right">Inhibition.Index</th>
 <th align="right">normInhibIndex</th>
 <th align="right">log10Pval</th>
-<th align="right">log10Padj</th>
+<th align="right">log10FDR</th>
 </tr>
 </thead>
 <tbody>
@@ -5767,8 +5879,8 @@ loaded via a namespace (and not attached):
 <div id="to-do" class="section level2">
 <h2>To do</h2>
 <ul>
+<li>log2 transformatio before standardizing (and comparison of the targets)</li>
 <li>Add the formula of the inhibition index</li>
-<li>comptage des positifs par plaque avec les différentes méthodes + plots</li>
 <li>distribution de valeurs plaque par plaque –&gt; vérifier si certaines plaques ont l’air d’avoir plus de 20 cibles (percentile75)</li>
 </ul>
 </div>
