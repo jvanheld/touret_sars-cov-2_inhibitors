@@ -1182,7 +1182,7 @@ kable(selected[ , c(1:3, 5:7, 10, 12, 15)],
 
 ## Dot plots
 
-```{r compa_viability_scores_dotplots, fig.width=10, fig.height=12, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
+```{r compa_viability_scores_dotplots, fig.width=8, fig.height=8, out.width="100%", fig.cap="Comparison between viability scores. Diamonds: cell control (uninfected cells). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "  }
 
 #### Dot plots to compare viability scores ####
 
@@ -1361,6 +1361,8 @@ inhibTable$selected.ii <- as.numeric(inhibTable$Inhibition.Index >= 1)
 # table(inhibTable$selected.ii)
 # sum(inhibTable$selected.ii, na.rm = TRUE)
 
+inhibTable$selected.arbidolMean <- as.numeric(inhibTable$viability > statPerPlate[inhibTable$Plate, "arbidolMean"])
+
 
 kable(table(inhibTable[, c("selected.FDR", "selected.ii")]), 
       caption = "Contingency table of the molecules selected by different criteria. Columns: inhibition index >= 1. Rows: FDR < 0.05. ")
@@ -1392,7 +1394,9 @@ inhibTable$selected.onlyii <- !inhibTable$selected.FDR & inhibTable$selected.ii
 inhibTable$selected.both <- inhibTable$selected.FDR & inhibTable$selected.ii
 inhibTable$selected.either <- inhibTable$selected.FDR | inhibTable$selected.ii
 
-criteria <- c("FDR", "ii", "both", "either", "onlyFDR", "onlyii")
+criteria <- c("FDR", "ii", "both", "either", "onlyFDR", "onlyii", "arbidolMean")
+
+# table(inhibTable$selected.ii, inhibTable$selected.arbidolMean)
 
 candidatesPerPlate <- data.frame(matrix(nrow = nbPlates, ncol = length(criteria), 0))
 row.names(candidatesPerPlate) <- 1:nbPlates

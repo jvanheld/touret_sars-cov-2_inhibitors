@@ -3492,9 +3492,11 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <a class="sourceLine" id="cb41-10" data-line-number="10"><span class="co"># table(inhibTable$selected.ii)</span></a>
 <a class="sourceLine" id="cb41-11" data-line-number="11"><span class="co"># sum(inhibTable$selected.ii, na.rm = TRUE)</span></a>
 <a class="sourceLine" id="cb41-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb41-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb41-14" data-line-number="14"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable[, <span class="kw">c</span>(<span class="st">&quot;selected.FDR&quot;</span>, <span class="st">&quot;selected.ii&quot;</span>)]), </a>
-<a class="sourceLine" id="cb41-15" data-line-number="15">      <span class="dt">caption =</span> <span class="st">&quot;Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05. &quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb41-13" data-line-number="13">inhibTable<span class="op">$</span>selected.arbidolMean &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(inhibTable<span class="op">$</span>viability <span class="op">&gt;</span><span class="st"> </span>statPerPlate[inhibTable<span class="op">$</span>Plate, <span class="st">&quot;arbidolMean&quot;</span>])</a>
+<a class="sourceLine" id="cb41-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb41-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb41-16" data-line-number="16"><span class="kw">kable</span>(<span class="kw">table</span>(inhibTable[, <span class="kw">c</span>(<span class="st">&quot;selected.FDR&quot;</span>, <span class="st">&quot;selected.ii&quot;</span>)]), </a>
+<a class="sourceLine" id="cb41-17" data-line-number="17">      <span class="dt">caption =</span> <span class="st">&quot;Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05. &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Contingency table of the molecules selected by different criteria. Columns: inhibition index &gt;= 1. Rows: FDR &lt; 0.05.</caption>
 <thead>
@@ -3543,25 +3545,27 @@ Venn diagram of the molecules selected by different criteria.
 <a class="sourceLine" id="cb43-4" data-line-number="4">inhibTable<span class="op">$</span>selected.both &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">&amp;</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.ii</a>
 <a class="sourceLine" id="cb43-5" data-line-number="5">inhibTable<span class="op">$</span>selected.either &lt;-<span class="st"> </span>inhibTable<span class="op">$</span>selected.FDR <span class="op">|</span><span class="st"> </span>inhibTable<span class="op">$</span>selected.ii</a>
 <a class="sourceLine" id="cb43-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb43-7" data-line-number="7">criteria &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;FDR&quot;</span>, <span class="st">&quot;ii&quot;</span>, <span class="st">&quot;both&quot;</span>, <span class="st">&quot;either&quot;</span>, <span class="st">&quot;onlyFDR&quot;</span>, <span class="st">&quot;onlyii&quot;</span>)</a>
+<a class="sourceLine" id="cb43-7" data-line-number="7">criteria &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;FDR&quot;</span>, <span class="st">&quot;ii&quot;</span>, <span class="st">&quot;both&quot;</span>, <span class="st">&quot;either&quot;</span>, <span class="st">&quot;onlyFDR&quot;</span>, <span class="st">&quot;onlyii&quot;</span>, <span class="st">&quot;arbidolMean&quot;</span>)</a>
 <a class="sourceLine" id="cb43-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb43-9" data-line-number="9">candidatesPerPlate &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="dt">nrow =</span> nbPlates, <span class="dt">ncol =</span> <span class="kw">length</span>(criteria), <span class="dv">0</span>))</a>
-<a class="sourceLine" id="cb43-10" data-line-number="10"><span class="kw">row.names</span>(candidatesPerPlate) &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span>nbPlates</a>
-<a class="sourceLine" id="cb43-11" data-line-number="11"><span class="kw">names</span>(candidatesPerPlate) &lt;-<span class="st"> </span>criteria</a>
-<a class="sourceLine" id="cb43-12" data-line-number="12"><span class="cf">for</span> (criterion <span class="cf">in</span> criteria) {</a>
-<a class="sourceLine" id="cb43-13" data-line-number="13">  candidates &lt;-<span class="st"> </span><span class="kw">as.data.frame.table</span>(</a>
-<a class="sourceLine" id="cb43-14" data-line-number="14">    <span class="kw">table</span>(</a>
-<a class="sourceLine" id="cb43-15" data-line-number="15">    <span class="kw">subset</span>(<span class="dt">x =</span> inhibTable, </a>
-<a class="sourceLine" id="cb43-16" data-line-number="16">           <span class="dt">subset =</span> inhibTable[<span class="kw">paste0</span>(<span class="st">&quot;selected.&quot;</span>, criterion)] <span class="op">==</span><span class="st"> </span><span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb43-17" data-line-number="17">           <span class="dt">select =</span> <span class="st">&quot;Plate&quot;</span>)))</a>
-<a class="sourceLine" id="cb43-18" data-line-number="18">  <span class="kw">names</span>(candidates) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Plate&quot;</span>, <span class="st">&quot;n&quot;</span>)</a>
-<a class="sourceLine" id="cb43-19" data-line-number="19">  candidatesPerPlate[<span class="kw">as.vector</span>(candidates<span class="op">$</span>Plate), criterion] &lt;-<span class="st"> </span>candidates<span class="op">$</span>n</a>
-<a class="sourceLine" id="cb43-20" data-line-number="20">}</a>
-<a class="sourceLine" id="cb43-21" data-line-number="21"><span class="co"># apply(candidatesPerPlate, 2, sum)</span></a>
-<a class="sourceLine" id="cb43-22" data-line-number="22"></a>
-<a class="sourceLine" id="cb43-23" data-line-number="23">ccpp &lt;-<span class="st"> </span>candidatesPerPlate</a>
-<a class="sourceLine" id="cb43-24" data-line-number="24">ccpp[<span class="st">&quot;Total&quot;</span>, ] &lt;-<span class="st"> </span><span class="kw">apply</span>(ccpp, <span class="dv">2</span>, sum)</a>
-<a class="sourceLine" id="cb43-25" data-line-number="25"><span class="kw">kable</span>(ccpp, <span class="dt">row.names =</span> <span class="ot">TRUE</span>, <span class="dt">ccaption =</span> <span class="st">&quot;Candidates per plate depending on the selection criteria&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb43-9" data-line-number="9"><span class="co"># table(inhibTable$selected.ii, inhibTable$selected.arbidolMean)</span></a>
+<a class="sourceLine" id="cb43-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb43-11" data-line-number="11">candidatesPerPlate &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="dt">nrow =</span> nbPlates, <span class="dt">ncol =</span> <span class="kw">length</span>(criteria), <span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb43-12" data-line-number="12"><span class="kw">row.names</span>(candidatesPerPlate) &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span>nbPlates</a>
+<a class="sourceLine" id="cb43-13" data-line-number="13"><span class="kw">names</span>(candidatesPerPlate) &lt;-<span class="st"> </span>criteria</a>
+<a class="sourceLine" id="cb43-14" data-line-number="14"><span class="cf">for</span> (criterion <span class="cf">in</span> criteria) {</a>
+<a class="sourceLine" id="cb43-15" data-line-number="15">  candidates &lt;-<span class="st"> </span><span class="kw">as.data.frame.table</span>(</a>
+<a class="sourceLine" id="cb43-16" data-line-number="16">    <span class="kw">table</span>(</a>
+<a class="sourceLine" id="cb43-17" data-line-number="17">    <span class="kw">subset</span>(<span class="dt">x =</span> inhibTable, </a>
+<a class="sourceLine" id="cb43-18" data-line-number="18">           <span class="dt">subset =</span> inhibTable[<span class="kw">paste0</span>(<span class="st">&quot;selected.&quot;</span>, criterion)] <span class="op">==</span><span class="st"> </span><span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb43-19" data-line-number="19">           <span class="dt">select =</span> <span class="st">&quot;Plate&quot;</span>)))</a>
+<a class="sourceLine" id="cb43-20" data-line-number="20">  <span class="kw">names</span>(candidates) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Plate&quot;</span>, <span class="st">&quot;n&quot;</span>)</a>
+<a class="sourceLine" id="cb43-21" data-line-number="21">  candidatesPerPlate[<span class="kw">as.vector</span>(candidates<span class="op">$</span>Plate), criterion] &lt;-<span class="st"> </span>candidates<span class="op">$</span>n</a>
+<a class="sourceLine" id="cb43-22" data-line-number="22">}</a>
+<a class="sourceLine" id="cb43-23" data-line-number="23"><span class="co"># apply(candidatesPerPlate, 2, sum)</span></a>
+<a class="sourceLine" id="cb43-24" data-line-number="24"></a>
+<a class="sourceLine" id="cb43-25" data-line-number="25">ccpp &lt;-<span class="st"> </span>candidatesPerPlate</a>
+<a class="sourceLine" id="cb43-26" data-line-number="26">ccpp[<span class="st">&quot;Total&quot;</span>, ] &lt;-<span class="st"> </span><span class="kw">apply</span>(ccpp, <span class="dv">2</span>, sum)</a>
+<a class="sourceLine" id="cb43-27" data-line-number="27"><span class="kw">kable</span>(ccpp, <span class="dt">row.names =</span> <span class="ot">TRUE</span>, <span class="dt">ccaption =</span> <span class="st">&quot;Candidates per plate depending on the selection criteria&quot;</span>)</a></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -3572,6 +3576,7 @@ Venn diagram of the molecules selected by different criteria.
 <th align="right">either</th>
 <th align="right">onlyFDR</th>
 <th align="right">onlyii</th>
+<th align="right">arbidolMean</th>
 </tr>
 </thead>
 <tbody>
@@ -3583,6 +3588,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">14</td>
 <td align="right">11</td>
 <td align="right">0</td>
+<td align="right">10</td>
 </tr>
 <tr class="even">
 <td>2</td>
@@ -3592,6 +3598,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">10</td>
 <td align="right">8</td>
 <td align="right">0</td>
+<td align="right">8</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -3601,6 +3608,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">9</td>
 <td align="right">6</td>
 <td align="right">0</td>
+<td align="right">10</td>
 </tr>
 <tr class="even">
 <td>4</td>
@@ -3610,6 +3618,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">7</td>
 <td align="right">0</td>
 <td align="right">5</td>
+<td align="right">16</td>
 </tr>
 <tr class="odd">
 <td>5</td>
@@ -3619,6 +3628,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">9</td>
 <td align="right">4</td>
 <td align="right">0</td>
+<td align="right">12</td>
 </tr>
 <tr class="even">
 <td>6</td>
@@ -3628,6 +3638,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">10</td>
 <td align="right">7</td>
 <td align="right">0</td>
+<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td>7</td>
@@ -3637,6 +3648,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">15</td>
 <td align="right">9</td>
 <td align="right">0</td>
+<td align="right">13</td>
 </tr>
 <tr class="even">
 <td>8</td>
@@ -3646,6 +3658,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">12</td>
 <td align="right">7</td>
 <td align="right">0</td>
+<td align="right">12</td>
 </tr>
 <tr class="odd">
 <td>9</td>
@@ -3655,6 +3668,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">12</td>
 <td align="right">8</td>
 <td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="even">
 <td>10</td>
@@ -3664,6 +3678,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">11</td>
 <td align="right">8</td>
 <td align="right">0</td>
+<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td>11</td>
@@ -3673,6 +3688,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">3</td>
 <td align="right">0</td>
 <td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="even">
 <td>12</td>
@@ -3682,6 +3698,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">2</td>
 <td align="right">0</td>
 <td align="right">1</td>
+<td align="right">11</td>
 </tr>
 <tr class="odd">
 <td>13</td>
@@ -3691,6 +3708,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">9</td>
 <td align="right">0</td>
 <td align="right">9</td>
+<td align="right">18</td>
 </tr>
 <tr class="even">
 <td>14</td>
@@ -3700,6 +3718,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">14</td>
 <td align="right">0</td>
 <td align="right">14</td>
+<td align="right">23</td>
 </tr>
 <tr class="odd">
 <td>15</td>
@@ -3709,6 +3728,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">16</td>
 <td align="right">0</td>
 <td align="right">16</td>
+<td align="right">25</td>
 </tr>
 <tr class="even">
 <td>16</td>
@@ -3718,6 +3738,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">9</td>
 <td align="right">0</td>
 <td align="right">8</td>
+<td align="right">18</td>
 </tr>
 <tr class="odd">
 <td>17</td>
@@ -3727,6 +3748,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">3</td>
 <td align="right">0</td>
 <td align="right">2</td>
+<td align="right">14</td>
 </tr>
 <tr class="even">
 <td>18</td>
@@ -3736,6 +3758,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">4</td>
 <td align="right">0</td>
 <td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="odd">
 <td>19</td>
@@ -3745,6 +3768,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">8</td>
 <td align="right">0</td>
 <td align="right">3</td>
+<td align="right">17</td>
 </tr>
 <tr class="even">
 <td>Total</td>
@@ -3754,6 +3778,7 @@ Venn diagram of the molecules selected by different criteria.
 <td align="right">177</td>
 <td align="right">68</td>
 <td align="right">58</td>
+<td align="right">260</td>
 </tr>
 </tbody>
 </table>
