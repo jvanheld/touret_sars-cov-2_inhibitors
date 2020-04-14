@@ -3,15 +3,11 @@ title: "Statistical analysis of *in vitro* screening for inhibitors of viral inf
 author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire1, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    code_folding: hide
+  pdf_document:
     fig_caption: yes
     highlight: zenburn
-    self_contained: no
-    theme: cerulean
     toc: yes
     toc_depth: 3
-    toc_float: yes
   ioslides_presentation:
     colortheme: dolphin
     fig_caption: yes
@@ -48,11 +44,15 @@ output:
     theme: cerulean
     toc: yes
     widescreen: yes
-  pdf_document:
+  html_document:
+    code_folding: hide
     fig_caption: yes
     highlight: zenburn
+    self_contained: no
+    theme: cerulean
     toc: yes
     toc_depth: 3
+    toc_float: yes
 font-import: http://fonts.googleapis.com/css?family=Risque
 subtitle:  Normalization and target selection methods
 font-family: Garamond
@@ -188,7 +188,26 @@ message("\tLoaded main table with ", nrow(supTable), " rows ")
 The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` molecules. 
 
 
-# Raw viability measurements
+# Viability measurements
+
+## Raw viability
+
+The viability is measured as the proportion of living cells in a given condition (infection, treatment).
+
+$$V = A / (D + A)$$
+
+where
+
+- $D$ is the number of dead cells 
+- $A$ is the number of cells alive
+- $V$ is denoted hereafter as **raw viability**
+
+## Inhibition index
+
+
+
+$$II =?$$
+
 
 ```{r raw_data}
 #### Load raw data ####
@@ -1052,7 +1071,7 @@ The plot of IQR-standardized viability values (top panel) clearly shows that the
 We compute the p-value as the upper tail of the normal distribution (rigth-side test) in order to detect significantly high values of the plate-wise IQR-standardized index.
 
 ```{r iqNormVpval}
-#### Compute P-value for the inhibition index ####
+#### Compute P-value from the IQR-standardized viability ####
 inhibTable$p.value <- pnorm(inhibTable$iqNormV, mean = 0, sd = 1, lower.tail = FALSE)
 inhibTable$log10Pval <- log10(inhibTable$p.value)
 inhibTable$e.value <- inhibTable$p.value * sum(wellType == "treated")
@@ -1348,6 +1367,8 @@ kable(table(inhibTable[, c("selected.FDR", "selected.ii")]),
 
 ```
 
+### Venn diagram
+
 ```{r Venn_candidate_molecules, fig.width=7, fig.height=5, out.width="60%", fig.cap="Venn diagram of the molecules selected by different criteria. "}
 #### Draw a Venn diagram of the selected molecules ####
 
@@ -1361,17 +1382,71 @@ vennDiagram(object = vennTable,
 
 ```
 
+### Candidates per plate
+
+```{r candidates_per_plate}
+
+#### Compute the number of candidates per plate depending on the criterion ####
+inhibTable$selected.onlyFDR <- inhibTable$selected.FDR & !inhibTable$selected.ii
+inhibTable$selected.onlyii <- !inhibTable$selected.FDR & inhibTable$selected.ii
+inhibTable$selected.both <- inhibTable$selected.FDR & inhibTable$selected.ii
+inhibTable$selected.either <- inhibTable$selected.FDR | inhibTable$selected.ii
+
+criteria <- c("FDR", "ii", "both", "either", "onlyFDR", "onlyii")
+
+candidatesPerPlate <- data.frame(matrix(nrow = nbPlates, ncol = length(criteria), 0))
+row.names(candidatesPerPlate) <- 1:nbPlates
+names(candidatesPerPlate) <- criteria
+for (criterion in criteria) {
+  candidates <- as.data.frame.table(
+    table(
+    subset(x = inhibTable, 
+           subset = inhibTable[paste0("selected.", criterion)] == 1,
+           select = "Plate")))
+  names(candidates) <- c("Plate", "n")
+  candidatesPerPlate[as.vector(candidates$Plate), criterion] <- candidates$n
+}
+# apply(candidatesPerPlate, 2, sum)
+
+ccpp <- candidatesPerPlate
+ccpp["Total", ] <- apply(ccpp, 2, sum)
+kable(ccpp, row.names = TRUE, ccaption = "Candidates per plate depending on the selection criteria")
+
+```
+
+```{r candidates_per_plate_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Number of candidate molecules per plate depending on the method. " }
+maxc <-  max(candidatesPerPlate)
+plot(candidatesPerPlate[, c("FDR", "ii")],
+     main = "Candidates per plate",
+     xlab = paste("FDR < ", alpha),
+     ylab = paste("Inhibition index >", 1),
+     xlim = c(0, maxc * 1.1),
+     las = 1, pch = 20,
+     panel.first = 
+       c(abline(h = seq(0, maxc, by = 1), col = "#DDDDDD"),
+         abline(h = seq(0, maxc, by = 5), col = "#BBBBBB"),
+         abline(v = seq(0, maxc, by = 1), col = "#EEEEEE"),
+         abline(v = seq(0, maxc, by = 5), col = "#BBBBBB")),
+     col = plateColor[rownames(candidatesPerPlate)])
+legend("topright", legend = names(plateColor), 
+       title = "Plate", col = plateColor, pch = 20, cex = 0.8)
 
 
-## Result tables
+```
+
+
+# Result files
 
 
 ```{r export_results}
+#### Export result tables ####
 
+## Define output file names
 outFiles <- list(
   "All results (tsv)" =  file.path(dir["results"], "result_table_all-molecules.tsv"),
   "All results (xlsx)" =  file.path(dir["results"], "result_table_all-molecules.xlsx")
 )
+
 
 write.table(x = inhibTable, file = outFiles$`All results (tsv)`,  
             sep = "\t", quote = FALSE, 
@@ -1380,7 +1455,18 @@ write.table(x = inhibTable, file = outFiles$`All results (tsv)`,
 write.xlsx2(x = inhibTable, file = outFiles$`All results (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 
-system(paste("open", dir["results"]))
+# system(paste("open", dir["results"]))
+
+## Prepare a data frame with the relative links to output files
+fileLinks <- data.frame(
+  name = names(outFiles),
+  path = unlist(outFiles),
+  basename = basename(unlist(outFiles))
+)
+
+fileLinks$link <- paste0("<a href='", fileLinks$path, "'>", fileLinks$basename, "</a>")
+
+kable(fileLinks[, c("name", "link")], row.names = FALSE, caption = "Links to the result tables. ")
 
 ```
 
@@ -1730,66 +1816,10 @@ sessionInfo()
 
 *****
 
-## Experimental design
+## To do
 
-- la manip consiste à faire un test colorimétrique
-
-    - sur certains puits tout est négatif, sur d'autres tout est positiv
-
-- mortalité des cellules
-
-    - infectées non-traitées ("virus control")
-    - 6 puits
-
-- viabilité des cellules -> 100%
-
-    - cellules non-infectées et non-traitées ("cell control")
-    - 8 puits
-
-- duplicat de traitement à l'arabidol 10µM
-
-    - seuil par plaque
-    - contrôle interne de la protection des cellules contre la mortalité viro-induite
-
-
-- Valeurs de départ
-
-    - mort cellulaire (moyenne sur 6 puits)
-    - viabilité (moyenne sur 8 puits)
-    - valeur du composé (monoplicat) : même concentration de 10µM par composé
-
-Indice d'inhibition: 
-
-$$V = A / (D + A)$$
-
-
-
-$$II = $$
-
-On cherche des molécules inhibitrices avec l'EC50 aux alentours de 5µM -> la concentration standard de 10µM on espère se trouver au début du plateau. 
-
-## A faire
-
-- comparer les listes de composés avant / après normalization par plaque
-- boxplot ou violin par plaque avant / après
-- standardization des valeurs de viabilité par la médiane
+- Add the formula of the inhibition index
+- comptage des positifs par plaque avec les différentes méthodes + plots
 - distribution de valeurs plaque par plaque --> vérifier si certaines plaques ont l'air d'avoir plus de 20 cibles (percentile75)
-
-
-- Contrôles intra-plaques
-    - utiliser médiane plutôt que moyenne ?
-
-- Valeurs négatives: 
-
-    - fluctuations expérimentales ?
-    - mortalité induite par le virus + la molécule ?
-    
-- Marquer sur les graphiques les valeurs de l'arbidol (contrôle interne en duplicat)
-
-
-- boxplot des contrôles par plaque: 
-
-    - cell viability
-    - viral 
 
 
