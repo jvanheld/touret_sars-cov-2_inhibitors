@@ -131,6 +131,8 @@ markPCh <- c(
 
 # Introduction
 
+This document describes in detail the procedure used to select molecules having a potential inhibitory effect on the infection of cultured cells by covid-19.
+
 # Data
 
 ## Supplementary data tables
@@ -190,28 +192,15 @@ The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` mole
 
 # Viability measurements
 
-## Raw viability
+## Cell Titer Blue intensity (CTB)
 
-The viability is measured as the proportion of living cells in a given condition (infection, treatment).
-
-$$V = A / (D + A)$$
-
-where
-
-- $D$ is the number of dead cells 
-- $A$ is the number of cells alive
-- $V$ is denoted hereafter as **raw viability**
-
-## Inhibition index
+The number of viable cells per well is measured by a colorimetric test. The primary measure is the **Cell Titer Blue intensity** ($CTB$).
 
 
 
-$$II =?$$
-
-
-```{r raw_data}
-#### Load raw data ####
-message("Loading raw data")
+```{r CTB}
+#### Read the CTB values from the Excel workbook ####
+message("Reading Cell Titer Blue (CTB) values from file ", supTableFile)
 nbPlates <- 19
 rowsPerPlate <- 8
 columnsPerPlate <- 12
@@ -232,7 +221,7 @@ colnames(inhibTable) <- c("ID",
                           "Plate", 
                           "Row", 
                           "Column", 
-                          "viability", 
+                          "CTB", 
                           "cellControl", 
                           "virusControl",
                           "Chemical.name")
@@ -259,8 +248,8 @@ for (i in 1:nbPlates) {
   ## Extract control values
   cellControl[i, ] <- as.vector(rawMeasures[,1])
   virusControl[i, ] <- as.vector(rawMeasures[3:8,12])
-  plateVC <- mean(unlist(virusControl[i, ]))
-  plateCC <- mean(unlist(cellControl[i, ]))
+  platevc <- mean(unlist(virusControl[i, ]))
+  platecc <- mean(unlist(cellControl[i, ]))
 
   ## Extract all values
   r <- 1
@@ -280,9 +269,9 @@ for (i in 1:nbPlates) {
     inhibTable[indices, "Plate"] <- i
     inhibTable[indices, "Row"] <- currentRowName
     inhibTable[indices, "Column"] <- 1:columnsPerPlate
-    inhibTable[indices, "viability"] <- currentValues
-    inhibTable[indices, "virusControl"] <- plateVC
-    inhibTable[indices, "cellControl"] <- plateCC
+    inhibTable[indices, "CTB"] <- currentValues
+    inhibTable[indices, "virusControl"] <- platevc
+    inhibTable[indices, "cellControl"] <- platecc
   }
   
   dataPerPlate[[i]] <- list()
@@ -353,41 +342,41 @@ kable(t(table(inhibTable$wellType)), caption = "Well types. cellCtl: no infectio
 
 The raw data contains `r nbPlates` plates with `r rowsPerPlate` rows (indiced  `r LETTERS[1]` to `r LETTERS[rowsPerPlate]`) and `r columnsPerPlate` columns (indiced from 1 to `r columnsPerPlate`. )
 
-The raw data consists of viability measurements in cell cultures. 
+The raw data consists of CTB measurements in cell cultures. 
 
 
 
-## Distribution of raw viability values
+## Distribution of raw CTB values
 
-```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the raw viability measures. Top: uninfected cells. Middle: infected cells without treatment. Bottom: infected cells treated with a specific molecule. "}
+```{r raw_viab_distrib, fig.width=10, fig.height=7, out.width="80%", fig.cap="Distributions of the CTB measures. Top: uninfected cells. Middle: infected cells without treatment. Bottom: infected cells treated with a specific molecule. "}
 
 #### Distribution of raw measurements ####
 classInterval <- 500
-# xmin <- floor(min(inhibTable$viability)/classInterval) * classInterval
-xmin <- 0 ## Intently start the scale at0 to show the remnant viability
-xmax <- ceiling(max(inhibTable$viability)/classInterval) * classInterval
+# xmin <- floor(min(inhibTable$CTB)/classInterval) * classInterval
+xmin <- 0 ## Intently start the scale at0 to show the remnant CTB
+xmax <- ceiling(max(inhibTable$CTB)/classInterval) * classInterval
 breaks = seq(from = xmin, to = xmax, by = classInterval)
-# range(inhibTable$viability)
+# range(inhibTable$CTB)
 
 par(mfrow = c(3, 1))
 par(mar = c(2,5,3,1))
-hist(inhibTable[wellType == "cellCtl", "viability"], 
+hist(inhibTable[wellType == "cellCtl", "CTB"], 
      main = "Uninfected (cell control)",
-     xlab = "Viability",
+     xlab = "CTB",
      ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "palegreen", border = "palegreen")
 
-hist(inhibTable[wellType == "virusCtl", "viability"], 
+hist(inhibTable[wellType == "virusCtl", "CTB"], 
      main = "Infected, no treatment (virus control))",
-     xlab = "Viability",
+     xlab = "CTB",
      ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "orange", border = "orange")
 
-hist(inhibTable[wellType == "treated", "viability"], 
+hist(inhibTable[wellType == "treated", "CTB"], 
      main = "Treated cells",
-     xlab = "Viability",
+     xlab = "CTB",
      ylab = "Number of plate wells",
      las = 1, 
      breaks = breaks, col = "#AACCFF", border = "#AACCFF")
@@ -399,23 +388,23 @@ par(par.ori)
 
 - ***Cell control***. 
 
-    - The top panel (green) shows the distribution of viability measurements in controls cultures, where the cells were neither infected by the virus nor treated with a drug. 
+    - The top panel (green) shows the distribution of CTB measurements in controls cultures, where the cells were neither infected by the virus nor treated with a drug. 
     - Each plate contains 8 wells with uninfected cells (total = `r sum(wellType == "cellCtl")`). 
 
 - ***Virus control***. 
 
-    - The middle panel (orange) shows the distribution of viability measurements in infected cells without drug treatment
+    - The middle panel (orange) shows the distribution of CTB measurements in infected cells without drug treatment
     - The virus control was performed on 6 wells per plate, total = `r sum(wellType == "virusCtl")`). 
 
 - ***Treated cells***. 
 
-    - The bottom distribution (pale blue) shows the viability values for cells infected and treated with a given drug. 
+    - The bottom distribution (pale blue) shows the CTB values for cells infected and treated with a given drug. 
     
     - Note that each drug was tested on a single well (no replicates). Indeed, in order to face the COVID-19 emergency, the study attempted to test as fast as possible a wide range of molecules. This first screening was thus performed without replicates. This has to be taken into account for the normalization, which should be done with no estimation of the variance for the individual drugs. 
 
     - The distribution is strongly asymmetrical, and seems bi- or multi-modal. This distribution can be considered as a mixture between different distributions;
     
-        - all the drugs that have no inhibitory effect (and are thus expected to have a viability similar to the virus control);
+        - all the drugs that have no inhibitory effect (and are thus expected to have a CTB similar to the virus control);
         - various drugs that inhibit the action of the virus, each one with its specific level of inhibition. This probably corresponds to the widely dispersed values above the bulk of distribution (and above the virus control distribution) 
 
 
@@ -456,8 +445,8 @@ arbidolWells <- (inhibTable$Column == 12) & (inhibTable$Row %in% c("A", "B"))
 inhibTable[arbidolWells, "Chemical.name"] <- "Arbidol"
 # inhibTable[arbidolWells, c("ID", "Chemical.name")]
 
-#### Extract raw viability measures per plate for arbidol ####
-arbidoltV <- inhibTable[arbidolWells, c("Plate", "viability")]
+#### Extract raw CTB measures per plate for arbidol ####
+arbidoltV <- inhibTable[arbidolWells, c("Plate", "CTB")]
 inhibTable[arbidolWells, "color"] <- markColor["Arbidol"]
 inhibTable[arbidolWells, "pch"] <- markPCh["Arbidol"]
 
@@ -479,26 +468,25 @@ inhibTable[HOClSindex, "pch"] <- HOClSpch
 ```
 
 
-## Raw viability boxplots
+## CTB boxplots
 
 
-```{r boxplots_per_plate_raw, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of raw viability values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "  }
+```{r boxplots_per_plate_CTB, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of CTB values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "  }
 #### Boxplots per plate  ####
 
-rawBoxPlot <- boxplot(viability ~ Plate + wellType, 
-        main = "Raw viability per plate",
+boxplot(CTB ~ Plate + wellType, 
+        main = "Cell Ttiter Blue (CTB) per plate",
         data = inhibTable, 
         las = 1, col = plateColor, 
-        xlab = "Viability (raw)", 
+        xlab = "CTB", 
         cex.axis = 0.5, cex = 0.5,
         horizontal = TRUE
         )
-abline(v = seq(from = 0, to = max(inhibTable$viability), by = 2000), col = "#EEEEEE", lty = "dashed")
-abline(v = seq(from = 0, to = max(inhibTable$viability), by = 10000), col = "grey")
-# View(rawBoxPlot)
+abline(v = seq(from = 0, to = max(inhibTable$CTB), by = 2000), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 0, to = max(inhibTable$CTB), by = 10000), col = "grey")
 
 ## Add points to denote the arbidol controls
-stripchart(viability ~ Plate, vertical = FALSE, 
+stripchart(CTB ~ Plate, vertical = FALSE, 
            data = inhibTable[arbidolWells, ],
            method = "jitter", add = TRUE, cex = 0.7, 
            col = markColor["Arbidol"], pch = markPCh["Arbidol"])
@@ -509,216 +497,402 @@ legend("topright", legend = names(plateColor),
 
 ```
 
-The boxplot of the raw viability measurements highlights a plate effect, for the treated cells (middle barplots) but also for the untreated virus control (top boxplots) and uninfected cell control (bottom boxplots). 
+The boxplot of the CTB measurements highlights a plate effect, for the treated cells (middle barplots) but also for the untreated virus control (top boxplots) and uninfected cell control (bottom boxplots). 
 
 
 - **Treated:**
 
     - The medians and interquartile ranges show strong variations between plates. 
     - In particular, plate 1 (in red) has a the smallest median and a remarkably compact interquartile range. There are many statistical outliers (empty circles) in this plate, which might correspond to the molecules having a significant inhibitory effect. 
-    - In contrast, plates 11 to 15 show a high median and a wide dispersion of the viability measures, and there is not a single statistical outlier. 
+    - In contrast, plates 11 to 15 show a high median and a wide dispersion of CTB measures, and there is not a single statistical outlier. 
 
-- **Virus control**
+- **Virus control ($vc$)**
 
-    - Not surprisingly, untreated infected cells generally gave a very small viability, with small variations (very compact interquartile rectangles)
-    - There is an obvious problem for plate 17, which shows a broad range of values, with a third quartile falling in the range of the uninfected cells. This suggests a problem with at least 2 of the 6 replicates (missed infection ?). Noticeably, the median falls in the same range as for the virus control of the other plates. 
+    - As expected, untreated infected cells generally gave a very small CTB, with small variations (very compact interquartile rectangles)
+    - There is a problem for the virus control of plate 17, which shows a broad range of values, with a third quartile falling in the range of the uninfected cells. This suggests a problem with at least 2 of the 6 replicates (missed infection ?). However, the median of the virus controls for this plate falls in the same range as for the virus control of the other plates. 
 
-- **Cell control**
+- **Cell control ($cc$)**
 
-    - The cell control performed as expected in all the plates, with high viability values.
-    - Note however that the viability measurements show inter-plate variations, with median values ranging from ~37,000 to ~53,000. 
+    - The cell control performs as expected in all the plates, with high CTB values.
+    - Note however that the CTB of uninfected cells show inter-plate variations, with median values ranging from ~37,000 to ~53,000. 
 
 Importantly, there is a consistency between the inter-plate differences observed for virus control, treated cells and cell control, respectively. For example, plate 2 whose consistently higher value than the other plates for the three types of wells. This highlights the importances to perform a plate-wise standardization. 
-    
-## Log2 viability boxplots
 
-We performed a log2 transformation of the raw viability measures in order to normalize them. 
 
-```{r boxplots_per_plate_log2, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of log2-transformed viability values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates. "}
+****************************************************************
 
-#### Boxplots of log2_transformed viability per plate ####
-inhibTable$log2V <- log2(inhibTable$viability)
-
-## Box plot per plate and well type
-boxplot(log2V ~ Plate + wellType, 
-        main = "log2-transformed viability",
-        data = inhibTable, 
-        las = 1, col = plateColor, 
-        xlab = "log2(V)", 
-        cex.axis = 0.5, cex = 0.5,
-        horizontal = TRUE)
-abline(v = seq(from = 12, to = max(inhibTable$log2V), by = 0.2), col = "#EEEEEE", lty = "dashed")
-abline(v = seq(from = 12, to = max(inhibTable$log2V), by = 1), col = "grey")
-legend("topright", legend = names(plateColor), 
-       title = "Plate", fill = plateColor, cex = 0.8)
-
-## Add points to denote the arbidol controls
-stripchart(log2V ~ Plate, vertical = FALSE, 
-           data = inhibTable[arbidolWells, ],
-           method = "jitter", add = TRUE, cex = 0.7, 
-           col = markColor["Arbidol"], pch = markPCh["Arbidol"])
-
-par(par.ori)
-
-```
-
-The barplots of log2-transformed viability measures show yet another potential plate bias: in   plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates. 
-
-**Note: I (JvH) think this should be reported to the company that produces these plates**
 
 # Plate-wise standardization
 
-## Two-points scaling: defining a relative viability ($v_r$)
+## Plate-wise control points
 
 Taking into account the above-reported results, we apply the following procedure to standardize the individual viability measures. 
 
-1. For each plate, we define two standard values: 
+For each plate, we define two control values: 
 
-    - $V_c$ is the median viability of the 8 cell controls (uninfected cells)
-    - $V_v$ is the median viability of the 6 virus controls (infected untreated cells)
+- $CTB_{cc,i}$: median CTB of the 8 **cell controls** (uninfected cells) of plate $i$ 
+- $CTB_{vc,i}$: median CTB of the 6 **virus controls** (infected untreated cells) of plate $i$ 
     
-    These two values are deliberately estimated with the median measurement of the control replicate, in order to avoid the effect of outliers as denoted for the virus control of plate 17. 
+These two values are deliberately estimated with the median measurement of the control replicate, in order to avoid the effect of outliers as denoted for the virus control of plate 17. 
 
-2. A **relative viability index** $v_r$ is computed for each treatment as follows.
+```{r plate_wise_stats}
 
-    $$v_r = \frac{v - V_c}{V_v - V_c} \cdot 100$$
+#### Compute plate-wise statistics ####
+plateStat <- data.frame(
+  plate = plateNumbers,
+  
+  ## Mean CTB
+  CTBmean = as.vector(by(
+    data = inhibTable$CTB, 
+    INDICES = inhibTable$Plate, 
+    FUN = mean)),
+  
+  ## Standard deviation
+  CTBsd = as.vector(by(
+    data = inhibTable$CTB, 
+    INDICES = inhibTable$Plate, 
+    FUN = sd)),
+  
+  ## Median
+  CTBmedian = as.vector(by(
+    data = inhibTable$CTB, 
+    INDICES = inhibTable$Plate, 
+    FUN = median)),
+  
+  ## Minimum
+  CTBmin = as.vector(by(
+    data = inhibTable$CTB, 
+    INDICES = inhibTable$Plate, 
+    FUN = min)),
+  
+  ## maximum
+ CTBmax = as.vector(by(
+    data = inhibTable$CTB, 
+    INDICES = inhibTable$Plate, 
+    FUN = max)),
+  
+  # ## interquartile range
+  # CTBiqr = as.vector(by(
+  #   data = inhibTable$CTB, 
+  #   INDICES = inhibTable$Plate, 
+  #   FUN = IQR)),
+  
+  ## Plate-wise virus control
+  BTCvc <- as.vector(by(
+    data = inhibTable[wellType == "virusCtl", "CTB"], 
+    INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
+    FUN = median)),
+  
+  ## Plate-wise cell control
+  BTCcc <- as.vector(by(
+    data = inhibTable[wellType == "cellCtl", "CTB"], 
+    INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
+    FUN = median))
+  
+)
+rownames(plateStat) <- plateStat$plate
 
-    - $v_r$ provides a viability measurement on a scale where 0 corresponds to the median of infected untreated cells, and 100 to the median of uninfected cells. 
-    - Note that $V_c$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from a cytotoxic effect of the drug, or from a plate bias.
-    - $V_c$ values can in principle also take values higher than 100, denoting a highly efficient treatment. 
+## print the plate-wise stats in the report
+kable(plateStat, caption = "Plate-wise statistics oninhibition index")
 
-```{r relative_viability}
-#### Compute relative viability ####
+## Add columns with the control values according to the plate
+inhibTable$BTCvc <- plateStat$BTCvc[inhibTable$Plate]
+inhibTable$BTCcc <- plateStat$BTCcc[inhibTable$Plate]
+# sort(table(inhibTable$BTCvc))
+# sort(table(inhibTable$BTCcc))
+```
 
-## Plate-wise virus control
-vcMed <- as.vector(by(data = inhibTable[wellType == "virusCtl", "viability"], 
-                               INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
-                               FUN = median))
-names(vcMed) <- 1:nbPlates
 
-## Plate-wise cell control
-ccMed <- as.vector(by(data = inhibTable[wellType == "cellCtl", "viability"], 
-                               INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
-                               FUN = median))
-names(ccMed) <- 1:nbPlates
+## Viability ratio and log2(ratio)
 
-## Relative viability
-inhibTable$vcMed <- vcMed[inhibTable$Plate]
-inhibTable$ccMed <- ccMed[inhibTable$Plate]
-inhibTable$Vr <- 100 * (inhibTable$viability - inhibTable$vcMed) / 
-  (inhibTable$ccMed - inhibTable$vcMed)
+
+The **viability ratio** ($R$) associated to a given treatment with molecule $m$ on a given plate $i$ is defined as the ratio between 
+- the $CTB$ measured on infected cells treated with this molecule ($CTB_{m,i}$) and 
+- the median $CTB$ of 8 replicates of uninfected cells (denoted $cc$ for *cell control*) on the same plate ($CTB_{cc,i}$). 
+
+$$R_{m,i} =  \frac{CTB_{m,i}}{CTB_{cc, i}}$$
+
+
+We further apply logarithmic transformation in order to normalise this ratio.
+
+$$R_{m,i} = log2(R) = log2 \left( \frac{CTB_{m,i}}{CTB_{cc, i}} \right)$$
+
+
+```{r compute_viability}
+#### Compute plate-relative viability ####
+inhibTable$Vratio <- inhibTable$CTB / inhibTable$BTCcc
+inhibTable$Vlog2R <- log2(inhibTable$Vratio)
+# table(wellType)
+# hist(inhibTable[wellType == "cellCtl", "Vratio"], breaks = 50)
+# hist(inhibTable[wellType == "cellCtl", "Vlog2R"], breaks = 50)
+
+## Plate-wise virus control viability ratio
+plateStat$Rvc <- as.vector(by(
+  data = inhibTable[wellType == "virusCtl", "Vratio"], 
+  INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
+  FUN = median))
+
+## Plate-wise cell control viability ratio
+## Note: this is 1 by definition, we compute it for validation
+plateStat$Rcc <- as.vector(by(
+  data = inhibTable[wellType == "cellCtl", "Vratio"], 
+  INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
+  FUN = median))
+
+
+## Plate-wise virus control viability log2 ratio
+plateStat$Lvc <- as.vector(by(
+  data = inhibTable[wellType == "virusCtl", "Vlog2R"], 
+  INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
+  FUN = median))
+
+## Plate-wise cell control viability log2 ratio
+plateStat$Lcc <- as.vector(by(
+  data = inhibTable[wellType == "cellCtl", "Vlog2R"], 
+  INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
+  FUN = median))
 
 ```
 
-### Relative viability boxplots
 
-```{r boxplots_per_plate_Vr, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of relative viability (Vr) values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "}
+### Viability ratio boxplots
 
-#### Boxplots of relative viability per plate ####
+```{r boxplots_per_plate_R_L, fig.width=12, fig.height=10, out.width="100%", fig.cap="Distribution of the viability log2(ratio)  per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates. "}
+
+par(mfrow = c(1,2))
+
+
+#### Boxplots of viability ratios per plate ####
+
+Rfloor <- floor(min(inhibTable$Vratio))
+Rceiling <- max(inhibTable$Vratio) * 1.1
 
 ## Box plot per plate and well type
-boxplot(Vr ~ Plate + wellType, 
-        main = "Relative viability",
+boxplot(Vratio ~ Plate + wellType, 
+        main = "Viability ratio distribution",
         data = inhibTable, 
         las = 1, col = plateColor, 
-        xlab = "Vr", 
+        xlab = "R = CTB / CTBcc", 
+        ylim = c(min(inhibTable$Vratio), Rceiling),
         cex.axis = 0.5, cex = 0.5,
         horizontal = TRUE)
-abline(v = seq(from = 0, to = max(inhibTable$Vr), by = 5), col = "#EEEEEE", lty = "dashed")
-abline(v = seq(from = 0, to = max(inhibTable$Vr), by = 25), col = "grey")
+abline(v = 1, col = "#00BB00")
+abline(v = seq(from = Lfloor, to = Rceiling, by = 0.05), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = Lfloor, to = Rceiling, by = 0.2), col = "grey")
 legend("topright", legend = names(plateColor), 
-       title = "Plate", fill = plateColor, cex = 0.8)
+       title = "Plate", fill = plateColor, cex = 0.6)
 
 ## Add points to denote the arbidol controls
-stripchart(Vr ~ Plate, vertical = FALSE, 
+stripchart(Vratio ~ Plate, vertical = FALSE, 
            data = inhibTable[arbidolWells, ],
            method = "jitter", add = TRUE, cex = 0.7, 
            col = markColor["Arbidol"], pch = markPCh["Arbidol"])
+
+legend("bottomleft", 
+       title = "Markers", 
+       legend = "Arbidol", 
+       col = markColor["Arbidol"], 
+       pch = markPCh["Arbidol"],
+       cex = 0.8)
+
+
+#### Boxplots of viability log(ratios) per plate ####
+
+Lfloor <- floor(min(inhibTable$Vlog2R))
+Lceiling <- ceiling(max(inhibTable$Vlog2R))
+
+## Box plot per plate and well type
+boxplot(Vlog2R ~ Plate + wellType, 
+        main = "Viability log2(ratio) distribution",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "L = log2(CTB / CTBcc)", 
+        ylim = c(min(inhibTable$Vlog2R), Lceiling),
+        cex.axis = 0.5, cex = 0.5,
+        horizontal = TRUE)
+abline(v = seq(from = Lfloor, to = Lceiling, by = 0.2), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = Lfloor, to = Lceiling, by = 1), col = "grey")
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.6)
+
+## Add points to denote the arbidol controls
+stripchart(Vlog2R ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = markColor["Arbidol"], pch = markPCh["Arbidol"])
+
+legend("bottomleft", 
+       title = "Markers", 
+       legend = "Arbidol", 
+       col = markColor["Arbidol"], 
+       pch = markPCh["Arbidol"],
+       cex = 0.8)
 
 par(par.ori)
 
 ```
 
-The box plots show that the relative viability already has a normalizing effect by positioning each treatment between the virus and cell control of its own plate.
+The barplots of log2-transformed viability measures show another indication for the possible existence of a plate bias: in plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates. 
 
-- The virus controls are well regrouped in the range of smaller $v_r$ values  (the third quartiles all fall below 15, except for plate).
-- The cell controls occupy the high range (their first quartile is higher than 80) and are quite compactly grouped around 100. 
+## Two-points scaling: defining a plate-wise inhibition index ($I_{m,i}$)
 
-However, we still observe a systematic plate effect in plates 11 to 19:
+A **plate-wise inhbiition index** $I_{m,i}$ is defined to indicate the inhibition provided by a given molecule $m$ relative to its plate ($i$). 
+
+It is computed as follows.
+
+$$I_{m,i} = 100 \cdot \frac{L_{m,i} - L_{vc}}{L_{cc} - L_{vc}}$$
+
+where $L_{cc,i}$ and $L_{vc,i}$ respectively denote the median values of cell controls and virus controls for plate $i$.
+
+
+$I_{m,i}$ provides a plate-wise relative viability measurement on a scale where 0 corresponds to the median of infected untreated cells (virus control), and 100 to the median of uninfected cells. 
+
+Note that $I_{m,i}$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from various sources: experimental flucturations, cytotoxic effect of the drug or plate bias.
+
+$I_{m,i}$ values can in principle also take values higher than 100, denoting a highly efficient treatment. 
+
+```{r relative_viability}
+#### Compute relative viability ####
+inhibTable$I <- 100 * 
+  (inhibTable$Vlog2R - plateStat$Lvc[inhibTable$Plate]) / 
+    (plateStat$Lcc[inhibTable$Plate] - plateStat$Lvc[inhibTable$Plate]) 
+
+# hist(inhibTable$I, breaks = 100)
+
+```
+
+### Inhibition index boxplots
+
+```{r boxplots_per_plate_I, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of inhibition index (I) values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "}
+
+#### Boxplots of inhibition index per plate ####
+Ifloor = floor(min(inhibTable$I))
+Iceiling = max(inhibTable$I) * 1.1
+
+## Box plot per plate and well type
+boxplot(I ~ Plate + wellType, 
+        main = "Inhibition index",
+        data = inhibTable, 
+        las = 1, col = plateColor, 
+        xlab = "I = (L - Lvc) / (Lcc - Lvc)", 
+        ylim = c(Ifloor, Iceiling),
+        cex.axis = 0.5, cex = 0.5,
+        horizontal = TRUE)
+abline(v = seq(from = Ifloor, to = Iceiling, by = 5), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = -100, to = 150, by = 25), col = "grey")
+legend("topright", legend = names(plateColor), 
+       title = "Plate", fill = plateColor, cex = 0.6)
+
+## Add points to denote the arbidol controls
+stripchart(I ~ Plate, vertical = FALSE, 
+           data = inhibTable[arbidolWells, ],
+           method = "jitter", add = TRUE, cex = 0.7, 
+           col = markColor["Arbidol"], pch = markPCh["Arbidol"])
+
+legend("bottomleft", 
+       title = "Markers", 
+       legend = "Arbidol", 
+       col = markColor["Arbidol"], 
+       pch = markPCh["Arbidol"],
+       cex = 0.8)
+
+par(par.ori)
+
+```
+
+The box plots show that the inhibition index standardises the measures by positioning each treatment relative to two milestones of its own plate:
+
+- the median virus control (0) 
+- the cell control  (100)
+
+
+The virus controls are well regrouped in the range of smaller $v_r$ values, except for plate 17. 
+
+The cell controls occupy the high range (their first quartile is higher than 80) and are quite compactly grouped around 100. 
+
+However, we still observe a strong difference between plates 11-19 and the other plates:
 
 - their median is mich higher than for the plates 1 to 10;
-- they also show a much wider inter-quartile rectangle, denoting a very high variance between all the viability measurements on this plate;
-- this higher variance is even visible in the virus control (untreated infected cells), and it is thus unlikely that it results from the particular molecules sampled on this second half of the plates. 
+- they also show a much wider inter-quartile rectangle, denoting a wide dispersion of values on this plate;
+- for plates 11 and 13-19, this wider dispersion is even visible for the virus controls (untreated infected cells), and it is thus unlikely that it results from the particular molecules sampled on this second half of the plates. 
 
 We thus need a way to perform a between-plates standardization of the variance. 
 
 ### Dot plots: relative viability
 
-```{r iqNormV_plot, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise relative viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "}
-yRange <- c(floor(min(inhibTable$Vr)), ceiling(max(inhibTable$Vr)))
+```{r dotplots_I, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise inhibition index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "}
+#### Dot plots of the inhibition index ####
+Ifloor <- floor(min(inhibTable$I / 10)) * 10
+Iceiling <- max(inhibTable$I) * 1.1
 
 ## Virus control plots
 par(mfrow = c(4,1))
-plot(inhibTable[wellType == "virusCtl", "Vr"],
+plot(inhibTable[wellType == "virusCtl", "I"],
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
-     ylab = "relative viability",
+     ylab = "I = (L - Lvc) / (Lcc - Lvc)",
      col = inhibTable[wellType == "virusCtl", "color"],
      pch = inhibTable[wellType == "virusCtl", "pch"],
-     ylim = yRange,
      xlim = c(0, (nbPlates * 6 * 1.05)),
-     panel.first = c(abline(h = 0), 
-                     abline(h = 100),
-                     abline(h = seq(10,90, 20), lty = "dotted"),
-                     abline(v = (1:19) * 6, col = "grey")
+     ylim = c(Ifloor, Iceiling),
+     panel.first = c(abline(h = 0, col = "red", lwd = 2), 
+                     abline(h = 100, col = "#008800", lwd = 2),
+                     abline(h = seq(Ifloor,Iceiling, 10), col = "#DDDDDD"),
+                     abline(v = (0:19) * 6, col = "#999999")
                      ),
+     xaxt = "n",
      las = 1,
      cex = 0.5
      )
+mtext(plateNumbers, at = (1:19) * 6 - 3, side = 1)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.7)
 
 ## Treated cells
-plot(inhibTable[wellType == "treated", "Vr"],
+plot(inhibTable[wellType == "treated", "I"],
      main = "Relative viability (Vr)",
      xlab = "Molecules",
      ylab = "relative viability",
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
-     ylim = yRange,
      xlim = c(0, (nbPlates * 80 * 1.05)),
-     panel.first = c(abline(h = 0), 
-                     abline(h = 100),
-                     abline(h = seq(10,90, 20), lty = "dotted"),
-                     abline(v = (1:19) * 80, col = "grey")
+     ylim = c(Ifloor, Iceiling),
+     panel.first = c(abline(h = 0, col = "red", lwd = 2), 
+                     abline(h = 100, col = "#008800", lwd = 2),
+                     abline(h = seq(Ifloor,Iceiling, 10), col = "#DDDDDD"),
+                     abline(v = (0:19) * 80, col = "#999999")
                      ),
+     xaxt = "n",
      las = 1,
      cex = 0.5
      )
+mtext(plateNumbers, at = (1:19) * 80 - 40, side = 1)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
-       cex = 0.7)
+       cex = 0.6)
 
 ## Cell control
-plot(inhibTable[wellType == "cellCtl", "Vr"],
+plot(inhibTable[wellType == "cellCtl", "I"],
      main = "Cell control (uninfected)",
      xlab = "Replicates, sorted per plate",
      ylab = "relative viability",
      col = inhibTable[wellType == "cellCtl", "color"],
      pch = inhibTable[wellType == "cellCtl", "pch"],
-     ylim = yRange,
      xlim = c(0, (nbPlates * 8 * 1.05)),
-     panel.first = c(abline(h = 0), 
-                     abline(h = 100),
-                     abline(h = seq(10,90, 20), lty = "dotted"),
-                     abline(v = (1:19) * 8, col = "grey")
+     ylim = c(Ifloor, Iceiling),
+     panel.first = c(abline(h = 0, col = "red", lwd = 2), 
+                     abline(h = 100, col = "#008800", lwd = 2),
+                     abline(h = seq(Ifloor,Iceiling, 10), col = "#DDDDDD"),
+                     abline(v = (0:19) * 8, col = "#999999")
                      ),
+     xaxt = "n",
      las = 1,
      cex = 0.5
      )
+mtext(plateNumbers, at = (1:19) * 8 - 4, side = 1)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -726,8 +900,8 @@ legend("topright",
 # names(supTable)
 
 ## Rank plot
-VrRank <- order(inhibTable$Vr, decreasing = TRUE)
-plot(inhibTable[VrRank, "Vr"],
+VrRank <- order(inhibTable$I, decreasing = TRUE)
+plot(inhibTable[VrRank, "I"],
      main = "Ranked relative viability values",
      xlab = "Molecules (ranked by relative viability)",
      ylab = "relative viability",
@@ -737,6 +911,8 @@ plot(inhibTable[VrRank, "Vr"],
      panel.first = grid(),
      xlim = c(0, length(VrRank) * 1.05)
      )
+abline(h = 0, col = "red", lwd = 2)
+abline(h = 100, col = "#008800", lwd = 2)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -751,10 +927,11 @@ par(mfrow = c(1,1))
 
 ### Plate-wise IQR-standardized viability
 
-We perform a plate-wise normalization with a centering on the median and a scaling to compensate for the plate-wise variance effect denoted above. To this purpose, we compute z-scores from the original value. 
+To take into account the between-plate differences in variance denoted above, we compute a z-scores from the original value. 
 
-- centering: substract an estimator of the plate-wise mean ;
+- centering: substract an estimator of the plate-wise mean $\hat{\mu}$;
 - scaling: divide by an estimator of the plate-wise standard deviation ($\hat{\sigma_i}$)
+
 
 $$z_{c,i} = \frac{V_c - \hat{\mu_i}}{\hat{\sigma_i}}$$
 
@@ -763,6 +940,7 @@ where
 - $V_c$ is the viability for molecule $c$;
 - $\hat{\mu_i}$ is the estimate for the mean viability of all the treated cells in plate $i$;
 - $\hat{\sigma_i}$ is the estimate for the standard deviation of all the treated cells in plate $i$;
+
 
 In classical statistics, the estimators of centrality and dispersion are derived from the sample mean and standard deviation, respectively:
 
@@ -782,54 +960,54 @@ An alternative is to estimate the dispersion based on the range between the firs
 
 In summary, we compute robust estimators, in order to avoid the effect of outliers (in this case, the suspected outliers are the molecules having an actual inhibitory effect). To this purpose, we use:
 
-- plate-wise median viability ($\tilde{v}$) to estimate the mean
-- plate-wise standardized inter-quantile range (IQR) to estimate the standard deviation
+- the median plate-wise inhibition index for all the molecules ($\tilde{I_i}$) to estimate the mean
+- the plate-wise standardized inter-quantile range; ($IQR_i$) standardized by the normal $IQR$ to estimate the standard deviation.
 
 ```{r plate_wise_stat_treated}
-#### Copute plate-wise statistics ####
+#### Compute plate-wise statistics ####
 statPerPlate <- data.frame(
   Plate = plateNumbers,
   TrMean = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = mean)),
   TrSD = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = sd)),
   TrMedian = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = median)),
-  VCMedian = as.vector(by(
-    data = inhibTable[wellType == "virusCtl", "viability"], 
+  BTCvcian = as.vector(by(
+    data = inhibTable[wellType == "virusCtl", "I"], 
     INDICES = inhibTable[wellType == "virusCtl", "Plate"], 
     FUN = median)),
-  CCMedian = as.vector(by(
-    data = inhibTable[wellType == "cellCtl", "viability"], 
+  BTCccian = as.vector(by(
+    data = inhibTable[wellType == "cellCtl", "I"], 
     INDICES = inhibTable[wellType == "cellCtl", "Plate"], 
     FUN = median)),
   arbidolMean = as.vector(by(
-    data = inhibTable[arbidolWells, "viability"], 
+    data = inhibTable[arbidolWells, "I"], 
     INDICES = inhibTable[arbidolWells, "Plate"], 
     FUN = mean)),
   TrMin = as.vector(by(    
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = min)),
   TrMax = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = max)),
   TrQ1 = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = quantile, probs = 0.25)),
   TrQ3 = as.vector(by(
-    data = inhibTable[wellType == "treated", "viability"], 
+    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = quantile, probs = 0.75)),
-  TrIQR = as.vector(by(    data = inhibTable[wellType == "treated", "viability"], 
+  TrIQR = as.vector(by(    data = inhibTable[wellType == "treated", "I"], 
     INDICES = inhibTable[wellType == "treated", "Plate"], 
     FUN = IQR))
 )
@@ -845,121 +1023,123 @@ $$S_i = \frac{Q3_N - Q1_N}{Q3_i - Q3_i} = \frac{`r round(digits=3, qnorm(0.75) -
 
 Where $Q1$ and $Q3$ denote the first and third quartile, $N$ the Normal distribution, and $i$ is the plate number. 
 
-The viability measures of each plate are then multiplied by the corresponding scaling factor to obtain plate-wise standardized values ($z$), which will have the same inter-quartile range as the normal distribution. 
+The inhibition indices  of each plate are then multiplied by the corresponding scaling factor to obtain plate-wise standardized values ($z$), which will have the same inter-quartile range as the normal distribution. 
 
-$$z_{c,i} = \frac{v_c - \hat{\mu_i}}{\hat{\sigma_i}} = (v_c - \tilde{v_i}) \frac{Q3_N - Q1_N}{Q3_i - Q3_i} = (v_c - \tilde{v_i}) \cdot S_i$$
+$$z_{c,i} = \frac{I_{m,i} - \hat{\mu_i}}{\hat{\sigma_i}} = (I_{m,i} - \tilde{I_i}) \frac{Q3_N - Q1_N}{Q3_i - Q3_i} = (v_c - \tilde{v_i}) \cdot S_i$$
+
+where
+
+- $Q1_N$ and $Q3_N$ are the first and third quartiles of the normal distribution,
+- $Q1_i$ and $Q3_i$ are the first and third quartiles of the inhibition index for all the molecules tested on plate $i$,
 
 The table below indicates the plate-wise statistics and scaling factor. 
 
 ```{r scaling_factor}
-## Compute the scaling factor as the difference between median and Q1
-## standardized relative to the same difference in a normal distribution.
-statPerPlate$scaling <- (qnorm(p = 0.5) - qnorm(p = 0.25)) / (statPerPlate$TrMedian - statPerPlate$TrQ1)
+#### Scaling factor per plate ####
 
 ## Compute scaling factor based on the standardized inter-quartile range.
-statPerPlate$scaling <- (qnorm(p = 0.75) - qnorm(p = 0.25)) / (statPerPlate$TrQ3 - statPerPlate$TrQ1) 
+statPerPlate$scaling <- 
+  (qnorm(p = 0.75) - qnorm(p = 0.25)) /
+  (statPerPlate$TrQ3 - statPerPlate$TrQ1) 
 
-kable(statPerPlate, caption = "Plate-wise statistics of treated cells. Column prefixes: Tr = treated cells; CC = cell control (uninfected cells); VC = virus control (infected, untreated cells). ")
+kable(statPerPlate, caption = "Plate-wise statistics of treated cells. Column prefixes: Tr = treated cells; cc = cell control (uninfected cells); vc = virus control (infected, untreated cells). ")
 
 ```
 
 
 
-```{r plate_wise_iqNormV}
-#### Compute plate-wise IQR-standardized viability ####
+```{r plate_wise_z}
+#### Compute plate-wise IQR-standardized inhibition ####
 
 ## Centering: substract the median
 ## Scaling: divide by IQR
 ## Standardize: multiply by IQR of the normal distribution
 plate <- as.vector(inhibTable$Plate)
-inhibTable$iqNormV <- (inhibTable$viability - statPerPlate[plate, "TrMedian"]) * statPerPlate[plate, "scaling"]
-# IQR(inhibTable$iqNormV)
+inhibTable$z <- (inhibTable$I
+      - statPerPlate[plate, "TrMedian"]) * statPerPlate[plate, "scaling"]
+# IQR(inhibTable$z)
 # IQR(rnorm(n = 1000000))
-
-# normIQR <- 2 * (qnorm(p = 0.5) - qnorm(p = 0.25))
-# normII <- normII * normIQR
-# sd(normII)
-# IQR(normII)
-
+# as.vector(by(data = inhibTable$z[wellType == "treated"], INDICES = inhibTable$Plate[wellType == "treated"], FUN = IQR))
+# as.vector(by(data = inhibTable$z[wellType == "treated"], INDICES = inhibTable$Plate[wellType == "treated"], FUN = median))
 
 
 ```
 
 
 
-```{r iqNormV_stat}
-### Descriptive statistics on the IQR-standardized viability ####
-iqNormVstat <- data.frame(
-  mean = mean(inhibTable$iqNormV),
-  sd = sd(inhibTable$iqNormV),
-  IQR = IQR(inhibTable$iqNormV),
-  var = var(inhibTable$iqNormV),
-  min = min(inhibTable$iqNormV),
-  Q1 = as.vector(quantile(inhibTable$iqNormV, probs = 0.25)),
-  median = median(inhibTable$iqNormV),
-  Q3 = as.vector(quantile(inhibTable$iqNormV, probs = 0.75)),
-  max = max(inhibTable$iqNormV)
+```{r z_stat}
+### Descriptive statistics on the IQR-standardized inhibition ####
+zstat <- data.frame(
+  mean = mean(inhibTable$z[wellType == "treated"]),
+  sd = sd(inhibTable$z[wellType == "treated"]),
+  IQR = IQR(inhibTable$z[wellType == "treated"]),
+  var = var(inhibTable$z[wellType == "treated"]),
+  min = min(inhibTable$z[wellType == "treated"]),
+  Q1 = as.vector(quantile(inhibTable$z[wellType == "treated"], probs = 0.25)),
+  median = median(inhibTable$z[wellType == "treated"]),
+  Q3 = as.vector(quantile(inhibTable$z[wellType == "treated"], probs = 0.75)),
+  max = max(inhibTable$z[wellType == "treated"])
 )
 
-kable(t(iqNormVstat), 
+kable(t(zstat), 
       col.names = "Stat", 
-      caption = "Statistics of the plate-wise IQR-standardized viability")
+      caption = "Statistics of the plate-wise IQR-standardized inhibition")
 
 ```
 
 
-### Histograms of inter-quartile standardized viability
+### Histograms of inter-quartile standardized inhibition indices
 
-The histogram of plate-wise IQR-standardized viability shows a clear improvement : the median is much closer to the mode than with the raw or log-transformed II values.
+The histogram of plate-wise IQR-standardized inhibition shows a clear improvement : the median is much closer to the mode than with the raw or log-transformed II values.
 
-```{r iqNormV_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the plate-wise IQR-standardized viability. Top: virus control (infected, untreated); middle: treated; bottom: cell control (untreated)"}
-#### Histograms of IQR-standardized viability ####
-histBreaks = seq(from = floor(min(inhibTable$iqNormV)), 
-                 to = ceiling(max(inhibTable$iqNormV)), by = 0.1)
+```{r z_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the plate-wise IQR-standardized inhibition (z-scores) Top: virus control (infected, untreated); middle: treated; bottom: cell control (untreated)"}
+#### Histograms of IQR-standardized inhibition ####
+histBreaks = seq(from = floor(min(inhibTable$z)), 
+                 to = ceiling(max(inhibTable$z)), by = 0.1)
 
 par(mfrow = c(3,1))
-hist(inhibTable[wellType == "virusCtl", "iqNormV"], 
-     main = "Virus control – IQR standardized viability",
-     breaks = histBreaks, xlab = "IQR-standardized viability", 
+hist(inhibTable[wellType == "virusCtl", "z"], 
+     main = "Virus control – IQR standardized inhibition",
+     breaks = histBreaks, xlab = "IQR-standardized inhibition", 
      col = "orange", border = "orange")
-hist(inhibTable[wellType == "treated", "iqNormV"], 
-     main = "Treated cells – IQR standardized viability",
-     breaks = histBreaks, xlab = "IQR-standardized viability", 
+hist(inhibTable[wellType == "treated", "z"], 
+     main = "Treated cells – IQR standardized inhibition",
+     breaks = histBreaks, xlab = "IQR-standardized inhibition", 
      col = "grey", border = "grey")
-abline(v = mean(inhibTable[wellType == "treated", "iqNormV"]), col = "blue")
-abline(v = median(inhibTable[wellType == "treated", "iqNormV"]), col = "darkgreen")
+abline(v = mean(inhibTable[wellType == "treated", "z"]), col = "blue")
+abline(v = median(inhibTable[wellType == "treated", "z"]), col = "darkgreen")
 legend("topright", legend = c("mean", "median"),
        col = c("blue", "darkgreen"),
        lwd = 2)
-hist(inhibTable[wellType == "cellCtl", "iqNormV"], 
-     main = "Cell control (untreated) – IQR standardized viability",
-     breaks = histBreaks, xlab = "IQR-standardized viability", 
+hist(inhibTable[wellType == "cellCtl", "z"], 
+     main = "Cell control (untreated) – IQR standardized inhibition",
+     breaks = histBreaks, xlab = "IQR-standardized inhibition", 
      col = "palegreen", border = "palegreen")
 par(par.ori)
 ```
 
 
-### Boxplots: inter-quartile standardized viability
+### Boxplots: inter-quartile standardized inhibition
 
-```{r boxplots_per_plate_iqNormV, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of inter-quartile standardized viability (iqNormV) values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "}
+```{r boxplots_per_plate_z, fig.width=7, fig.height=10, out.width="80%", fig.cap="Distribution of inter-quartile standardized inhibition (z) values per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates.  "}
 
-#### Boxplots of relative viability per plate ####
+#### Boxplots of relative inhibition per plate ####
 
 ## Box plot per plate and well type
-boxplot(iqNormV ~ Plate + wellType, 
-        main = "Inter-quartile standardized viability",
+boxplot(z ~ Plate + wellType, 
+        main = "Inter-quartile standardized inhibition",
         data = inhibTable, 
         las = 1, col = plateColor, 
-        xlab = "iqNormV", 
+        xlab = "z", 
         cex.axis = 0.5, cex = 0.5,
         horizontal = TRUE)
-abline(v = seq(from = 0, to = max(inhibTable$iqNormV), by = 1), col = "#EEEEEE", lty = "dashed")
-abline(v = seq(from = 0, to = max(inhibTable$iqNormV), by = 5), col = "grey")
+abline(v = seq(from = 0, to = max(inhibTable$z), by = 1), col = "#EEEEEE", lty = "dashed")
+abline(v = seq(from = 0, to = max(inhibTable$z), by = 5), col = "grey")
 legend("topright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.8)
 
 ## Add points to denote the arbidol controls
-stripchart(iqNormV ~ Plate, vertical = FALSE, 
+stripchart(z ~ Plate, vertical = FALSE, 
            data = inhibTable[arbidolWells, ],
            method = "jitter", add = TRUE, cex = 0.7, 
            col = markColor["Arbidol"], pch = markPCh["Arbidol"])
@@ -974,25 +1154,25 @@ The above boxplots show that the inter-quartile standardization efficiently corr
 
 - The cell control box plots show wide variation in their medians and dispersion: 
 
-    - Uninfected cells (cell control)  have much lower values in some plates (plates 4 and 11-19) than in other ones. This is not expected, since these cells should by definition have the same viability values. 
+    - Uninfected cells (cell control)  have much lower values in some plates (plates 4 and 11-19) than in other ones. This is not expected, since these cells should by definition have the same inhibition values. 
     
-    - Even for the plates where the cell controls have a high viability after IQR-based standardization, there are strong between-plates variations. 
+    - Even for the plates where the cell controls have a high inhibition index after IQR-based standardization, there are strong between-plates variations. 
 
-This standardization seems thus efficient to correct the apparent over-dispersion of plates 11 to 19, and thereby reduce the rate of likely false positives, but the wide between-plate variability of the untreated cells suggest that the resulting z-scores should not be interpreted as indicators of viability.
+This standardization seems thus efficient to correct the apparent over-dispersion of plates 11 to 19, and thereby reduce the rate of likely false positives, but the wide between-plate variability of the untreated cells suggest that the resulting z-scores should not be interpreted as indicators of inhibition.
 
 
-### Dot plots: inter-quartile standardized viability
+### Dot plots: inter-quartile standardized inhibition
 
-```{r iqNormV_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise IQR-standardized viability index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "}
-yRange <- c(floor(min(inhibTable$iqNormV)), ceiling(max(inhibTable$iqNormV)))
+```{r z_ranked, fig.width=7, fig.height=12, out.width="80%", fig.cap="Values of the plate-wise IQR-standardized inhibition index for all the tested molecules. Molecules are colored according to the plate number. A: virus control (infected untreated); B: treated cells; C: cell control (untreated cells); D: ranked values (all types). Plain triangles: virus control (untreated infected cells). Black plain circles: arbidol control duplicates per plate. Orange square: Hydroxychloroquine sulfate. "}
+yRange <- c(floor(min(inhibTable$z)), ceiling(max(inhibTable$z)))
 
 ## Virus control
 par(mfrow = c(4,1))
-plot(inhibTable[wellType == "virusCtl", "iqNormV"],
+plot(inhibTable[wellType == "virusCtl", "z"],
      panel.first = grid(),
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
-     ylab = "iqNormV",
+     ylab = "z",
      ylim = yRange,
      col = inhibTable[wellType == "virusCtl", "color"],
      pch = inhibTable[wellType == "virusCtl", "pch"],
@@ -1005,16 +1185,16 @@ legend("topright",
        cex = 0.7)
 
 ## Treated cells
-plot(inhibTable[wellType == "treated", "iqNormV"],
+plot(inhibTable[wellType == "treated", "z"],
      panel.first = grid(),
-     main = "IQR-standardized viability (iqNormV)",
+     main = "IQR-standardized inhibition (z)",
      xlab = "Molecules",
-     ylab = "iqNormV",
+     ylab = "z",
      ylim = yRange,
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
      cex = 0.5, las = 1,
-     xlim = c(0, length(inhibTable[wellType == "treated", "iqNormV"])*1.05)
+     xlim = c(0, length(inhibTable[wellType == "treated", "z"])*1.05)
      )
 abline(h = 0)
 legend("topright", 
@@ -1023,11 +1203,11 @@ legend("topright",
        cex = 0.7)
 
 ## Cell control
-plot(inhibTable[wellType == "cellCtl", "iqNormV"],
+plot(inhibTable[wellType == "cellCtl", "z"],
      panel.first = grid(),
      main = "Cell control (uninfected)",
      xlab = "Replicates, sorted per plate",
-     ylab = "iqNormV",
+     ylab = "z",
      ylim = yRange,
      col = inhibTable[wellType == "cellCtl", "color"],
      pch = inhibTable[wellType == "cellCtl", "pch"],
@@ -1041,16 +1221,16 @@ legend("topright",
 # names(supTable)
 
 ## Rank plot
-iqNormVrank <- order(inhibTable$iqNormV, decreasing = TRUE)
-plot(inhibTable[iqNormVrank, "iqNormV"],
-     main = "Ranked IQR-standardized viability values",
-     xlab = "Molecules (ranked by iqNormV index)",
-     ylab = "iqNormV",
-     col = inhibTable[iqNormVrank, "color"],
-     pch = inhibTable[iqNormVrank, "pch"],
+zrank <- order(inhibTable$z, decreasing = TRUE)
+plot(inhibTable[zrank, "z"],
+     main = "Ranked IQR-standardized inhibition values",
+     xlab = "Molecules (ranked by z index)",
+     ylab = "z",
+     col = inhibTable[zrank, "color"],
+     pch = inhibTable[zrank, "pch"],
      cex = 0.5, las = 1,
      panel.first = grid(),
-     xlim = c(0, length(iqNormVrank) * 1.05)
+     xlim = c(0, length(zrank) * 1.05)
      )
 abline(h = 0)
 legend("topright", 
@@ -1062,7 +1242,7 @@ par(mfrow = c(1,1))
 ```
 
 
-The plot of IQR-standardized viability values (top panel) clearly shows that the plate-wise normalization suppressed the background bias. However it denotes a new problem: the cell controls show striking differences depending on the plates. Noticeably,they show very high values in plates 1 and 3, and very low values in plates 11 to 19, as well as in plate 4.
+The plot of IQR-standardized inhibition values (top panel) clearly shows that the plate-wise normalization suppressed the background bias. However it denotes a new problem: the cell controls show striking differences depending on the plates. Noticeably,they show very high values in plates 1 and 3, and very low values in plates 11 to 19, as well as in plate 4.
 
 
 
@@ -1070,9 +1250,9 @@ The plot of IQR-standardized viability values (top panel) clearly shows that the
 
 We compute the p-value as the upper tail of the normal distribution (rigth-side test) in order to detect significantly high values of the plate-wise IQR-standardized index.
 
-```{r iqNormVpval}
-#### Compute P-value from the IQR-standardized viability ####
-inhibTable$p.value <- pnorm(inhibTable$iqNormV, mean = 0, sd = 1, lower.tail = FALSE)
+```{r zpval}
+#### Compute P-value from the IQR-standardized inhibition ####
+inhibTable$p.value <- pnorm(inhibTable$z, mean = 0, sd = 1, lower.tail = FALSE)
 inhibTable$log10Pval <- log10(inhibTable$p.value)
 inhibTable$e.value <- inhibTable$p.value * sum(wellType == "treated")
 inhibTable$FDR <- NA
@@ -1085,7 +1265,7 @@ inhibTable$log10FDR <- log10(inhibTable$FDR)
 
 ### P-value histogram
 
-```{r iqNormVpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise IQR-standardized viability index. "}
+```{r zpval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise IQR-standardized inhibition index. "}
 hist(inhibTable[wellType == "treated", "p.value"], 
      breaks = 20, 
      col = "grey",
@@ -1106,13 +1286,13 @@ hist(inhibTable[wellType == "treated", "p.value"],
 
 ### Significance plot
 
-```{r iqNormV_manhattan_plot, fig.width=7, fig.height=4, out.width="80%", fig.cap="Volcano plot. "}
+```{r z_manhattan_plot, fig.width=7, fig.height=4, out.width="80%", fig.cap="Volcano plot. "}
 #### Manhattan plot ####
 plot(x = -inhibTable[wellType == "treated", "log10FDR"], 
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
      main = "Significance plot",
-     xlab = "Relative viability",
+     xlab = "Relative inhibition",
      ylab = "Significance = -log10(FDR)",
      panel.first = c(
        abline(h = 0), 
@@ -1130,14 +1310,14 @@ legend("topright",
 
 ### Volcano plot
 
-```{r iqNormV_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
+```{r z_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
 #### Volcano plot ####
 plot(x = inhibTable[wellType == "treated", "Vr"],
      y = -inhibTable[wellType == "treated", "log10FDR"], 
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
      main = "Volcano plot",
-     xlab = "Relative viability",
+     xlab = "Relative inhibition",
      ylab = "Significance = -log10(FDR)")
 grid()
 
@@ -1155,17 +1335,17 @@ legend("topright",
 ## Significance of Arbidol after IQR-based standardisation
 
 
-```{r arbidol_viability_indices}
-#### Viability indices for the arbidol contron ####
+```{r arbidol_inhibition_indices}
+#### inhibition indices for the arbidol contron ####
 # sum(arbidolWells)
-kable(inhibTable[arbidolWells, c("Plate", "viability", "Vr", "iqNormV", "log10FDR")], caption = "Viability indices for the arbidol controls (2 replicates per plate) ")
+kable(inhibTable[arbidolWells, c("Plate", "inhibition", "Vr", "z", "log10FDR")], caption = "inhibition indices for the arbidol controls (2 replicates per plate) ")
 ```
 
 
 
 ## Selection of candidate molecules
 
-```{r iqNormV_candidates}
+```{r z_candidates}
 
 #### Select significant normalized II values ####
 
@@ -1251,7 +1431,7 @@ legend("topleft", legend = names(markColor),
 
 
 #### Dot plot: IQR-standardized versus relative viability ####
-plot(inhibTable[, c("Vr", "iqNormV")],
+plot(inhibTable[, c("Vr", "z")],
      main = "Relative vs IQR-standardized viability",
      xlab = "Relative viability",
      ylab = "IQR-standardized viability",
@@ -1262,16 +1442,16 @@ plot(inhibTable[, c("Vr", "iqNormV")],
      las = 1)
 
 ## Mark cell controls
-points(inhibTable[wellType == "cellCtl", c("Vr", "iqNormV")], 
+points(inhibTable[wellType == "cellCtl", c("Vr", "z")], 
        col = markColor["cellCtl"], pch = markPCh["cellCtl"], cex = 0.5)
 ## Mark virus controls
-points(inhibTable[wellType == "virusCtl", c("Vr", "iqNormV")], 
+points(inhibTable[wellType == "virusCtl", c("Vr", "z")], 
        col = markColor["virusCtl"], pch = markPCh["virusCtl"], cex = 0.5)
 ## Mark arbidol controls
-points(inhibTable[arbidolWells, c("Vr", "iqNormV")], 
+points(inhibTable[arbidolWells, c("Vr", "z")], 
        col = markColor["Arbidol"], pch = markPCh["Arbidol"], cex = 0.5)
 ## Mark Hydroxychloroquine
-points(inhibTable[HOClSindex, c("Vr", "iqNormV")], 
+points(inhibTable[HOClSindex, c("Vr", "z")], 
        col = markColor["Hydroxychloroquine"], pch = markPCh["Hydroxychloroquine"], cex = 0.5)
 
 ## Mark milestones for the selected metrics
@@ -1670,19 +1850,37 @@ To this purpose, we use:
 - plate-wise standardized inter-quantile range (IQR) to estimate the standard deviation
 
 ```{r ii_plate_wise_stat}
-#### Copute plate-wise statistics ####
+#### Compute plate-wise statistics ####
 plateStat <- data.frame(
   plate = plateNumbers,
-  mean = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = mean)),
-  sd = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = sd)),
-  median = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = median)),
-  min = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = min)),
-  max = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = max)),
-  IQR = as.vector(by(data = supTable$Inhibition.Index, INDICES = supTable$plateNumber, FUN = IQR))
+  mean = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = mean)),
+  sd = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = sd)),
+  median = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = median)),
+  min = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = min)),
+  max = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = max)),
+  IQR = as.vector(by(
+    data = supTable$Inhibition.Index, 
+    INDICES = supTable$plateNumber, 
+    FUN = IQR))
 )
 rownames(plateStat) <- plateStat$plate
 
-kable(plateStat, caption = "Plate-wise statistics")
+kable(plateStat, caption = "Plate-wise statistics oninhibition index")
 
 ```
 
@@ -1873,5 +2071,32 @@ sessionInfo()
 - log2 transformatio before standardizing (and comparison of the targets)
 - Add the formula of the inhibition index
 - distribution de valeurs plaque par plaque --> vérifier si certaines plaques ont l'air d'avoir plus de 20 cibles (percentile75)
+
+
+- $$II = $$ : valeurs relative à la moyenne de l'arbidol. Comme l'arbidol change d'une plaque à l'autre, pas évident qu'on la conserve. Plutôt baser sur la viabilité des deux contrôles. 
+
+
+$$v'_{m,i} = log2(V_{m,i})$$
+
+
+- Afficher les numéros des plaques sur les dot plots, plutôt que le nombre de molécules
+
+- Vérifier si les plaques où il y a plein de molécules comportent des 
+
+- Hybrid approach
+
+    - for each molecule, we compute a statistical significance
+    - intersection: high-confidence molecules, i.e. staistically significant relative to their plate + biologically relevant with respect to the arbidol threshold
+    
+- replace candidates by hits
+    
+- Export 
+
+    - full result table
+    - statistically significant
+    - above arbidol
+    - high-confidence hits (intersection between the two lists)
+
+
 
 
