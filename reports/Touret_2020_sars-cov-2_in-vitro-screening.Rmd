@@ -1257,11 +1257,11 @@ abline(h = seq(from = zfloor, to = zceiling, by = 1), col = "#EEEEEE")
 abline(h = seq(from = zfloor, to = zceiling, by = 5), col = "grey")
 abline(h = 0)
 abline(h = c(-1, 1), lty = "dotted")
-legend("topright", 
+legend("right", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
        cex = 0.6)
-legend("bottomleft", 
+legend("topright", 
        title = "Markers", 
        legend = names(markColor), 
        col = markColor, 
