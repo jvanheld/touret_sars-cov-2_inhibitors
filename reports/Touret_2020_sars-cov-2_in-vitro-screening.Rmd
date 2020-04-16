@@ -673,7 +673,7 @@ plateStat$Lcc <- as.vector(by(
 
 ### Viability ratio boxplots
 
-```{r boxplots_per_plate_R_L, fig.width=12, fig.height=10, out.width="100%", fig.cap="Distribution of the viability ratio (R)  per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates. "}
+```{r boxplots_per_plate_R_L, fig.width=12, fig.height=10, out.width="100%", fig.cap="Distribution of the viability ratio (left) and log(ratio) (right)  per plate. Top virus control (untreated infected cells); middle: treated cells; bottom: cell control (uninfected). Black plain circles: arbidol control duplicates. "}
 
 par(mfrow = c(1,2))
 
@@ -1839,16 +1839,38 @@ legend("topright", legend = names(plateColor),
 
 ## Define output file names
 outFiles <- list(
-  "All results (tsv)" =  file.path(dir["results"], "result_table_all-molecules.tsv"),
-  "All results (xlsx)" =  file.path(dir["results"], "result_table_all-molecules.xlsx")
+  "All results (tsv)" =  
+    file.path(dir["results"], "result_table_all-molecules.tsv"),
+  "All results (xlsx)" =  
+    file.path(dir["results"], "result_table_all-molecules.xlsx"),
+  "FDR-based hits (xlsx)" =  
+    file.path(dir["results"], "result_table_FDR-hits.xlsx"),
+  "Arbidol-based hits (xlsx)" =  
+    file.path(dir["results"], "result_table_arbidol-hits.xlsx"),
+  "High confidence hits (xlsx)" =  
+    file.path(dir["results"], "result_table_HiConfidence-hits.xlsx")
 )
 
 
-write.table(x = inhibTable, file = outFiles$`All results (tsv)`,  
+write.table(x = inhibTable, 
+            file = outFiles$`All results (tsv)`,  
             sep = "\t", quote = FALSE, 
             row.names = FALSE, col.names = TRUE)
 
-write.xlsx2(x = inhibTable, file = outFiles$`All results (xlsx)`, 
+write.xlsx2(x = inhibTable, 
+            file = outFiles$`All results (xlsx)`, 
+            row.names = FALSE, col.names = TRUE)
+
+write.xlsx2(x = inhibTable[inhibTable$selected.FDR, ], 
+            file = outFiles$`FDR-based hits (xlsx)`, 
+            row.names = FALSE, col.names = TRUE)
+
+write.xlsx2(x = inhibTable[inhibTable$selected.arbidolMean, ], 
+            file = outFiles$`Arbidol-based hits (xlsx)`, 
+            row.names = FALSE, col.names = TRUE)
+
+write.xlsx2(x = inhibTable[inhibTable$selected.FDRandArbidol, ], 
+            file = outFiles$`High confidence hits (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 
 # system(paste("open", dir["results"]))
