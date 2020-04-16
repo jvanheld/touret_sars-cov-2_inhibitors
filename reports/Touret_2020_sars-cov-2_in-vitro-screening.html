@@ -1183,30 +1183,35 @@ Distribution of the viability ratio (left) and log(ratio) (right) per plate. Top
 <p>The barplots of log2-transformed viability measures show another indication for the possible existence of a plate bias: in plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates.</p>
 </div>
 </div>
-<div id="two-points-scaling-defining-a-plate-wise-relative-viability-i_mi" class="section level2">
-<h2>Two-points scaling: defining a plate-wise relative viability (<span class="math inline">\(I_{m,i}\)</span>)</h2>
-<p>A <strong>plate-wise relative viability</strong> <span class="math inline">\(I_{m,i}\)</span> is defined to indicate the viability of cells treated with a given molecule <span class="math inline">\(m\)</span> relative to the two controls f their plate (<span class="math inline">\(i\)</span>):</p>
+<div id="two-points-scaling-defining-a-plate-wise-relative-viability-v_mi" class="section level2">
+<h2>Two-points scaling: defining a plate-wise relative viability (<span class="math inline">\(V_{m,i}\)</span>)</h2>
+<p>A <strong>plate-wise relative viability</strong> <span class="math inline">\(V_{m,i}\)</span> is defined to indicate the viability of cells treated with a given molecule <span class="math inline">\(m\)</span> relative to the two controls f their plate (<span class="math inline">\(i\)</span>):</p>
 <ul>
 <li>virus control (<span class="math inline">\(vc\)</span>): infected untreated cells;</li>
 <li>cell control (<span class="math inline">\(cc\)</span>): uninfected cells.</li>
 </ul>
 <p>It is computed as follows.</p>
-<p><span class="math display">\[I_{m,i} = 100 \cdot \frac{L_{m,i} - L_{vc}}{L_{cc} - L_{vc}}\]</span></p>
-<p>where <span class="math inline">\(L_{cc,i}\)</span> and <span class="math inline">\(L_{vc,i}\)</span> respectively denote the median values of cell controls and virus controls for plate <span class="math inline">\(i\)</span>.</p>
-<p>The plate-wise relative viability <span class="math inline">\(I_{m,i}\)</span> is measured on a scale where 0 corresponds to the median of infected untreated cells (virus control), and 100 to the median of uninfected cells (cell control).</p>
-<p>Note that <span class="math inline">\(I_{m,i}\)</span> values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from various sources: experimental flucturations, cytotoxic effect of the drug or plate bias.</p>
-<p><span class="math inline">\(I_{m,i}\)</span> can also take values higher than 100, denoting a highly efficient treatment.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co">#### Compute relative viability from log-ratios ####</span></a>
-<a class="sourceLine" id="cb16-2" data-line-number="2">inhibTable<span class="op">$</span>Lrel &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">*</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-3" data-line-number="3"><span class="st">  </span>(inhibTable<span class="op">$</span>Vlog2R <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Lvc[inhibTable<span class="op">$</span>Plate]) <span class="op">/</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-4" data-line-number="4"><span class="st">    </span>(plateStat<span class="op">$</span>Lcc[inhibTable<span class="op">$</span>Plate] <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Lvc[inhibTable<span class="op">$</span>Plate]) </a>
+<p><span class="math display">\[V_{m,i} = 100 \cdot \frac{L_{m,i} - L_{vc}}{L_{cc} - L_{vc}}\]</span></p>
+<p>where <span class="math inline">\(L_{cc,i}\)</span> and <span class="math inline">\(L_{vc,i}\)</span> denote the median values of the log2(ratios) respectively obtained in cell controls and virus controls for plate <span class="math inline">\(i\)</span>.</p>
+<p>The plate-wise relative viability <span class="math inline">\(V_{m,i}\)</span> is measured on a scale where</p>
+<ul>
+<li>0 corresponds to the median of infected untreated cells (virus control), and</li>
+<li>100 to the median of uninfected cells (cell control).</li>
+</ul>
+<p>Note that <span class="math inline">\(V_{m,i}\)</span> values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from various sources: experimental flucturations, cytotoxic effect of the drug or plate bias.</p>
+<p><span class="math inline">\(V_{m,i}\)</span> can also take values higher than 100, denoting a highly efficient treatment.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co">#### Compute relative viability from ratios ####</span></a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">inhibTable<span class="op">$</span>Vrel &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">*</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3"><span class="st">  </span>(inhibTable<span class="op">$</span>Vratio <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Rvc[inhibTable<span class="op">$</span>Plate]) <span class="op">/</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-4" data-line-number="4"><span class="st">    </span>(plateStat<span class="op">$</span>Rcc[inhibTable<span class="op">$</span>Plate] <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Rvc[inhibTable<span class="op">$</span>Plate]) </a>
 <a class="sourceLine" id="cb16-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb16-6" data-line-number="6"><span class="co"># hist(inhibTable$I, breaks = 100)</span></a>
-<a class="sourceLine" id="cb16-7" data-line-number="7"><span class="co"># </span></a>
-<a class="sourceLine" id="cb16-8" data-line-number="8"><span class="co">#### Compute relative viability from ratios ####</span></a>
-<a class="sourceLine" id="cb16-9" data-line-number="9">inhibTable<span class="op">$</span>Vrel &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">*</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-10" data-line-number="10"><span class="st">  </span>(inhibTable<span class="op">$</span>Vratio <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Rvc[inhibTable<span class="op">$</span>Plate]) <span class="op">/</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-11" data-line-number="11"><span class="st">    </span>(plateStat<span class="op">$</span>Rcc[inhibTable<span class="op">$</span>Plate] <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Rvc[inhibTable<span class="op">$</span>Plate]) </a></code></pre></div>
+<a class="sourceLine" id="cb16-6" data-line-number="6"><span class="co">#### Compute relative viability from log-ratios ####</span></a>
+<a class="sourceLine" id="cb16-7" data-line-number="7">inhibTable<span class="op">$</span>Vrel &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">*</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-8" data-line-number="8"><span class="st">  </span>(inhibTable<span class="op">$</span>Vlog2R <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Lvc[inhibTable<span class="op">$</span>Plate]) <span class="op">/</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-9" data-line-number="9"><span class="st">    </span>(plateStat<span class="op">$</span>Lcc[inhibTable<span class="op">$</span>Plate] <span class="op">-</span><span class="st"> </span>plateStat<span class="op">$</span>Lvc[inhibTable<span class="op">$</span>Plate]) </a>
+<a class="sourceLine" id="cb16-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb16-11" data-line-number="11"><span class="co"># hist(inhibTable$I, breaks = 100)</span></a>
+<a class="sourceLine" id="cb16-12" data-line-number="12"><span class="co"># </span></a></code></pre></div>
 <div id="relative-viability-boxplots" class="section level3">
 <h3>Relative viability boxplots</h3>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="co">#### Boxplots of relative viability per plate ####</span></a>
@@ -1488,288 +1493,288 @@ Values of the plate-wise relative viability for all the tested molecules. Molecu
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">10.65724</td>
-<td align="right">23.44074</td>
-<td align="right">1.287252</td>
+<td align="right">12.90684</td>
+<td align="right">28.85439</td>
+<td align="right">2.589052</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">78.69645</td>
-<td align="right">-10.653628</td>
-<td align="right">93.92306</td>
-<td align="right">-0.8612547</td>
-<td align="right">7.015984</td>
-<td align="right">7.877239</td>
-<td align="right">0.1712503</td>
+<td align="right">86.95038</td>
+<td align="right">-25.59828</td>
+<td align="right">96.51344</td>
+<td align="right">-1.7821824</td>
+<td align="right">13.16103</td>
+<td align="right">14.94322</td>
+<td align="right">0.0902737</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">12.84856</td>
-<td align="right">20.48569</td>
-<td align="right">8.656760</td>
+<td align="right">17.39446</td>
+<td align="right">27.93057</td>
+<td align="right">16.069910</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">72.84800</td>
-<td align="right">-10.404975</td>
-<td align="right">76.42084</td>
-<td align="right">-0.2766580</td>
-<td align="right">15.479014</td>
-<td align="right">15.755672</td>
-<td align="right">0.0856187</td>
+<td align="right">83.09473</td>
+<td align="right">-25.25135</td>
+<td align="right">85.57929</td>
+<td align="right">-0.5736503</td>
+<td align="right">26.71207</td>
+<td align="right">27.28572</td>
+<td align="right">0.0494390</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
-<td align="right">10.57859</td>
-<td align="right">14.39757</td>
-<td align="right">5.852577</td>
+<td align="right">16.83370</td>
+<td align="right">18.63510</td>
+<td align="right">11.395323</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">61.68145</td>
-<td align="right">-8.031421</td>
-<td align="right">66.89917</td>
-<td align="right">3.2724995</td>
-<td align="right">12.094535</td>
-<td align="right">8.822036</td>
-<td align="right">0.1529102</td>
+<td align="right">75.08391</td>
+<td align="right">-19.15266</td>
+<td align="right">79.09630</td>
+<td align="right">6.5846565</td>
+<td align="right">21.89036</td>
+<td align="right">15.30570</td>
+<td align="right">0.0881358</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
-<td align="right">19.93263</td>
-<td align="right">27.39853</td>
-<td align="right">10.524594</td>
+<td align="right">24.81053</td>
+<td align="right">34.66755</td>
+<td align="right">18.942453</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">62.56503</td>
-<td align="right">-11.192798</td>
-<td align="right">92.68559</td>
-<td align="right">1.7600698</td>
-<td align="right">36.334538</td>
-<td align="right">34.574468</td>
-<td align="right">0.0390166</td>
+<td align="right">74.97339</td>
+<td align="right">-26.98529</td>
+<td align="right">95.77630</td>
+<td align="right">3.5136062</td>
+<td align="right">51.96317</td>
+<td align="right">48.44957</td>
+<td align="right">0.0278430</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">16.38903</td>
-<td align="right">21.51424</td>
-<td align="right">11.215011</td>
+<td align="right">23.26384</td>
+<td align="right">29.05021</td>
+<td align="right">21.490158</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">64.04599</td>
-<td align="right">-8.596412</td>
-<td align="right">92.26401</td>
-<td align="right">3.1468314</td>
-<td align="right">21.880786</td>
-<td align="right">18.733955</td>
-<td align="right">0.0720072</td>
+<td align="right">77.77693</td>
+<td align="right">-22.65224</td>
+<td align="right">95.78776</td>
+<td align="right">6.7390393</td>
+<td align="right">37.13402</td>
+<td align="right">30.39498</td>
+<td align="right">0.0443816</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
-<td align="right">13.55398</td>
-<td align="right">23.87465</td>
-<td align="right">3.974892</td>
+<td align="right">17.43508</td>
+<td align="right">30.30878</td>
+<td align="right">8.006709</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">83.20621</td>
-<td align="right">-8.952712</td>
-<td align="right">89.41139</td>
-<td align="right">-0.4278225</td>
-<td align="right">20.076973</td>
-<td align="right">20.504796</td>
-<td align="right">0.0657885</td>
+<td align="right">90.14721</td>
+<td align="right">-21.90392</td>
+<td align="right">93.95942</td>
+<td align="right">-0.8851005</td>
+<td align="right">33.63426</td>
+<td align="right">34.51936</td>
+<td align="right">0.0390789</td>
 </tr>
 <tr class="odd">
 <td align="right">7</td>
-<td align="right">16.34907</td>
-<td align="right">26.20411</td>
-<td align="right">5.937598</td>
+<td align="right">21.08448</td>
+<td align="right">30.61298</td>
+<td align="right">11.384151</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">68.22324</td>
-<td align="right">-8.995095</td>
-<td align="right">113.37786</td>
-<td align="right">1.8070194</td>
-<td align="right">16.883196</td>
-<td align="right">15.076177</td>
-<td align="right">0.0894776</td>
+<td align="right">79.78517</td>
+<td align="right">-21.27708</td>
+<td align="right">107.11582</td>
+<td align="right">3.6549605</td>
+<td align="right">28.72765</td>
+<td align="right">25.07269</td>
+<td align="right">0.0538027</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
-<td align="right">13.70064</td>
-<td align="right">26.29018</td>
-<td align="right">2.776594</td>
+<td align="right">16.67873</td>
+<td align="right">30.63601</td>
+<td align="right">5.283791</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">83.34600</td>
-<td align="right">-11.686530</td>
-<td align="right">119.42874</td>
-<td align="right">-1.2455747</td>
-<td align="right">16.314804</td>
-<td align="right">17.560379</td>
-<td align="right">0.0768195</td>
+<td align="right">89.77955</td>
+<td align="right">-26.97461</td>
+<td align="right">110.48853</td>
+<td align="right">-2.4830636</td>
+<td align="right">27.03439</td>
+<td align="right">29.51745</td>
+<td align="right">0.0457011</td>
 </tr>
 <tr class="odd">
 <td align="right">9</td>
-<td align="right">12.09549</td>
-<td align="right">21.35717</td>
-<td align="right">4.191356</td>
+<td align="right">16.31472</td>
+<td align="right">25.35433</td>
+<td align="right">7.863786</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">77.72124</td>
-<td align="right">-11.060479</td>
-<td align="right">90.10209</td>
-<td align="right">1.3179505</td>
-<td align="right">11.055649</td>
-<td align="right">9.737698</td>
-<td align="right">0.1385317</td>
+<td align="right">85.92780</td>
+<td align="right">-25.29322</td>
+<td align="right">94.09538</td>
+<td align="right">2.5641306</td>
+<td align="right">19.27661</td>
+<td align="right">16.71248</td>
+<td align="right">0.0807169</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">14.05262</td>
-<td align="right">21.26600</td>
-<td align="right">8.196586</td>
+<td align="right">19.42648</td>
+<td align="right">25.89632</td>
+<td align="right">14.943992</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">80.16822</td>
-<td align="right">-10.894698</td>
-<td align="right">89.86229</td>
-<td align="right">1.2896842</td>
-<td align="right">14.913004</td>
-<td align="right">13.623320</td>
-<td align="right">0.0990199</td>
+<td align="right">87.83983</td>
+<td align="right">-25.54365</td>
+<td align="right">94.03011</td>
+<td align="right">2.5522727</td>
+<td align="right">25.38238</td>
+<td align="right">22.83011</td>
+<td align="right">0.0590877</td>
 </tr>
 <tr class="odd">
 <td align="right">11</td>
-<td align="right">29.94993</td>
-<td align="right">31.95786</td>
-<td align="right">22.921485</td>
+<td align="right">35.61332</td>
+<td align="right">39.56404</td>
+<td align="right">35.389084</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">93.46817</td>
-<td align="right">-27.256916</td>
-<td align="right">119.93258</td>
-<td align="right">8.0397325</td>
-<td align="right">48.638230</td>
-<td align="right">40.598498</td>
-<td align="right">0.0332273</td>
+<td align="right">95.99690</td>
+<td align="right">-76.49642</td>
+<td align="right">111.03708</td>
+<td align="right">14.4378585</td>
+<td align="right">62.68187</td>
+<td align="right">48.24401</td>
+<td align="right">0.0279616</td>
 </tr>
 <tr class="even">
 <td align="right">12</td>
-<td align="right">32.97116</td>
-<td align="right">26.23733</td>
-<td align="right">29.140311</td>
+<td align="right">43.11607</td>
+<td align="right">30.50020</td>
+<td align="right">44.454842</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">90.25879</td>
-<td align="right">-18.817588</td>
-<td align="right">104.88506</td>
-<td align="right">12.6887370</td>
-<td align="right">47.367884</td>
-<td align="right">34.679147</td>
-<td align="right">0.0388989</td>
+<td align="right">94.35243</td>
+<td align="right">-54.72326</td>
+<td align="right">102.67258</td>
+<td align="right">22.5882232</td>
+<td align="right">63.03681</td>
+<td align="right">40.44858</td>
+<td align="right">0.0333505</td>
 </tr>
 <tr class="odd">
 <td align="right">13</td>
-<td align="right">41.03991</td>
-<td align="right">36.73360</td>
-<td align="right">41.005813</td>
+<td align="right">45.02793</td>
+<td align="right">47.46814</td>
+<td align="right">55.760669</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">87.00809</td>
-<td align="right">-24.955178</td>
-<td align="right">118.92283</td>
-<td align="right">16.6355783</td>
-<td align="right">67.288433</td>
-<td align="right">50.652855</td>
-<td align="right">0.0266319</td>
+<td align="right">92.00095</td>
+<td align="right">-71.05808</td>
+<td align="right">110.34226</td>
+<td align="right">27.3510609</td>
+<td align="right">78.39580</td>
+<td align="right">51.04474</td>
+<td align="right">0.0264274</td>
 </tr>
 <tr class="even">
 <td align="right">14</td>
-<td align="right">44.18947</td>
-<td align="right">34.61745</td>
-<td align="right">45.337705</td>
+<td align="right">48.84468</td>
+<td align="right">46.17014</td>
+<td align="right">58.970068</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">73.57697</td>
-<td align="right">-31.457420</td>
-<td align="right">121.95583</td>
-<td align="right">24.0607024</td>
-<td align="right">65.057927</td>
-<td align="right">40.997224</td>
-<td align="right">0.0329042</td>
+<td align="right">82.41156</td>
+<td align="right">-93.22169</td>
+<td align="right">112.33839</td>
+<td align="right">35.9895577</td>
+<td align="right">76.01952</td>
+<td align="right">40.02996</td>
+<td align="right">0.0336992</td>
 </tr>
 <tr class="odd">
 <td align="right">15</td>
-<td align="right">43.10173</td>
-<td align="right">35.62465</td>
-<td align="right">42.192277</td>
+<td align="right">49.12716</td>
+<td align="right">41.55740</td>
+<td align="right">57.064352</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">76.77182</td>
-<td align="right">-25.635768</td>
-<td align="right">123.61632</td>
-<td align="right">17.6907303</td>
-<td align="right">74.642524</td>
-<td align="right">56.951793</td>
-<td align="right">0.0236863</td>
+<td align="right">85.30208</td>
+<td align="right">-75.32854</td>
+<td align="right">112.66365</td>
+<td align="right">28.9231837</td>
+<td align="right">83.82389</td>
+<td align="right">54.90071</td>
+<td align="right">0.0245713</td>
 </tr>
 <tr class="even">
 <td align="right">16</td>
-<td align="right">37.09870</td>
-<td align="right">32.99190</td>
-<td align="right">38.908786</td>
+<td align="right">43.91908</td>
+<td align="right">38.84888</td>
+<td align="right">53.967685</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">69.13411</td>
-<td align="right">-22.949880</td>
-<td align="right">145.16096</td>
-<td align="right">10.5232998</td>
-<td align="right">57.989685</td>
-<td align="right">47.466386</td>
-<td align="right">0.0284197</td>
+<td align="right">79.82340</td>
+<td align="right">-65.94913</td>
+<td align="right">122.55003</td>
+<td align="right">18.4567483</td>
+<td align="right">71.31749</td>
+<td align="right">52.86074</td>
+<td align="right">0.0255195</td>
 </tr>
 <tr class="odd">
 <td align="right">17</td>
-<td align="right">22.42951</td>
-<td align="right">28.21706</td>
-<td align="right">18.507698</td>
+<td align="right">26.21813</td>
+<td align="right">40.33094</td>
+<td align="right">28.927309</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">72.99269</td>
-<td align="right">-30.382711</td>
-<td align="right">96.97478</td>
-<td align="right">2.5921552</td>
-<td align="right">40.341062</td>
-<td align="right">37.748907</td>
-<td align="right">0.0357356</td>
+<td align="right">81.93965</td>
+<td align="right">-82.28630</td>
+<td align="right">98.15012</td>
+<td align="right">5.1396817</td>
+<td align="right">53.96415</td>
+<td align="right">48.82447</td>
+<td align="right">0.0276292</td>
 </tr>
 <tr class="even">
 <td align="right">18</td>
-<td align="right">29.19213</td>
-<td align="right">29.89163</td>
-<td align="right">21.979194</td>
+<td align="right">35.81653</td>
+<td align="right">36.11849</td>
+<td align="right">34.146657</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">90.92914</td>
-<td align="right">-26.495954</td>
-<td align="right">113.63030</td>
-<td align="right">10.0969147</td>
-<td align="right">43.659643</td>
-<td align="right">33.562728</td>
-<td align="right">0.0401928</td>
+<td align="right">94.46603</td>
+<td align="right">-75.77164</td>
+<td align="right">107.65872</td>
+<td align="right">17.4846896</td>
+<td align="right">58.06189</td>
+<td align="right">40.57720</td>
+<td align="right">0.0332448</td>
 </tr>
 <tr class="odd">
 <td align="right">19</td>
-<td align="right">29.41383</td>
-<td align="right">32.44893</td>
-<td align="right">17.123122</td>
+<td align="right">35.74937</td>
+<td align="right">37.27653</td>
+<td align="right">28.621896</td>
 <td align="right">0</td>
 <td align="right">100</td>
-<td align="right">80.26475</td>
-<td align="right">-22.069967</td>
-<td align="right">123.65065</td>
-<td align="right">8.2692558</td>
-<td align="right">46.908454</td>
-<td align="right">38.639199</td>
-<td align="right">0.0349122</td>
+<td align="right">87.94144</td>
+<td align="right">-65.45262</td>
+<td align="right">112.37523</td>
+<td align="right">15.1202507</td>
+<td align="right">62.11723</td>
+<td align="right">46.99698</td>
+<td align="right">0.0287035</td>
 </tr>
 </tbody>
 </table>
@@ -1812,27 +1817,27 @@ Values of the plate-wise relative viability for all the tested molecules. Molecu
 <tbody>
 <tr class="odd">
 <td>mean</td>
-<td align="right">0.4566598</td>
+<td align="right">0.1656308</td>
 </tr>
 <tr class="even">
 <td>sd</td>
-<td align="right">1.8532899</td>
+<td align="right">1.4587500</td>
 </tr>
 <tr class="odd">
 <td>IQR</td>
-<td align="right">1.3083010</td>
+<td align="right">1.2842621</td>
 </tr>
 <tr class="even">
 <td>var</td>
-<td align="right">3.4346835</td>
+<td align="right">2.1279515</td>
 </tr>
 <tr class="odd">
 <td>min</td>
-<td align="right">-2.5268796</td>
+<td align="right">-5.1287479</td>
 </tr>
 <tr class="even">
 <td>Q1</td>
-<td align="right">-0.4810615</td>
+<td align="right">-0.5507888</td>
 </tr>
 <tr class="odd">
 <td>median</td>
@@ -1840,11 +1845,11 @@ Values of the plate-wise relative viability for all the tested molecules. Molecu
 </tr>
 <tr class="even">
 <td>Q3</td>
-<td align="right">0.8272395</td>
+<td align="right">0.7334733</td>
 </tr>
 <tr class="odd">
 <td>max</td>
-<td align="right">15.8639101</td>
+<td align="right">8.4789023</td>
 </tr>
 </tbody>
 </table>
@@ -2206,380 +2211,380 @@ Volcano plot.
 <td align="right">1</td>
 <td align="right">30140</td>
 <td align="right">0.8102695</td>
-<td align="right">73.85675</td>
-<td align="right">12.4275490</td>
+<td align="right">83.73696</td>
+<td align="right">7.3255223</td>
 <td align="right">0.0000000</td>
-<td align="right">32.3178798</td>
+<td align="right">10.2090616</td>
 </tr>
 <tr class="even">
 <td>01B12</td>
 <td align="right">1</td>
 <td align="right">32753</td>
 <td align="right">0.8805162</td>
-<td align="right">83.53614</td>
-<td align="right">14.0851476</td>
+<td align="right">90.16381</td>
+<td align="right">7.9056975</td>
 <td align="right">0.0000000</td>
-<td align="right">41.7386174</td>
+<td align="right">11.9838973</td>
 </tr>
 <tr class="odd">
 <td>02A12</td>
 <td align="right">2</td>
 <td align="right">43022</td>
 <td align="right">0.8278078</td>
-<td align="right">76.42084</td>
-<td align="right">5.8018695</td>
-<td align="right">0.0000001</td>
-<td align="right">6.8937539</td>
+<td align="right">85.57929</td>
+<td align="right">3.4364768</td>
+<td align="right">0.0095644</td>
+<td align="right">2.0193432</td>
 </tr>
 <tr class="even">
 <td>02B12</td>
 <td align="right">2</td>
 <td align="right">40310</td>
 <td align="right">0.7756249</td>
-<td align="right">69.27516</td>
-<td align="right">5.1900660</td>
-<td align="right">0.0000034</td>
-<td align="right">5.4705606</td>
+<td align="right">80.61017</td>
+<td align="right">3.1908082</td>
+<td align="right">0.0179826</td>
+<td align="right">1.7451485</td>
 </tr>
 <tr class="odd">
 <td>03A12</td>
 <td align="right">3</td>
 <td align="right">27158</td>
 <td align="right">0.6786785</td>
-<td align="right">56.46374</td>
-<td align="right">7.7389641</td>
-<td align="right">0.0000000</td>
-<td align="right">12.4691925</td>
+<td align="right">71.07152</td>
+<td align="right">5.2596065</td>
+<td align="right">0.0000056</td>
+<td align="right">5.2500335</td>
 </tr>
 <tr class="even">
 <td>03B12</td>
 <td align="right">3</td>
 <td align="right">30240</td>
 <td align="right">0.7556977</td>
-<td align="right">66.89917</td>
-<td align="right">9.3346482</td>
-<td align="right">0.0000000</td>
-<td align="right">18.2166799</td>
+<td align="right">79.09630</td>
+<td align="right">5.9668772</td>
+<td align="right">0.0000002</td>
+<td align="right">6.8041204</td>
 </tr>
 <tr class="odd">
 <td>04A12</td>
 <td align="right">4</td>
 <td align="right">28768</td>
 <td align="right">0.6487754</td>
-<td align="right">51.48438</td>
-<td align="right">1.5981130</td>
-<td align="right">0.3821808</td>
-<td align="right">0.4177311</td>
+<td align="right">66.39001</td>
+<td align="right">1.3210805</td>
+<td align="right">0.6399280</td>
+<td align="right">0.1938689</td>
 </tr>
 <tr class="even">
 <td>04B12</td>
 <td align="right">4</td>
 <td align="right">35882</td>
 <td align="right">0.8092102</td>
-<td align="right">73.64568</td>
-<td align="right">2.4627726</td>
-<td align="right">0.0801482</td>
-<td align="right">1.0961060</td>
+<td align="right">83.55677</td>
+<td align="right">1.7990539</td>
+<td align="right">0.3966139</td>
+<td align="right">0.4016321</td>
 </tr>
 <tr class="odd">
 <td>05A12</td>
 <td align="right">5</td>
 <td align="right">29898</td>
 <td align="right">0.7116538</td>
-<td align="right">62.30337</td>
-<td align="right">3.6787294</td>
-<td align="right">0.0022000</td>
-<td align="right">2.6575853</td>
+<td align="right">76.50695</td>
+<td align="right">2.4417358</td>
+<td align="right">0.1279384</td>
+<td align="right">0.8929990</td>
 </tr>
 <tr class="even">
 <td>05B12</td>
 <td align="right">5</td>
 <td align="right">31018</td>
 <td align="right">0.7383129</td>
-<td align="right">65.78861</td>
-<td align="right">3.9296920</td>
-<td align="right">0.0009076</td>
-<td align="right">3.0420868</td>
+<td align="right">79.04691</td>
+<td align="right">2.5544633</td>
+<td align="right">0.1022814</td>
+<td align="right">0.9902034</td>
 </tr>
 <tr class="odd">
 <td>06A12</td>
 <td align="right">6</td>
 <td align="right">32760</td>
 <td align="right">0.8518273</td>
-<td align="right">80.01683</td>
-<td align="right">5.0026843</td>
-<td align="right">0.0000082</td>
-<td align="right">5.0885199</td>
+<td align="right">88.15047</td>
+<td align="right">3.1319317</td>
+<td align="right">0.0214732</td>
+<td align="right">1.6681026</td>
 </tr>
 <tr class="even">
 <td>06B12</td>
 <td align="right">6</td>
 <td align="right">34579</td>
 <td align="right">0.8991250</td>
-<td align="right">86.39560</td>
-<td align="right">5.4223335</td>
-<td align="right">0.0000010</td>
-<td align="right">5.9921058</td>
+<td align="right">92.14395</td>
+<td align="right">3.2879925</td>
+<td align="right">0.0140365</td>
+<td align="right">1.8527400</td>
 </tr>
 <tr class="odd">
 <td>07A12</td>
 <td align="right">7</td>
 <td align="right">31481</td>
 <td align="right">0.7995175</td>
-<td align="right">72.54165</td>
-<td align="right">5.9595684</td>
-<td align="right">0.0000001</td>
-<td align="right">7.2737070</td>
+<td align="right">82.92103</td>
+<td align="right">3.8488803</td>
+<td align="right">0.0023701</td>
+<td align="right">2.6252267</td>
 </tr>
 <tr class="even">
 <td>07B12</td>
 <td align="right">7</td>
 <td align="right">28998</td>
 <td align="right">0.7364571</td>
-<td align="right">63.90483</td>
-<td align="right">5.1867667</td>
-<td align="right">0.0000034</td>
-<td align="right">5.4705606</td>
+<td align="right">76.64930</td>
+<td align="right">3.5114438</td>
+<td align="right">0.0076324</td>
+<td align="right">2.1173377</td>
 </tr>
 <tr class="odd">
 <td>08A12</td>
 <td align="right">8</td>
 <td align="right">32999</td>
 <td align="right">0.8647310</td>
-<td align="right">80.86412</td>
-<td align="right">5.9986444</td>
-<td align="right">0.0000000</td>
-<td align="right">7.3537397</td>
+<td align="right">88.15897</td>
+<td align="right">3.7874855</td>
+<td align="right">0.0029637</td>
+<td align="right">2.5281661</td>
 </tr>
 <tr class="even">
 <td>08B12</td>
 <td align="right">8</td>
 <td align="right">34338</td>
 <td align="right">0.8998192</td>
-<td align="right">85.82788</td>
-<td align="right">6.3799583</td>
-<td align="right">0.0000000</td>
-<td align="right">8.3653050</td>
+<td align="right">91.40012</td>
+<td align="right">3.9356094</td>
+<td align="right">0.0017472</td>
+<td align="right">2.7576602</td>
 </tr>
 <tr class="odd">
 <td>09A12</td>
 <td align="right">9</td>
 <td align="right">34990</td>
 <td align="right">0.7969570</td>
-<td align="right">71.29170</td>
-<td align="right">9.2955227</td>
-<td align="right">0.0000000</td>
-<td align="right">18.0887986</td>
+<td align="right">81.53001</td>
+<td align="right">5.9461083</td>
+<td align="right">0.0000002</td>
+<td align="right">6.7837172</td>
 </tr>
 <tr class="even">
 <td>09B12</td>
 <td align="right">9</td>
 <td align="right">38983</td>
 <td align="right">0.8879044</td>
-<td align="right">84.15078</td>
-<td align="right">11.0769118</td>
+<td align="right">90.32560</td>
+<td align="right">6.6560607</td>
 <td align="right">0.0000000</td>
-<td align="right">25.7430361</td>
+<td align="right">8.5044463</td>
 </tr>
 <tr class="odd">
 <td>10A12</td>
 <td align="right">10</td>
 <td align="right">36991</td>
 <td align="right">0.8742747</td>
-<td align="right">82.45403</td>
-<td align="right">7.3529630</td>
-<td align="right">0.0000000</td>
-<td align="right">11.2189130</td>
+<td align="right">89.35443</td>
+<td align="right">4.3967436</td>
+<td align="right">0.0002952</td>
+<td align="right">3.5299142</td>
 </tr>
 <tr class="even">
 <td>10B12</td>
 <td align="right">10</td>
 <td align="right">35605</td>
 <td align="right">0.8415169</td>
-<td align="right">77.88241</td>
-<td align="right">6.9002820</td>
-<td align="right">0.0000000</td>
-<td align="right">9.8404583</td>
+<td align="right">86.32523</td>
+<td align="right">4.2177554</td>
+<td align="right">0.0005825</td>
+<td align="right">3.2347260</td>
 </tr>
 <tr class="odd">
 <td>11A12</td>
 <td align="right">11</td>
 <td align="right">40557</td>
 <td align="right">0.9954470</td>
-<td align="right">99.33480</td>
-<td align="right">2.5390102</td>
-<td align="right">0.0676204</td>
-<td align="right">1.1699219</td>
+<td align="right">99.62165</td>
+<td align="right">1.7960449</td>
+<td align="right">0.3966139</td>
+<td align="right">0.4016321</td>
 </tr>
 <tr class="even">
 <td>11B12</td>
 <td align="right">11</td>
 <td align="right">37285</td>
 <td align="right">0.9151378</td>
-<td align="right">87.60153</td>
-<td align="right">2.1491448</td>
-<td align="right">0.1483991</td>
-<td align="right">0.8285687</td>
+<td align="right">92.37214</td>
+<td align="right">1.5933371</td>
+<td align="right">0.4843136</td>
+<td align="right">0.3148733</td>
 </tr>
 <tr class="odd">
 <td>12A12</td>
 <td align="right">12</td>
 <td align="right">38378</td>
 <td align="right">0.9549736</td>
-<td align="right">93.84649</td>
-<td align="right">2.5169971</td>
-<td align="right">0.0693250</td>
-<td align="right">1.1591100</td>
+<td align="right">96.50145</td>
+<td align="right">1.7357792</td>
+<td align="right">0.4170330</td>
+<td align="right">0.3798296</td>
 </tr>
 <tr class="even">
 <td>12B12</td>
 <td align="right">12</td>
 <td align="right">36268</td>
 <td align="right">0.9024697</td>
-<td align="right">86.67109</td>
-<td align="right">2.2378820</td>
-<td align="right">0.1253598</td>
-<td align="right">0.9018416</td>
+<td align="right">92.20341</td>
+<td align="right">1.5924375</td>
+<td align="right">0.4843136</td>
+<td align="right">0.3148733</td>
 </tr>
 <tr class="odd">
 <td>13A12</td>
 <td align="right">13</td>
 <td align="right">37554</td>
 <td align="right">0.9484172</td>
-<td align="right">92.60218</td>
-<td align="right">1.3741071</td>
-<td align="right">0.5161851</td>
-<td align="right">0.2871946</td>
+<td align="right">95.58200</td>
+<td align="right">1.0523741</td>
+<td align="right">0.8170508</td>
+<td align="right">0.0877510</td>
 </tr>
 <tr class="even">
 <td>13B12</td>
 <td align="right">13</td>
 <td align="right">34465</td>
 <td align="right">0.8704052</td>
-<td align="right">81.41401</td>
-<td align="right">1.0761451</td>
-<td align="right">0.6992700</td>
-<td align="right">0.1553551</td>
+<td align="right">88.41989</td>
+<td align="right">0.8630982</td>
+<td align="right">0.8917906</td>
+<td align="right">0.0497371</td>
 </tr>
 <tr class="odd">
 <td>14A12</td>
 <td align="right">14</td>
 <td align="right">29114</td>
 <td align="right">0.7881003</td>
-<td align="right">68.51040</td>
-<td align="right">0.7624782</td>
-<td align="right">0.8390417</td>
-<td align="right">0.0762164</td>
+<td align="right">78.69880</td>
+<td align="right">0.6648434</td>
+<td align="right">0.9330662</td>
+<td align="right">0.0300875</td>
 </tr>
 <tr class="even">
 <td>14B12</td>
 <td align="right">14</td>
 <td align="right">31633</td>
 <td align="right">0.8562882</td>
-<td align="right">78.64355</td>
-<td align="right">1.0959011</td>
-<td align="right">0.6863293</td>
-<td align="right">0.1634674</td>
+<td align="right">86.12432</td>
+<td align="right">0.9150780</td>
+<td align="right">0.8732382</td>
+<td align="right">0.0588673</td>
 </tr>
 <tr class="odd">
 <td>15A12</td>
 <td align="right">15</td>
 <td align="right">33124</td>
 <td align="right">0.8494313</td>
-<td align="right">78.50016</td>
-<td align="right">0.8600007</td>
-<td align="right">0.8021167</td>
-<td align="right">0.0957624</td>
+<td align="right">86.49818</td>
+<td align="right">0.7232261</td>
+<td align="right">0.9199074</td>
+<td align="right">0.0362559</td>
 </tr>
 <tr class="even">
 <td>15B12</td>
 <td align="right">15</td>
 <td align="right">32180</td>
 <td align="right">0.8252234</td>
-<td align="right">75.04348</td>
-<td align="right">0.7781248</td>
-<td align="right">0.8334067</td>
-<td align="right">0.0791430</td>
+<td align="right">84.10597</td>
+<td align="right">0.6644467</td>
+<td align="right">0.9330662</td>
+<td align="right">0.0300875</td>
 </tr>
 <tr class="odd">
 <td>16A12</td>
 <td align="right">16</td>
 <td align="right">28576</td>
 <td align="right">0.8277740</td>
-<td align="right">75.66461</td>
-<td align="right">1.0445889</td>
-<td align="right">0.7143961</td>
-<td align="right">0.1460609</td>
+<td align="right">84.63658</td>
+<td align="right">0.7826548</td>
+<td align="right">0.9060414</td>
+<td align="right">0.0428520</td>
 </tr>
 <tr class="even">
 <td>16B12</td>
 <td align="right">16</td>
 <td align="right">25385</td>
 <td align="right">0.7353388</td>
-<td align="right">62.60361</td>
-<td align="right">0.6733992</td>
-<td align="right">0.8804517</td>
-<td align="right">0.0552944</td>
+<td align="right">75.01022</td>
+<td align="right">0.5369949</td>
+<td align="right">0.9330662</td>
+<td align="right">0.0300875</td>
 </tr>
 <tr class="odd">
 <td>17A12</td>
 <td align="right">17</td>
 <td align="right">30476</td>
 <td align="right">0.8362190</td>
-<td align="right">75.26367</td>
-<td align="right">2.0282082</td>
-<td align="right">0.1821089</td>
-<td align="right">0.7396688</td>
+<td align="right">83.61734</td>
+<td align="right">1.5110402</td>
+<td align="right">0.5361907</td>
+<td align="right">0.2706807</td>
 </tr>
 <tr class="even">
 <td>17B12</td>
 <td align="right">17</td>
 <td align="right">29380</td>
 <td align="right">0.8061462</td>
-<td align="right">70.72170</td>
-<td align="right">1.8658983</td>
-<td align="right">0.2441480</td>
-<td align="right">0.6123467</td>
+<td align="right">80.26197</td>
+<td align="right">1.4183340</td>
+<td align="right">0.5798132</td>
+<td align="right">0.2367119</td>
 </tr>
 <tr class="odd">
 <td>18A12</td>
 <td align="right">18</td>
 <td align="right">37191</td>
 <td align="right">0.9128754</td>
-<td align="right">87.37619</td>
-<td align="right">2.6284873</td>
-<td align="right">0.0543182</td>
-<td align="right">1.2650548</td>
+<td align="right">92.23756</td>
+<td align="right">1.9312183</td>
+<td align="right">0.3203252</td>
+<td align="right">0.4944090</td>
 </tr>
 <tr class="even">
 <td>18B12</td>
 <td align="right">18</td>
 <td align="right">39189</td>
 <td align="right">0.9619175</td>
-<td align="right">94.48208</td>
-<td align="right">2.9140930</td>
-<td align="right">0.0255995</td>
-<td align="right">1.5917678</td>
+<td align="right">96.69449</td>
+<td align="right">2.0793879</td>
+<td align="right">0.2549801</td>
+<td align="right">0.5934937</td>
 </tr>
 <tr class="odd">
 <td>19A12</td>
 <td align="right">19</td>
 <td align="right">32305</td>
 <td align="right">0.8646833</td>
-<td align="right">81.17518</td>
-<td align="right">2.2361983</td>
-<td align="right">0.1253598</td>
-<td align="right">0.9018416</td>
+<td align="right">88.54249</td>
+<td align="right">1.7199327</td>
+<td align="right">0.4239580</td>
+<td align="right">0.3726772</td>
 </tr>
 <tr class="even">
 <td>19B12</td>
 <td align="right">19</td>
 <td align="right">31816</td>
 <td align="right">0.8515946</td>
-<td align="right">79.35432</td>
-<td align="right">2.1726282</td>
-<td align="right">0.1415895</td>
-<td align="right">0.8489690</td>
+<td align="right">87.34039</td>
+<td align="right">1.6854284</td>
+<td align="right">0.4339075</td>
+<td align="right">0.3626029</td>
 </tr>
 </tbody>
 </table>
@@ -2826,13 +2831,13 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td align="right">1372</td>
-<td align="right">67</td>
+<td align="right">1397</td>
+<td align="right">89</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td align="right">77</td>
-<td align="right">42</td>
+<td align="right">50</td>
+<td align="right">22</td>
 </tr>
 </tbody>
 </table>
@@ -2866,8 +2871,8 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">1439</td>
-<td align="right">119</td>
+<td align="right">1486</td>
+<td align="right">72</td>
 </tr>
 </tbody>
 </table>
@@ -2939,9 +2944,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Local anesthetic</td>
 <td align="right">1.1929</td>
 <td align="right">0.9559</td>
-<td align="right">93.9231</td>
-<td align="right">15.8639</td>
-<td align="right">53.0567</td>
+<td align="right">96.5134</td>
+<td align="right">8.4789</td>
+<td align="right">13.7518</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -2956,9 +2961,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.8805</td>
-<td align="right">83.5361</td>
-<td align="right">14.0851</td>
-<td align="right">41.7386</td>
+<td align="right">90.1638</td>
+<td align="right">7.9057</td>
+<td align="right">11.9839</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">1</td>
@@ -2973,9 +2978,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.8103</td>
-<td align="right">73.8568</td>
-<td align="right">12.4275</td>
-<td align="right">32.3179</td>
+<td align="right">83.7370</td>
+<td align="right">7.3255</td>
+<td align="right">10.2091</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">0</td>
@@ -2990,9 +2995,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Local anesthetic</td>
 <td align="right">0.9095</td>
 <td align="right">0.7935</td>
-<td align="right">71.5490</td>
-<td align="right">12.0323</td>
-<td align="right">30.3298</td>
+<td align="right">82.1224</td>
+<td align="right">7.1798</td>
+<td align="right">9.8665</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3002,37 +3007,37 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">09F04</td>
-<td align="left">Promazine hydrochloride</td>
-<td align="left">Antipsychotic</td>
-<td align="right">1.1610</td>
-<td align="right">0.9300</td>
-<td align="right">90.1021</td>
-<td align="right">11.9014</td>
-<td align="right">29.7413</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
 <td align="left">01A06</td>
 <td align="left">Atracurium besylate</td>
 <td align="left">Curarizing</td>
 <td align="right">0.8693</td>
 <td align="right">0.7705</td>
-<td align="right">68.3781</td>
-<td align="right">11.4893</td>
-<td align="right">27.7126</td>
+<td align="right">79.8475</td>
+<td align="right">6.9744</td>
+<td align="right">9.3559</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">09F04</td>
+<td align="left">Promazine hydrochloride</td>
+<td align="left">Antipsychotic</td>
+<td align="right">1.1610</td>
+<td align="right">0.9300</td>
+<td align="right">94.0954</td>
+<td align="right">6.9603</td>
+<td align="right">9.3559</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
@@ -3041,9 +3046,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.8879</td>
-<td align="right">84.1508</td>
-<td align="right">11.0769</td>
-<td align="right">25.7430</td>
+<td align="right">90.3256</td>
+<td align="right">6.6561</td>
+<td align="right">8.5044</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">1</td>
@@ -3058,9 +3063,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antidepressant ’Antipsychotic</td>
 <td align="right">1.0521</td>
 <td align="right">0.8708</td>
-<td align="right">81.7290</td>
-<td align="right">10.7414</td>
-<td align="right">24.1984</td>
+<td align="right">88.7401</td>
+<td align="right">6.5281</td>
+<td align="right">8.1880</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -3075,9 +3080,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antihypertensive ’Diuretic</td>
 <td align="right">0.7586</td>
 <td align="right">0.7071</td>
-<td align="right">59.6396</td>
-<td align="right">9.9929</td>
-<td align="right">20.8484</td>
+<td align="right">73.2080</td>
+<td align="right">6.3750</td>
+<td align="right">7.8004</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3092,9 +3097,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antimalarial ’Antiprotozoal ’Antineoplastic</td>
 <td align="right">0.7421</td>
 <td align="right">0.6977</td>
-<td align="right">58.3394</td>
-<td align="right">9.7702</td>
-<td align="right">19.9290</td>
+<td align="right">72.1695</td>
+<td align="right">6.2813</td>
+<td align="right">7.5824</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3104,31 +3109,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">07G07</td>
-<td align="left">Pregnenolone</td>
-<td align="left">Anabolic ’Anti-inflammatory</td>
-<td align="right">1.6589</td>
-<td align="right">1.0977</td>
-<td align="right">113.3779</td>
-<td align="right">9.6135</td>
-<td align="right">19.3040</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
 <td align="left">01H05</td>
 <td align="left">Amitryptiline hydrochloride</td>
 <td align="left">Antidepressant</td>
 <td align="right">0.7185</td>
 <td align="right">0.6841</td>
-<td align="right">56.4724</td>
-<td align="right">9.4505</td>
-<td align="right">18.6596</td>
+<td align="right">70.6535</td>
+<td align="right">6.1444</td>
+<td align="right">7.2454</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3137,15 +3125,15 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">1</td>
 <td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">03B12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.7557</td>
-<td align="right">66.8992</td>
-<td align="right">9.3346</td>
-<td align="right">18.2167</td>
+<td align="right">79.0963</td>
+<td align="right">5.9669</td>
+<td align="right">6.8041</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">1</td>
@@ -3154,72 +3142,21 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">09A12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.7970</td>
-<td align="right">71.2917</td>
-<td align="right">9.2955</td>
-<td align="right">18.0888</td>
+<td align="right">81.5300</td>
+<td align="right">5.9461</td>
+<td align="right">6.7837</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">08E11</td>
-<td align="left">Hydroxychloroquine sulfate</td>
-<td align="left">Antimalarial</td>
-<td align="right">1.4327</td>
-<td align="right">1.1373</td>
-<td align="right">119.4287</td>
-<td align="right">8.9612</td>
-<td align="right">16.7777</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">09G07</td>
-<td align="left">Chlorcyclizine hydrochloride</td>
-<td align="left">Antiemetic ’Antihistaminic ’Sedative</td>
-<td align="right">0.8573</td>
-<td align="right">0.7648</td>
-<td align="right">66.7445</td>
-<td align="right">8.6656</td>
-<td align="right">15.6602</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">03G08</td>
-<td align="left">Clemizole hydrochloride</td>
-<td align="left">Antibacterial ’Antifungal ’Antihistaminic ’Antipruritic</td>
-<td align="right">1.0073</td>
-<td align="right">0.7205</td>
-<td align="right">62.1284</td>
-<td align="right">8.6051</td>
-<td align="right">15.4569</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
@@ -3228,9 +3165,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antidepressant</td>
 <td align="right">0.6546</td>
 <td align="right">0.6475</td>
-<td align="right">51.4271</td>
-<td align="right">8.5865</td>
-<td align="right">15.4110</td>
+<td align="right">66.4013</td>
+<td align="right">5.7606</td>
+<td align="right">6.3312</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3240,14 +3177,48 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
+<td align="left">09G07</td>
+<td align="left">Chlorcyclizine hydrochloride</td>
+<td align="left">Antiemetic ’Antihistaminic ’Sedative</td>
+<td align="right">0.8573</td>
+<td align="right">0.7648</td>
+<td align="right">78.1773</td>
+<td align="right">5.6755</td>
+<td align="right">6.1438</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">03G08</td>
+<td align="left">Clemizole hydrochloride</td>
+<td align="left">Antibacterial ’Antifungal ’Antihistaminic ’Antipruritic</td>
+<td align="right">1.0073</td>
+<td align="right">0.7205</td>
+<td align="right">75.5343</td>
+<td align="right">5.6529</td>
+<td align="right">6.1147</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
 <td align="left">03H10</td>
 <td align="left">Orphenadrine hydrochloride</td>
 <td align="left">Antihistaminic ’Antiparkinsonian</td>
 <td align="right">0.9732</td>
 <td align="right">0.7051</td>
-<td align="right">60.0393</td>
-<td align="right">8.2857</td>
-<td align="right">14.3175</td>
+<td align="right">73.9193</td>
+<td align="right">5.5106</td>
+<td align="right">5.7855</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3262,9 +3233,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antihistaminic ’Antipruritic ’Sedative</td>
 <td align="right">0.8198</td>
 <td align="right">0.7444</td>
-<td align="right">63.8590</td>
-<td align="right">8.2659</td>
-<td align="right">14.2674</td>
+<td align="right">75.9759</td>
+<td align="right">5.4978</td>
+<td align="right">5.7788</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3274,31 +3245,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">10G08</td>
-<td align="left">Merbromin disodium salt</td>
-<td align="left">Antibacterial ’Antineoplastic</td>
-<td align="right">1.1210</td>
-<td align="right">0.9274</td>
-<td align="right">89.8623</td>
-<td align="right">8.0865</td>
-<td align="right">13.6426</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
 <td align="left">01G11</td>
 <td align="left">Tolnaftate</td>
 <td align="left">Antifungal ’Antifungal</td>
 <td align="right">0.5943</td>
 <td align="right">0.6129</td>
-<td align="right">46.6670</td>
-<td align="right">7.7713</td>
-<td align="right">12.5606</td>
+<td align="right">62.1630</td>
+<td align="right">5.3780</td>
+<td align="right">5.5102</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3307,51 +3261,34 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">1</td>
 <td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">03A12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.6787</td>
-<td align="right">56.4637</td>
-<td align="right">7.7390</td>
-<td align="right">12.4692</td>
+<td align="right">71.0715</td>
+<td align="right">5.2596</td>
+<td align="right">5.2500</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">07G09</td>
-<td align="left">Chloroquine diphosphate</td>
-<td align="left">Anti-inflammatory ’Antimalarial ’Antiprotozoal</td>
-<td align="right">1.3510</td>
-<td align="right">0.9436</td>
-<td align="right">92.2780</td>
-<td align="right">7.7255</td>
-<td align="right">12.4418</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">10A12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.8743</td>
-<td align="right">82.4540</td>
-<td align="right">7.3530</td>
-<td align="right">11.2189</td>
+<td align="left">07G07</td>
+<td align="left">Pregnenolone</td>
+<td align="left">Anabolic ’Anti-inflammatory</td>
+<td align="right">1.6589</td>
+<td align="right">1.0977</td>
+<td align="right">107.1158</td>
+<td align="right">5.1506</td>
+<td align="right">5.0163</td>
 <td align="right">1</td>
-<td align="right">NA</td>
+<td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -3359,50 +3296,16 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">07B04</td>
-<td align="left">Omeprazole</td>
-<td align="left">Antiulcer</td>
-<td align="right">1.2487</td>
-<td align="right">0.8924</td>
-<td align="right">85.2691</td>
-<td align="right">7.0984</td>
-<td align="right">10.4223</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
 <td align="left">01H04</td>
 <td align="left">Sulindac</td>
 <td align="left">Analgesic ’Anti-inflammatory ’Antipyretic</td>
 <td align="right">0.5382</td>
 <td align="right">0.5808</td>
-<td align="right">42.2441</td>
-<td align="right">7.0139</td>
-<td align="right">10.1747</td>
+<td align="right">58.0051</td>
+<td align="right">5.0026</td>
+<td align="right">4.6984</td>
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">10B12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.8415</td>
-<td align="right">77.8824</td>
-<td align="right">6.9003</td>
-<td align="right">9.8405</td>
-<td align="right">1</td>
-<td align="right">NA</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
@@ -3410,14 +3313,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">08D06</td>
-<td align="left">Exemestane</td>
-<td align="left">Antineoplastic</td>
-<td align="right">1.0965</td>
-<td align="right">0.9392</td>
-<td align="right">91.3959</td>
-<td align="right">6.8077</td>
-<td align="right">9.5744</td>
+<td align="left">08E11</td>
+<td align="left">Hydroxychloroquine sulfate</td>
+<td align="left">Antimalarial</td>
+<td align="right">1.4327</td>
+<td align="right">1.1373</td>
+<td align="right">110.4885</td>
+<td align="right">4.8080</td>
+<td align="right">4.2870</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -3432,9 +3335,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Contraceptive</td>
 <td align="right">0.5082</td>
 <td align="right">0.5636</td>
-<td align="right">39.8696</td>
-<td align="right">6.6072</td>
-<td align="right">8.9928</td>
+<td align="right">55.6771</td>
+<td align="right">4.7925</td>
+<td align="right">4.2718</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3444,99 +3347,31 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">10D08</td>
-<td align="left">Chlorotrianisene</td>
-<td align="left">Antineoplastic</td>
-<td align="right">0.9163</td>
-<td align="right">0.8098</td>
-<td align="right">73.4625</td>
-<td align="right">6.4626</td>
-<td align="right">8.5874</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
+<td align="left">10G08</td>
+<td align="left">Merbromin disodium salt</td>
+<td align="left">Antibacterial ’Antineoplastic</td>
+<td align="right">1.1210</td>
+<td align="right">0.9274</td>
+<td align="right">94.0301</td>
+<td align="right">4.6730</td>
+<td align="right">4.0339</td>
 <td align="right">1</td>
 <td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">08B12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.8998</td>
-<td align="right">85.8279</td>
-<td align="right">6.3800</td>
-<td align="right">8.3653</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
 <td align="left">03B05</td>
 <td align="left">Alverine citrate salt</td>
 <td align="left">Antispastic</td>
 <td align="right">0.7629</td>
 <td align="right">0.6101</td>
-<td align="right">47.1694</td>
-<td align="right">6.3178</td>
-<td align="right">8.2031</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">08H03</td>
-<td align="left">Dipivefrin hydrochloride</td>
-<td align="left">Antiglaucoma</td>
-<td align="right">1.0095</td>
-<td align="right">0.8879</td>
-<td align="right">84.1412</td>
-<td align="right">6.2504</td>
-<td align="right">8.0278</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">08A12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.8647</td>
-<td align="right">80.8641</td>
-<td align="right">5.9986</td>
-<td align="right">7.3537</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">09G09</td>
-<td align="left">Benzethonium chloride</td>
-<td align="left">Antibacterial ’Antiseptic ’Antineoplastic</td>
-<td align="right">0.6042</td>
-<td align="right">0.6272</td>
-<td align="right">47.2836</td>
-<td align="right">5.9696</td>
-<td align="right">7.2886</td>
+<td align="right">63.1168</td>
+<td align="right">4.5585</td>
+<td align="right">3.8115</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3546,16 +3381,16 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">07A12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.7995</td>
-<td align="right">72.5417</td>
-<td align="right">5.9596</td>
-<td align="right">7.2737</td>
+<td align="left">07G09</td>
+<td align="left">Chloroquine diphosphate</td>
+<td align="left">Anti-inflammatory ’Antimalarial ’Antiprotozoal</td>
+<td align="right">1.3510</td>
+<td align="right">0.9436</td>
+<td align="right">95.5713</td>
+<td align="right">4.5295</td>
+<td align="right">3.7681</td>
 <td align="right">1</td>
-<td align="right">NA</td>
+<td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -3568,9 +3403,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Anticoagulant ’Antiplatelet</td>
 <td align="right">0.4552</td>
 <td align="right">0.5333</td>
-<td align="right">35.6911</td>
-<td align="right">5.8917</td>
-<td align="right">7.1058</td>
+<td align="right">51.4019</td>
+<td align="right">4.4065</td>
+<td align="right">3.5342</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3580,31 +3415,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">05A10</td>
-<td align="left">Tacrine hydrochloride</td>
-<td align="left">CNS Stimulant</td>
-<td align="right">1.4422</td>
-<td align="right">0.9408</td>
-<td align="right">92.2640</td>
-<td align="right">5.8361</td>
-<td align="right">6.9717</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">02A12</td>
+<td align="left">10A12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
-<td align="right">0.8278</td>
-<td align="right">76.4208</td>
-<td align="right">5.8019</td>
-<td align="right">6.8938</td>
+<td align="right">0.8743</td>
+<td align="right">89.3544</td>
+<td align="right">4.3967</td>
+<td align="right">3.5299</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">1</td>
@@ -3613,49 +3431,32 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
-<tr class="odd">
-<td align="left">10H10</td>
-<td align="left">Pridinol methanesulfonate salt</td>
-<td align="left">Antiparkinsonian</td>
-<td align="right">0.8315</td>
-<td align="right">0.7612</td>
-<td align="right">66.6678</td>
-<td align="right">5.7898</td>
-<td align="right">6.8733</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
 <tr class="even">
-<td align="left">07H07</td>
-<td align="left">Mirtazapine</td>
-<td align="left">Antidepressant</td>
-<td align="right">1.0320</td>
-<td align="right">0.7840</td>
-<td align="right">70.4164</td>
-<td align="right">5.7694</td>
-<td align="right">6.8311</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="left">09G09</td>
+<td align="left">Benzethonium chloride</td>
+<td align="left">Antibacterial ’Antiseptic ’Antineoplastic</td>
+<td align="right">0.6042</td>
+<td align="right">0.6272</td>
+<td align="right">62.0279</td>
+<td align="right">4.3720</td>
+<td align="right">3.4952</td>
 <td align="right">1</td>
 <td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">06D11</td>
-<td align="left">Epiandrosterone</td>
-<td align="left">Anabolic</td>
-<td align="right">1.0748</td>
-<td align="right">0.9215</td>
-<td align="right">89.4114</td>
-<td align="right">5.6207</td>
-<td align="right">6.4629</td>
+<td align="left">07B04</td>
+<td align="left">Omeprazole</td>
+<td align="left">Antiulcer</td>
+<td align="right">1.2487</td>
+<td align="right">0.8924</td>
+<td align="right">91.3149</td>
+<td align="right">4.3005</td>
+<td align="right">3.3683</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
@@ -3670,9 +3471,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antiemetic ’Antihistaminic ’Antitussive ’Sedative</td>
 <td align="right">0.4338</td>
 <td align="right">0.5210</td>
-<td align="right">34.0020</td>
-<td align="right">5.6024</td>
-<td align="right">6.4268</td>
+<td align="right">49.6043</td>
+<td align="right">4.2442</td>
+<td align="right">3.2725</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3682,20 +3483,54 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">06B12</td>
+<td align="left">10B12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
-<td align="right">0.8991</td>
-<td align="right">86.3956</td>
-<td align="right">5.4223</td>
-<td align="right">5.9921</td>
+<td align="right">0.8415</td>
+<td align="right">86.3252</td>
+<td align="right">4.2178</td>
+<td align="right">3.2347</td>
 <td align="right">1</td>
 <td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">08D06</td>
+<td align="left">Exemestane</td>
+<td align="left">Antineoplastic</td>
+<td align="right">1.0965</td>
+<td align="right">0.9392</td>
+<td align="right">94.8887</td>
+<td align="right">4.0950</td>
+<td align="right">3.0145</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">10D08</td>
+<td align="left">Chlorotrianisene</td>
+<td align="left">Antineoplastic</td>
+<td align="right">0.9163</td>
+<td align="right">0.8098</td>
+<td align="right">83.2823</td>
+<td align="right">4.0380</td>
+<td align="right">2.9208</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
@@ -3704,9 +3539,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Progestogen</td>
 <td align="right">0.5447</td>
 <td align="right">0.5947</td>
-<td align="right">42.7010</td>
-<td align="right">5.3348</td>
-<td align="right">5.7905</td>
+<td align="right">57.7090</td>
+<td align="right">4.0233</td>
+<td align="right">2.9060</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3716,14 +3551,116 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">06H02</td>
-<td align="left">Vatalanib</td>
-<td align="left">Antineoplastic</td>
-<td align="right">0.9984</td>
-<td align="right">0.8745</td>
-<td align="right">83.0712</td>
-<td align="right">5.2036</td>
-<td align="right">5.4896</td>
+<td align="left">08B12</td>
+<td align="left">Arbidol</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">0.8998</td>
+<td align="right">91.4001</td>
+<td align="right">3.9356</td>
+<td align="right">2.7577</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">08H03</td>
+<td align="left">Dipivefrin hydrochloride</td>
+<td align="left">Antiglaucoma</td>
+<td align="right">1.0095</td>
+<td align="right">0.8879</td>
+<td align="right">90.3132</td>
+<td align="right">3.8859</td>
+<td align="right">2.6799</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">07A12</td>
+<td align="left">Arbidol</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">0.7995</td>
+<td align="right">82.9210</td>
+<td align="right">3.8489</td>
+<td align="right">2.6252</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">08A12</td>
+<td align="left">Arbidol</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">0.8647</td>
+<td align="right">88.1590</td>
+<td align="right">3.7875</td>
+<td align="right">2.5282</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">07H07</td>
+<td align="left">Mirtazapine</td>
+<td align="left">Antidepressant</td>
+<td align="right">1.0320</td>
+<td align="right">0.7840</td>
+<td align="right">81.4249</td>
+<td align="right">3.7684</td>
+<td align="right">2.5056</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">10H10</td>
+<td align="left">Pridinol methanesulfonate salt</td>
+<td align="left">Antiparkinsonian</td>
+<td align="right">0.8315</td>
+<td align="right">0.7612</td>
+<td align="right">78.3641</td>
+<td align="right">3.7474</td>
+<td align="right">2.4796</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">03F02</td>
+<td align="left">Piroxicam</td>
+<td align="left">Analgesic ’Anticoagulant ’Anti-inflammatory ’Antiplatelet ’Antipyretic ’Uricosuric</td>
+<td align="right">0.5726</td>
+<td align="right">0.5241</td>
+<td align="right">51.7713</td>
+<td align="right">3.5586</td>
+<td align="right">2.1704</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3733,16 +3670,16 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">02B12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.7756</td>
-<td align="right">69.2752</td>
-<td align="right">5.1901</td>
-<td align="right">5.4706</td>
+<td align="left">09G04</td>
+<td align="left">Famprofazone</td>
+<td align="left">Analgesic ’Antipyretic</td>
+<td align="right">0.4661</td>
+<td align="right">0.5520</td>
+<td align="right">51.6373</td>
+<td align="right">3.5333</td>
+<td align="right">2.1386</td>
 <td align="right">1</td>
-<td align="right">NA</td>
+<td align="right">0</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
@@ -3750,14 +3687,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">02C08</td>
-<td align="left">Pioglitazone</td>
-<td align="left">NA</td>
-<td align="right">0.9499</td>
-<td align="right">0.7751</td>
-<td align="right">69.2040</td>
-<td align="right">5.1840</td>
-<td align="right">5.4706</td>
+<td align="left">07B03</td>
+<td align="left">Nitrofural</td>
+<td align="left">Antibacterial ’Antidotes</td>
+<td align="right">0.9359</td>
+<td align="right">0.7359</td>
+<td align="right">76.5940</td>
+<td align="right">3.5085</td>
+<td align="right">2.1173</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3772,9 +3709,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">NA</td>
 <td align="right">NA</td>
 <td align="right">0.7365</td>
-<td align="right">63.9048</td>
-<td align="right">5.1868</td>
-<td align="right">5.4706</td>
+<td align="right">76.6493</td>
+<td align="right">3.5114</td>
+<td align="right">2.1173</td>
 <td align="right">1</td>
 <td align="right">NA</td>
 <td align="right">0</td>
@@ -3784,48 +3721,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">07B03</td>
-<td align="left">Nitrofural</td>
-<td align="left">Antibacterial ’Antidotes</td>
-<td align="right">0.9359</td>
-<td align="right">0.7359</td>
-<td align="right">63.8318</td>
-<td align="right">5.1802</td>
-<td align="right">5.4704</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
 <td align="left">07F02</td>
 <td align="left">Pirenperone</td>
 <td align="left">Anxiolytic</td>
 <td align="right">0.9157</td>
 <td align="right">0.7258</td>
-<td align="right">62.4439</td>
-<td align="right">5.0560</td>
-<td align="right">5.1930</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">08H02</td>
-<td align="left">Alendronate sodium</td>
-<td align="left">Antiosteoporetic</td>
-<td align="right">0.8169</td>
-<td align="right">0.7743</td>
-<td align="right">68.0747</td>
-<td align="right">5.0162</td>
-<td align="right">5.1108</td>
+<td align="right">75.5356</td>
+<td align="right">3.4515</td>
+<td align="right">2.0344</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3835,20 +3738,20 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">06A12</td>
+<td align="left">02A12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
-<td align="right">0.8518</td>
-<td align="right">80.0168</td>
-<td align="right">5.0027</td>
-<td align="right">5.0885</td>
+<td align="right">0.8278</td>
+<td align="right">85.5793</td>
+<td align="right">3.4365</td>
+<td align="right">2.0193</td>
 <td align="right">1</td>
 <td align="right">NA</td>
-<td align="right">0</td>
-<td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
@@ -3857,9 +3760,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antipsoriatic ’Antiacneic</td>
 <td align="right">0.9001</td>
 <td align="right">0.7180</td>
-<td align="right">61.3760</td>
-<td align="right">4.9605</td>
-<td align="right">5.0018</td>
+<td align="right">74.7110</td>
+<td align="right">3.4072</td>
+<td align="right">1.9815</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -3874,145 +3777,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antipsychotic</td>
 <td align="right">0.8959</td>
 <td align="right">0.7159</td>
-<td align="right">61.0908</td>
-<td align="right">4.9350</td>
-<td align="right">4.9527</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">02B04</td>
-<td align="left">Azacyclonol</td>
-<td align="left">Antipsychotic</td>
-<td align="right">0.8837</td>
-<td align="right">0.7400</td>
-<td align="right">64.3954</td>
-<td align="right">4.7723</td>
-<td align="right">4.6039</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">07C03</td>
-<td align="left">Biperiden hydrochloride</td>
-<td align="left">Antiparkinsonian ’Antineoplastic</td>
-<td align="right">0.8495</td>
-<td align="right">0.6927</td>
-<td align="right">57.9116</td>
-<td align="right">4.6505</td>
-<td align="right">4.3519</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">10A08</td>
-<td align="left">Liranaftate</td>
-<td align="left">Antifungal</td>
-<td align="right">0.6869</td>
-<td align="right">0.6782</td>
-<td align="right">55.0837</td>
-<td align="right">4.6428</td>
-<td align="right">4.3430</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">03F02</td>
-<td align="left">Piroxicam</td>
-<td align="left">Analgesic ’Anticoagulant ’Anti-inflammatory ’Antiplatelet ’Antipyretic ’Uricosuric</td>
-<td align="right">0.5726</td>
-<td align="right">0.5241</td>
-<td align="right">35.5150</td>
-<td align="right">4.5357</td>
-<td align="right">4.1276</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">09G04</td>
-<td align="left">Famprofazone</td>
-<td align="left">Analgesic ’Antipyretic</td>
-<td align="right">0.4661</td>
-<td align="right">0.5520</td>
-<td align="right">36.6563</td>
-<td align="right">4.4974</td>
-<td align="right">4.0563</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">10E06</td>
-<td align="left">Ethoxyquin</td>
-<td align="left">Antifungal ’Antineoplastic</td>
-<td align="right">0.6516</td>
-<td align="right">0.6579</td>
-<td align="right">52.2536</td>
-<td align="right">4.3625</td>
-<td align="right">3.7917</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">06F06</td>
-<td align="left">Mebhydroline 1,5-naphtalenedisulfonate</td>
-<td align="left">Antihistaminic</td>
-<td align="right">0.8344</td>
-<td align="right">0.7736</td>
-<td align="right">69.4686</td>
-<td align="right">4.3087</td>
-<td align="right">3.6924</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">02B03</td>
-<td align="left">Zimelidine dihydrochloride monohydrate</td>
-<td align="left">Antidepressant</td>
-<td align="right">0.8074</td>
-<td align="right">0.6994</td>
-<td align="right">58.8438</td>
-<td align="right">4.2970</td>
-<td align="right">3.6762</td>
+<td align="right">74.4893</td>
+<td align="right">3.3952</td>
+<td align="right">1.9715</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4027,9 +3794,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antineoplastic</td>
 <td align="right">0.4442</td>
 <td align="right">0.5401</td>
-<td align="right">34.9720</td>
-<td align="right">4.2641</td>
-<td align="right">3.6188</td>
+<td align="right">49.8616</td>
+<td align="right">3.3899</td>
+<td align="right">1.9715</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4039,82 +3806,48 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">05E07</td>
-<td align="left">Ambroxol hydrochloride</td>
-<td align="left">Expectorant ’Mucolytic</td>
-<td align="right">1.0851</td>
-<td align="right">0.7665</td>
-<td align="right">69.4761</td>
-<td align="right">4.1952</td>
-<td align="right">3.4977</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="left">08H02</td>
+<td align="left">Alendronate sodium</td>
+<td align="left">Antiosteoporetic</td>
+<td align="right">0.8169</td>
+<td align="right">0.7743</td>
+<td align="right">79.1607</td>
+<td align="right">3.3763</td>
+<td align="right">1.9583</td>
 <td align="right">1</td>
 <td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">07H06</td>
-<td align="left">Nifuroxazide</td>
-<td align="left">Antibacterial ’Antineoplastic</td>
-<td align="right">0.7750</td>
-<td align="right">0.6554</td>
-<td align="right">52.8018</td>
-<td align="right">4.1933</td>
-<td align="right">3.4977</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
+<td align="left">06D11</td>
+<td align="left">Epiandrosterone</td>
+<td align="left">Anabolic</td>
+<td align="right">1.0748</td>
+<td align="right">0.9215</td>
+<td align="right">93.9594</td>
+<td align="right">3.3589</td>
+<td align="right">1.9393</td>
 <td align="right">1</td>
 <td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">08G02</td>
-<td align="left">Mizolastine</td>
-<td align="left">Antihistaminic</td>
-<td align="right">0.6881</td>
-<td align="right">0.6984</td>
-<td align="right">57.3354</td>
-<td align="right">4.1912</td>
-<td align="right">3.4977</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
 <td align="left">09A09</td>
 <td align="left">Nilvadipine</td>
 <td align="left">Antianginal ’Antihypertensive</td>
 <td align="right">0.4331</td>
 <td align="right">0.5341</td>
-<td align="right">34.1250</td>
-<td align="right">4.1468</td>
-<td align="right">3.4194</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">08E07</td>
-<td align="left">Rimantadine hydrochloride</td>
-<td align="left">Antiviral</td>
-<td align="right">0.6754</td>
-<td align="right">0.6909</td>
-<td align="right">56.2788</td>
-<td align="right">4.1100</td>
-<td align="right">3.3563</td>
+<td align="right">48.9538</td>
+<td align="right">3.3167</td>
+<td align="right">1.8813</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4124,14 +3857,48 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">08B06</td>
-<td align="left">Tenatoprazole</td>
-<td align="left">Antiulcer</td>
-<td align="right">0.6656</td>
-<td align="right">0.6851</td>
-<td align="right">55.4596</td>
-<td align="right">4.0471</td>
-<td align="right">3.2449</td>
+<td align="left">05A10</td>
+<td align="left">Tacrine hydrochloride</td>
+<td align="left">CNS Stimulant</td>
+<td align="right">1.4422</td>
+<td align="right">0.9408</td>
+<td align="right">95.7878</td>
+<td align="right">3.2975</td>
+<td align="right">1.8595</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">06B12</td>
+<td align="left">Arbidol</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">0.8991</td>
+<td align="right">92.1439</td>
+<td align="right">3.2880</td>
+<td align="right">1.8527</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">07C03</td>
+<td align="left">Biperiden hydrochloride</td>
+<td align="left">Antiparkinsonian ’Antineoplastic</td>
+<td align="right">0.8495</td>
+<td align="right">0.6927</td>
+<td align="right">71.9731</td>
+<td align="right">3.2599</td>
+<td align="right">1.8172</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4146,9 +3913,9 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="left">Antiparkinsonian</td>
 <td align="right">0.4224</td>
 <td align="right">0.5282</td>
-<td align="right">33.2974</td>
-<td align="right">4.0321</td>
-<td align="right">3.2232</td>
+<td align="right">48.0568</td>
+<td align="right">3.2443</td>
+<td align="right">1.8009</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4158,31 +3925,65 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">05B12</td>
+<td align="left">06H02</td>
+<td align="left">Vatalanib</td>
+<td align="left">Antineoplastic</td>
+<td align="right">0.9984</td>
+<td align="right">0.8745</td>
+<td align="right">90.0896</td>
+<td align="right">3.2077</td>
+<td align="right">1.7578</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">10A08</td>
+<td align="left">Liranaftate</td>
+<td align="left">Antifungal</td>
+<td align="right">0.6869</td>
+<td align="right">0.6782</td>
+<td align="right">69.2049</td>
+<td align="right">3.2062</td>
+<td align="right">1.7578</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">02B12</td>
 <td align="left">Arbidol</td>
 <td align="left">NA</td>
 <td align="right">NA</td>
-<td align="right">0.7383</td>
-<td align="right">65.7886</td>
-<td align="right">3.9297</td>
-<td align="right">3.0421</td>
+<td align="right">0.7756</td>
+<td align="right">80.6102</td>
+<td align="right">3.1908</td>
+<td align="right">1.7451</td>
 <td align="right">1</td>
 <td align="right">NA</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
 <td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">07D09</td>
-<td align="left">Budesonide</td>
-<td align="left">Anti-inflammatory ’Antineoplastic</td>
-<td align="right">0.7260</td>
-<td align="right">0.6309</td>
-<td align="right">49.4487</td>
-<td align="right">3.8933</td>
-<td align="right">2.9825</td>
+<td align="left">02C08</td>
+<td align="left">Pioglitazone</td>
+<td align="left">NA</td>
+<td align="right">0.9499</td>
+<td align="right">0.7751</td>
+<td align="right">80.5590</td>
+<td align="right">3.1883</td>
+<td align="right">1.7451</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4192,16 +3993,16 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">02B07</td>
-<td align="left">Guanabenz acetate</td>
-<td align="left">Antihypertensive</td>
-<td align="right">0.7415</td>
-<td align="right">0.6645</td>
-<td align="right">54.0537</td>
-<td align="right">3.8868</td>
-<td align="right">2.9768</td>
+<td align="left">06A12</td>
+<td align="left">Arbidol</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">0.8518</td>
+<td align="right">88.1505</td>
+<td align="right">3.1319</td>
+<td align="right">1.6681</td>
 <td align="right">1</td>
-<td align="right">0</td>
+<td align="right">NA</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">1</td>
@@ -4209,14 +4010,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">10C04</td>
-<td align="left">Medrysone</td>
-<td align="left">Anti-inflammatory</td>
-<td align="right">0.5853</td>
-<td align="right">0.6198</td>
-<td align="right">46.9465</td>
-<td align="right">3.8370</td>
-<td align="right">2.8940</td>
+<td align="left">10E06</td>
+<td align="left">Ethoxyquin</td>
+<td align="left">Antifungal ’Antineoplastic</td>
+<td align="right">0.6516</td>
+<td align="right">0.6579</td>
+<td align="right">66.7968</td>
+<td align="right">3.0639</td>
+<td align="right">1.5752</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4226,133 +4027,31 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">05F11</td>
-<td align="left">Clebopride maleate</td>
-<td align="left">Antiemetic ’Antispastic</td>
-<td align="right">1.0019</td>
-<td align="right">0.7259</td>
-<td align="right">64.1642</td>
-<td align="right">3.8127</td>
-<td align="right">2.8568</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="left">07H06</td>
+<td align="left">Nifuroxazide</td>
+<td align="left">Antibacterial ’Antineoplastic</td>
+<td align="right">0.7750</td>
+<td align="right">0.6554</td>
+<td align="right">67.7468</td>
+<td align="right">3.0325</td>
+<td align="right">1.5365</td>
 <td align="right">1</td>
 <td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">02F05</td>
-<td align="left">Diltiazem hydrochloride</td>
-<td align="left">Antianginal ’Antiarrhythmic ’Antihypertensive ’Antiplatelet ’Diuretic ’Vasodilator</td>
-<td align="right">0.7261</td>
-<td align="right">0.6563</td>
-<td align="right">52.9339</td>
-<td align="right">3.7909</td>
-<td align="right">2.8243</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">19B02</td>
-<td align="left">Budralazine</td>
-<td align="left">Vasodilator ’Antihypertensive</td>
-<td align="right">1.5490</td>
-<td align="right">1.1700</td>
-<td align="right">123.6506</td>
-<td align="right">3.7191</td>
-<td align="right">2.7052</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">02G02</td>
-<td align="left">Verapamil hydrochloride</td>
-<td align="left">Antihypertensive ’Antineoplastic</td>
-<td align="right">0.7099</td>
-<td align="right">0.6477</td>
-<td align="right">51.7561</td>
-<td align="right">3.6901</td>
-<td align="right">2.6610</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
 <td align="left">03E06</td>
 <td align="left">Tolfenamic acid</td>
 <td align="left">Analgesic ’Anti-inflammatory</td>
 <td align="right">0.4812</td>
 <td align="right">0.4828</td>
-<td align="right">29.9214</td>
-<td align="right">3.6804</td>
-<td align="right">2.6576</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">05A12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.7117</td>
-<td align="right">62.3034</td>
-<td align="right">3.6787</td>
-<td align="right">2.6576</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">18B09</td>
-<td align="left">Eperisone HCl</td>
-<td align="left">Muscle relaxant ’Antispastic</td>
-<td align="right">1.2543</td>
-<td align="right">1.0941</td>
-<td align="right">113.6303</td>
-<td align="right">3.6837</td>
-<td align="right">2.6576</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">06G08</td>
-<td align="left">Rifapentine</td>
-<td align="left">Antibacterial</td>
-<td align="right">0.7050</td>
-<td align="right">0.6940</td>
-<td align="right">58.7309</td>
-<td align="right">3.6023</td>
-<td align="right">2.5339</td>
+<td align="right">45.6459</td>
+<td align="right">3.0187</td>
+<td align="right">1.5234</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4362,14 +4061,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">07B10</td>
-<td align="left">Propafenone hydrochloride</td>
-<td align="left">Antiarrhythmic</td>
-<td align="right">0.6744</td>
-<td align="right">0.6051</td>
-<td align="right">45.9077</td>
-<td align="right">3.5764</td>
-<td align="right">2.4959</td>
+<td align="left">02B04</td>
+<td align="left">Azacyclonol</td>
+<td align="left">Antipsychotic</td>
+<td align="right">0.8837</td>
+<td align="right">0.7400</td>
+<td align="right">77.0208</td>
+<td align="right">3.0134</td>
+<td align="right">1.5223</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4379,218 +4078,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">10G06</td>
-<td align="left">Dicumarol</td>
-<td align="left">Anticoagulant</td>
-<td align="right">0.5496</td>
-<td align="right">0.5993</td>
-<td align="right">44.0802</td>
-<td align="right">3.5532</td>
-<td align="right">2.4625</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">06H07</td>
-<td align="left">Primaquine diphosphate</td>
-<td align="left">Antimalarial</td>
-<td align="right">0.6817</td>
-<td align="right">0.6797</td>
-<td align="right">56.8057</td>
-<td align="right">3.4757</td>
-<td align="right">2.3408</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">05G08</td>
-<td align="left">Carbetapentane citrate</td>
-<td align="left">Antispastic ’Antitussive ’Local anesthetic</td>
-<td align="right">0.9224</td>
-<td align="right">0.6871</td>
-<td align="right">59.0951</td>
-<td align="right">3.4477</td>
-<td align="right">2.3006</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">07A09</td>
-<td align="left">Dosulepin hydrochloride</td>
-<td align="left">Antidepressant ’CNS Stimulant</td>
-<td align="right">0.6519</td>
-<td align="right">0.5938</td>
-<td align="right">44.3668</td>
-<td align="right">3.4385</td>
-<td align="right">2.2908</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">10B11</td>
-<td align="left">Amprenavir</td>
-<td align="left">Antiviral</td>
-<td align="right">0.5188</td>
-<td align="right">0.5816</td>
-<td align="right">41.6129</td>
-<td align="right">3.3089</td>
-<td align="right">2.0911</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">11E11</td>
-<td align="left">Equilin</td>
-<td align="left">NA</td>
-<td align="right">1.2816</td>
-<td align="right">1.1364</td>
-<td align="right">119.9326</td>
-<td align="right">3.2234</td>
-<td align="right">1.9696</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">18C04</td>
-<td align="left">Methandrostenolone</td>
-<td align="left">Anabolic</td>
-<td align="right">1.1262</td>
-<td align="right">1.0152</td>
-<td align="right">102.1997</td>
-<td align="right">3.2243</td>
-<td align="right">1.9696</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">06E06</td>
-<td align="left">Cyclobenzaprine hydrochloride</td>
-<td align="left">Muscle relaxant</td>
-<td align="right">0.6333</td>
-<td align="right">0.6499</td>
-<td align="right">52.7905</td>
-<td align="right">3.2115</td>
-<td align="right">1.9562</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">04B07</td>
-<td align="left">Isotretinoin</td>
-<td align="left">Keratolytic ’Antineoplastic</td>
-<td align="right">1.4837</td>
-<td align="right">0.9470</td>
-<td align="right">92.6856</td>
-<td align="right">3.2056</td>
-<td align="right">1.9520</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">11F03</td>
-<td align="left">Nylidrin</td>
-<td align="left">Vasodilator</td>
-<td align="right">1.2631</td>
-<td align="right">1.1245</td>
-<td align="right">118.1898</td>
-<td align="right">3.1655</td>
-<td align="right">1.8964</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">10G10</td>
-<td align="left">Drofenine hydrochloride</td>
-<td align="left">Antispastic</td>
-<td align="right">0.4990</td>
-<td align="right">0.5703</td>
-<td align="right">40.0264</td>
-<td align="right">3.1518</td>
-<td align="right">1.8805</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">08A08</td>
-<td align="left">Itraconazole</td>
-<td align="left">Antifungal ’Antifungal</td>
-<td align="right">0.5215</td>
-<td align="right">0.6002</td>
-<td align="right">43.4450</td>
-<td align="right">3.1241</td>
-<td align="right">1.8440</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">05F02</td>
-<td align="left">Ketotifen fumarate</td>
+<td align="left">08G02</td>
+<td align="left">Mizolastine</td>
 <td align="left">Antihistaminic</td>
-<td align="right">0.8370</td>
-<td align="right">0.6454</td>
-<td align="right">53.6432</td>
-<td align="right">3.0551</td>
-<td align="right">1.7476</td>
+<td align="right">0.6881</td>
+<td align="right">0.6984</td>
+<td align="right">70.7524</td>
+<td align="right">2.9920</td>
+<td align="right">1.4982</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4600,14 +4095,14 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">08C11</td>
-<td align="left">Etretinate</td>
-<td align="left">Antipsoriatic</td>
-<td align="right">0.5098</td>
-<td align="right">0.5933</td>
-<td align="right">42.4663</td>
-<td align="right">3.0489</td>
-<td align="right">1.7430</td>
+<td align="left">08E07</td>
+<td align="left">Rimantadine hydrochloride</td>
+<td align="left">Antiviral</td>
+<td align="right">0.6754</td>
+<td align="right">0.6909</td>
+<td align="right">69.8764</td>
+<td align="right">2.9520</td>
+<td align="right">1.4479</td>
 <td align="right">1</td>
 <td align="right">0</td>
 <td align="right">0</td>
@@ -4617,343 +4112,54 @@ Comparison between viability scores. Diamonds: cell control (uninfected cells). 
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">05D10</td>
-<td align="left">Dextromethorphan hydrobromide monohydrate</td>
-<td align="left">Antitussive</td>
-<td align="right">0.8332</td>
-<td align="right">0.6436</td>
-<td align="right">53.4004</td>
-<td align="right">3.0377</td>
-<td align="right">1.7311</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">04D11</td>
-<td align="left">Quinidine hydrochloride monohydrate</td>
-<td align="left">Antiarrhythmic ’Antimalarial</td>
-<td align="right">1.4110</td>
-<td align="right">0.9143</td>
-<td align="right">88.1592</td>
-<td align="right">3.0290</td>
-<td align="right">1.7230</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">06C08</td>
-<td align="left">Dibenzepine hydrochloride</td>
-<td align="left">Antidepressant</td>
-<td align="right">0.5990</td>
-<td align="right">0.6288</td>
-<td align="right">49.9395</td>
-<td align="right">3.0239</td>
-<td align="right">1.7200</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">16C10</td>
-<td align="left">Ethoxzolamide</td>
-<td align="left">Antiglaucoma ’Antiulcer ’Diuretic ’Antiepileptic</td>
-<td align="right">2.0989</td>
-<td align="right">1.3196</td>
-<td align="right">145.1610</td>
-<td align="right">3.0197</td>
-<td align="right">1.7181</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">19E10</td>
-<td align="left">Dilevalol</td>
-<td align="left">Antihypertensive</td>
-<td align="right">1.2767</td>
-<td align="right">1.0153</td>
-<td align="right">102.1318</td>
-<td align="right">2.9678</td>
-<td align="right">1.6499</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">19H04</td>
-<td align="left">Acetyl spiramycin</td>
-<td align="left">Antibacterial</td>
-<td align="right">1.2760</td>
-<td align="right">1.0149</td>
-<td align="right">102.0759</td>
-<td align="right">2.9659</td>
-<td align="right">1.6499</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">12E07</td>
-<td align="left">Idazoxan hydrochloride</td>
-<td align="left">Antiparkinsonian ’Antipsychotic</td>
-<td align="right">1.1619</td>
-<td align="right">1.0357</td>
-<td align="right">104.8851</td>
-<td align="right">2.9464</td>
-<td align="right">1.6266</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">03H09</td>
-<td align="left">Lomefloxacin hydrochloride</td>
-<td align="left">Antibacterial</td>
-<td align="right">0.3996</td>
-<td align="right">0.4459</td>
-<td align="right">24.9272</td>
-<td align="right">2.9167</td>
-<td align="right">1.5918</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">18B12</td>
-<td align="left">Arbidol</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">0.9619</td>
-<td align="right">94.4821</td>
-<td align="right">2.9141</td>
-<td align="right">1.5918</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">18H11</td>
-<td align="left">Artenimol</td>
-<td align="left">Antimalarial ’Antipaludic</td>
-<td align="right">1.0394</td>
-<td align="right">0.9617</td>
-<td align="right">94.4501</td>
-<td align="right">2.9128</td>
-<td align="right">1.5918</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">05F08</td>
-<td align="left">Nafronyl oxalate</td>
-<td align="left">Anti-ischemic ’Antispastic ’Vasodilator</td>
-<td align="right">0.8036</td>
-<td align="right">0.6291</td>
-<td align="right">51.5147</td>
-<td align="right">2.9019</td>
-<td align="right">1.5805</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">11E02</td>
-<td align="left">Olanzapine</td>
-<td align="left">Antipsychotic</td>
-<td align="right">1.1565</td>
-<td align="right">1.0559</td>
-<td align="right">108.1706</td>
-<td align="right">2.8326</td>
-<td align="right">1.4918</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">19A03</td>
-<td align="left">Eletriptan</td>
-<td align="left">Antimigraine</td>
-<td align="right">1.2273</td>
-<td align="right">0.9872</td>
-<td align="right">98.2257</td>
-<td align="right">2.8315</td>
-<td align="right">1.4918</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">08B02</td>
-<td align="left">Tetracaïne hydrochloride</td>
-<td align="left">NA</td>
-<td align="right">0.4749</td>
-<td align="right">0.5728</td>
-<td align="right">39.5600</td>
-<td align="right">2.8257</td>
-<td align="right">1.4878</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">02G11</td>
-<td align="left">Dihydroergotamine tartrate</td>
-<td align="left">Antimigraine</td>
-<td align="right">0.5699</td>
-<td align="right">0.5733</td>
-<td align="right">41.5725</td>
-<td align="right">2.8182</td>
-<td align="right">1.4815</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">02F04</td>
-<td align="left">Hydroxyzine dihydrochloride</td>
-<td align="left">Antiemetic ’Antihistaminic ’Antipruritic ’Anxiolytic ’Sedative</td>
-<td align="right">0.5689</td>
-<td align="right">0.5728</td>
-<td align="right">41.5040</td>
-<td align="right">2.8123</td>
-<td align="right">1.4773</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">17D04</td>
-<td align="left">Oxiglutatione</td>
-<td align="left">Antidote</td>
-<td align="right">1.2966</td>
-<td align="right">0.9800</td>
-<td align="right">96.9748</td>
-<td align="right">2.8041</td>
-<td align="right">1.4700</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">06G05</td>
-<td align="left">Quetiapine hemifumarate</td>
-<td align="left">Antipsychotic</td>
-<td align="right">0.5507</td>
-<td align="right">0.5991</td>
-<td align="right">45.9348</td>
-<td align="right">2.7605</td>
-<td align="right">1.4153</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">03E08</td>
-<td align="left">Tibolone</td>
-<td align="left">NA</td>
-<td align="right">0.3794</td>
-<td align="right">0.4368</td>
-<td align="right">23.6880</td>
-<td align="right">2.7272</td>
-<td align="right">1.3750</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">19F05</td>
-<td align="left">Vonoprazan</td>
+<td align="left">08B06</td>
+<td align="left">Tenatoprazole</td>
 <td align="left">Antiulcer</td>
-<td align="right">1.1711</td>
-<td align="right">0.9553</td>
-<td align="right">93.7871</td>
-<td align="right">2.6765</td>
-<td align="right">1.3125</td>
+<td align="right">0.6656</td>
+<td align="right">0.6851</td>
+<td align="right">69.1905</td>
+<td align="right">2.9206</td>
+<td align="right">1.4103</td>
 <td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1</td>
 <td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">07D09</td>
+<td align="left">Budesonide</td>
+<td align="left">Anti-inflammatory ’Antineoplastic</td>
+<td align="right">0.7260</td>
+<td align="right">0.6309</td>
+<td align="right">64.8405</td>
+<td align="right">2.8761</td>
+<td align="right">1.3548</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">06F06</td>
+<td align="left">Mebhydroline 1,5-naphtalenedisulfonate</td>
+<td align="left">Antihistaminic</td>
+<td align="right">0.8344</td>
+<td align="right">0.7736</td>
+<td align="right">81.0329</td>
+<td align="right">2.8538</td>
+<td align="right">1.3303</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">0</td>
 </tr>
 </tbody>
@@ -5032,70 +4238,70 @@ Venn diagram of the molecules selected by different criteria.
 <td>2</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">10</td>
+<td align="right">4</td>
 <td align="right">1</td>
-<td align="right">10</td>
-<td align="right">9</td>
+<td align="right">4</td>
+<td align="right">3</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">9</td>
-<td align="right">2</td>
-<td align="right">9</td>
 <td align="right">7</td>
+<td align="right">2</td>
+<td align="right">7</td>
+<td align="right">5</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td align="right">7</td>
-<td align="right">8</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">8</td>
+<td align="right">9</td>
 <td align="right">0</td>
-<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">9</td>
 </tr>
 <tr class="odd">
 <td>5</td>
 <td align="right">3</td>
 <td align="right">4</td>
-<td align="right">9</td>
+<td align="right">1</td>
+<td align="right">1</td>
 <td align="right">4</td>
-<td align="right">9</td>
-<td align="right">5</td>
 <td align="right">0</td>
+<td align="right">3</td>
 </tr>
 <tr class="even">
 <td>6</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">10</td>
+<td align="right">5</td>
 <td align="right">2</td>
-<td align="right">10</td>
-<td align="right">8</td>
+<td align="right">5</td>
+<td align="right">3</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>7</td>
 <td align="right">4</td>
 <td align="right">5</td>
-<td align="right">15</td>
+<td align="right">13</td>
 <td align="right">5</td>
-<td align="right">15</td>
-<td align="right">10</td>
+<td align="right">13</td>
+<td align="right">8</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>8</td>
 <td align="right">3</td>
 <td align="right">4</td>
-<td align="right">12</td>
+<td align="right">9</td>
 <td align="right">4</td>
-<td align="right">12</td>
-<td align="right">8</td>
+<td align="right">9</td>
+<td align="right">5</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
@@ -5112,31 +4318,31 @@ Venn diagram of the molecules selected by different criteria.
 <td>10</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">11</td>
+<td align="right">7</td>
 <td align="right">2</td>
-<td align="right">11</td>
-<td align="right">9</td>
+<td align="right">7</td>
+<td align="right">5</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>11</td>
 <td align="right">3</td>
 <td align="right">4</td>
-<td align="right">3</td>
-<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">4</td>
 <td align="right">0</td>
-<td align="right">1</td>
+<td align="right">4</td>
 </tr>
 <tr class="even">
 <td>12</td>
 <td align="right">2</td>
 <td align="right">3</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">2</td>
+<td align="right">3</td>
 </tr>
 <tr class="odd">
 <td>13</td>
@@ -5171,52 +4377,52 @@ Venn diagram of the molecules selected by different criteria.
 <tr class="even">
 <td>16</td>
 <td align="right">9</td>
-<td align="right">10</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">10</td>
+<td align="right">11</td>
 <td align="right">0</td>
-<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">11</td>
+<td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="odd">
 <td>17</td>
 <td align="right">3</td>
 <td align="right">4</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">4</td>
 <td align="right">0</td>
-<td align="right">3</td>
+<td align="right">4</td>
 </tr>
 <tr class="even">
 <td>18</td>
 <td align="right">3</td>
 <td align="right">4</td>
-<td align="right">4</td>
-<td align="right">4</td>
-<td align="right">4</td>
 <td align="right">0</td>
 <td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">4</td>
 </tr>
 <tr class="odd">
 <td>19</td>
 <td align="right">8</td>
 <td align="right">9</td>
-<td align="right">5</td>
-<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">9</td>
 <td align="right">0</td>
-<td align="right">4</td>
+<td align="right">9</td>
 </tr>
 <tr class="even">
 <td>Total</td>
 <td align="right">90</td>
-<td align="right">109</td>
-<td align="right">119</td>
-<td align="right">42</td>
-<td align="right">186</td>
-<td align="right">77</td>
-<td align="right">67</td>
+<td align="right">111</td>
+<td align="right">72</td>
+<td align="right">22</td>
+<td align="right">161</td>
+<td align="right">50</td>
+<td align="right">89</td>
 </tr>
 </tbody>
 </table>

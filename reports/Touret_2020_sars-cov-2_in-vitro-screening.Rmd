@@ -750,38 +750,41 @@ par(par.ori)
 
 The barplots of log2-transformed viability measures show another indication for the possible existence of a plate bias: in plates 11 to 19, several molecules are associated to a much smaller viability than in any of the untreated cells. This might reflect a cytotoxic effect of the drug that would enforce the viral infection, but there is a priori no reason to expect such effects to be concentrated on the last plates. 
 
-## Two-points scaling: defining a plate-wise relative viability ($I_{m,i}$)
+## Two-points scaling: defining a plate-wise relative viability ($V_{m,i}$)
 
-A **plate-wise relative viability** $I_{m,i}$ is defined to indicate the viability of cells treated with a given molecule $m$ relative to the two controls f their plate ($i$): 
+A **plate-wise relative viability** $V_{m,i}$ is defined to indicate the viability of cells treated with a given molecule $m$ relative to the two controls f their plate ($i$): 
 
 - virus control ($vc$): infected untreated cells;
 - cell control ($cc$): uninfected cells. 
 
 It is computed as follows.
 
-$$I_{m,i} = 100 \cdot \frac{L_{m,i} - L_{vc}}{L_{cc} - L_{vc}}$$
+$$V_{m,i} = 100 \cdot \frac{L_{m,i} - L_{vc}}{L_{cc} - L_{vc}}$$
 
-where $L_{cc,i}$ and $L_{vc,i}$ respectively denote the median values of cell controls and virus controls for plate $i$.
+where $L_{cc,i}$ and $L_{vc,i}$  denote the median values of the log2(ratios) respectively obtained in cell controls and virus controls for plate $i$.
 
+The plate-wise relative viability $V_{m,i}$ is measured on a scale where 
 
-The plate-wise relative viability $I_{m,i}$ is measured on a scale where 0 corresponds to the median of infected untreated cells (virus control), and 100 to the median of uninfected cells (cell control). 
+- 0 corresponds to the median of infected untreated cells (virus control), and
+- 100 to the median of uninfected cells (cell control). 
 
-Note that $I_{m,i}$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from various sources: experimental flucturations, cytotoxic effect of the drug or plate bias.
+Note that $V_{m,i}$ values lower than 0 denote treatments with a lower viability than the untreated virus infection. This might result from various sources: experimental flucturations, cytotoxic effect of the drug or plate bias.
 
-$I_{m,i}$ can also take values higher than 100, denoting a highly efficient treatment. 
+$V_{m,i}$ can also take values higher than 100, denoting a highly efficient treatment. 
 
 ```{r relative_viability}
+#### Compute relative viability from ratios ####
+inhibTable$Vrel <- 100 * 
+  (inhibTable$Vratio - plateStat$Rvc[inhibTable$Plate]) / 
+    (plateStat$Rcc[inhibTable$Plate] - plateStat$Rvc[inhibTable$Plate]) 
+
 #### Compute relative viability from log-ratios ####
-inhibTable$Lrel <- 100 * 
+inhibTable$Vrel <- 100 * 
   (inhibTable$Vlog2R - plateStat$Lvc[inhibTable$Plate]) / 
     (plateStat$Lcc[inhibTable$Plate] - plateStat$Lvc[inhibTable$Plate]) 
 
 # hist(inhibTable$I, breaks = 100)
 # 
-#### Compute relative viability from ratios ####
-inhibTable$Vrel <- 100 * 
-  (inhibTable$Vratio - plateStat$Rvc[inhibTable$Plate]) / 
-    (plateStat$Rcc[inhibTable$Plate] - plateStat$Rvc[inhibTable$Plate]) 
 ```
 
 ### Relative viability boxplots
