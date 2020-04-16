@@ -3,15 +3,11 @@ title: "Statistical analysis of *in vitro* screening for inhibitors of viral inf
 author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden. "
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    code_folding: hide
+  pdf_document:
     fig_caption: yes
     highlight: zenburn
-    self_contained: no
-    theme: cerulean
     toc: yes
     toc_depth: 3
-    toc_float: yes
   ioslides_presentation:
     colortheme: dolphin
     fig_caption: yes
@@ -48,11 +44,15 @@ output:
     theme: cerulean
     toc: yes
     widescreen: yes
-  pdf_document:
+  html_document:
+    code_folding: hide
     fig_caption: yes
     highlight: zenburn
+    self_contained: no
+    theme: cerulean
     toc: yes
     toc_depth: 3
+    toc_float: yes
 font-import: http://fonts.googleapis.com/css?family=Risque
 subtitle:  Normalization and target selection methods
 font-family: Garamond
