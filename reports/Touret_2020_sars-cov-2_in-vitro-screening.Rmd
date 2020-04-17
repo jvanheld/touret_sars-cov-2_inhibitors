@@ -871,7 +871,7 @@ plot(inhibTable[wellType == "virusCtl", "Vrel"],
      las = 1,
      cex = 0.5
      )
-mtext(plateNumbers, at = (1:19) * 6 - 3, side = 1)
+mtext(plateNumbers, at = (1:19) * 6 - 3, side = 1, col = plateColor)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -895,7 +895,7 @@ plot(inhibTable[wellType == "treated", "Vrel"],
      las = 1,
      cex = 0.5
      )
-mtext(plateNumbers, at = (1:19) * 80 - 40, side = 1)
+mtext(plateNumbers, at = (1:19) * 80 - 40, side = 1, col = plateColor)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -919,7 +919,7 @@ plot(inhibTable[wellType == "cellCtl", "Vrel"],
      las = 1,
      cex = 0.5
      )
-mtext(plateNumbers, at = (1:19) * 8 - 4, side = 1)
+mtext(plateNumbers, at = (1:19) * 8 - 4, side = 1, col = plateColor)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -1226,7 +1226,6 @@ zRange <- c(zfloor, zceiling)
 ## Virus control
 par(mfrow = c(4,1))
 plot(inhibTable[wellType == "virusCtl", "z"],
-     panel.first = grid(),
      main = "Virus control (infected, untreated)",
      xlab = "Replicates, sorted per plate",
      ylab = "z",
@@ -1234,12 +1233,18 @@ plot(inhibTable[wellType == "virusCtl", "z"],
      xlim = c(0, (19*6*1.1)),
      col = inhibTable[wellType == "virusCtl", "color"],
      pch = inhibTable[wellType == "virusCtl", "pch"],
-     cex = 0.5, las = 1
+     panel.first = c(
+       abline(h = seq(from = zfloor, to = zceiling, by = 1), col = "#EEEEEE"),
+       abline(h = seq(from = -5, to = zceiling, by = 5), col = "grey"),
+       abline(v = (0:19) * 6, col = "#999999")
+     ),
+     xaxt = "n",
+     cex = 0.5, 
+     las = 1
      )
-abline(h = seq(from = zfloor, to = zceiling, by = 1), col = "#EEEEEE")
-abline(h = seq(from = zfloor, to = zceiling, by = 5), col = "grey")
 abline(h = 0)
 abline(h = c(-1, 1), lty = "dotted")
+mtext(plateNumbers, at = (1:19) * 6 - 3, side = 1, col = plateColor)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -1247,20 +1252,23 @@ legend("topright",
 
 ## Treated cells
 plot(inhibTable[wellType == "treated", "z"],
-     panel.first = grid(),
      main = "IQR-standardized viability (z)",
      xlab = "Molecules",
      ylab = "z",
      ylim = zRange,
      col = inhibTable[wellType == "treated", "color"],
      pch = inhibTable[wellType == "treated", "pch"],
-     cex = 0.5, las = 1,
+     xaxt = "n",
+     cex = 0.5, 
+     las = 1,
      xlim = c(0, length(inhibTable[wellType == "treated", "z"])*1.1)
      )
 abline(h = seq(from = zfloor, to = zceiling, by = 1), col = "#EEEEEE")
 abline(h = seq(from = zfloor, to = zceiling, by = 5), col = "grey")
 abline(h = 0)
 abline(h = c(-1, 1), lty = "dotted")
+abline(v = (0:19) * 82, col = "#999999")
+mtext(plateNumbers, at = (1:19) * 82 - 41, side = 1, col = plateColor)
 legend("right", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -1281,12 +1289,16 @@ plot(inhibTable[wellType == "cellCtl", "z"],
      ylim = zRange,
      col = inhibTable[wellType == "cellCtl", "color"],
      pch = inhibTable[wellType == "cellCtl", "pch"],
-     cex = 0.5, las = 1
+     xaxt = "n",
+     cex = 0.5, 
+     las = 1
      )
 abline(h = seq(from = zfloor, to = zceiling, by = 1), col = "#EEEEEE")
 abline(h = seq(from = zfloor, to = zceiling, by = 5), col = "grey")
 abline(h = 0)
 abline(h = c(-1, 1), lty = "dotted")
+abline(v = (0:19) * 8, col = "#999999")
+mtext(plateNumbers, at = (1:19) * 8 - 4, side = 1, col = plateColor)
 legend("topright", 
        legend = names(plateColor), 
        col = plateColor, pch = 1, 
@@ -1382,7 +1394,7 @@ abline(h = 0)
 abline(h = seq(0, sigCeiling, 1), lty = "dotted", col = "grey")
 abline(h = -log10(alpha), col = "red")
 abline(v = (0:19) * 82, col = "grey")
-mtext(plateNumbers, at = (1:19) * 82 - 41, side = 1)
+mtext(plateNumbers, at = (1:19) * 82 - 41, side = 1, col = plateColor)
 
 ## Legends
 legend("bottomright", 
@@ -1420,8 +1432,9 @@ plot(x = inhibTable[wellType == "treated", "Vrel"],
      las = 1,
      cex = 0.7)
 abline(h = 0)
-abline(h = -log10(alpha), col = "red")
-
+abline(h = -log10(alpha), col = "blue")
+abline(v = 0, col = "red")
+abline(v = 100, col = "#00BB00")
 ## Mark arbidol
 points(x = inhibTable[arbidolWells, "Vrel"],
      y = inhibTable[arbidolWells, "sig"], 
@@ -1503,13 +1516,14 @@ points(inhibTable[HOClSindex, c("CTB", "Vrel")],
 abline(h = seq(from = -100, to = 150, by = 10), col = "#DDDDDD")
 abline(h = 0, col = "red")
 abline(h = 100, col = "#00BB00")
-abline(v = seq(from = 0, to = 1.4, by = 0.1), col = "#DDDDDD")
+abline(v = seq(from = 0, to = max(inhibTable$CTB), by = 2000), col = "#DDDDDD")
+abline(v = seq(from = 0, to = max(inhibTable$CTB), by = 10000), col = "#BBBBBB")
 abline(v = 1)
 
 ## Legends
-legend("topright", legend = names(plateColor), 
+legend("bottomright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.6)
-legend("bottomright", legend = names(markColor), 
+legend("topleft", legend = names(markColor), 
        title = "Markers", 
        col = markColor, 
        pch = markPCh,
@@ -1558,12 +1572,12 @@ abline(v = 100, col = "#00BB00")
 abline(h = seq(-5, 10, 1), col = "#EEEEEE")
 abline(h = seq(-5, 10, 5), col = "#BBBBBB")
 abline(h = 0)
-abline(h = c(-1, 1), col = "#BBBBBB")
+abline(h = c(-1, 1), lty = "dashed")
 
 ## Legends
-legend("topright", legend = names(plateColor), 
+legend("topleft", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.7)
-legend("topleft", legend = names(markColor), 
+legend("bottomright", legend = names(markColor), 
        title = "Markers", 
        col = markColor, 
        pch = markPCh,
@@ -1603,8 +1617,12 @@ points(x = inhibTable[HOClSindex, "Vrel"],
        pch = markPCh["Hydroxychloroquine"], cex = 0.7)
 
 ## Grid + specific values for the selected metrics
+abline(v = seq(VrFloor, VrCeiling, 10), col = "#EEEEEE")
+abline(v = seq(VrFloor, VrCeiling, 50), col = "#BBBBBB")
 abline(v = 0, col = "red")
 abline(v = 100, col = "#00BB00")
+abline(h = seq(0, sigCeiling, 1), col = "#EEEEEE")
+abline(h = seq(0, sigCeiling, 5), col = "#BBBBBB")
 abline(h = 0)
 abline(h = -log10(alpha), col = "blue", lwd = 2)
 
@@ -1640,10 +1658,13 @@ plot(x = inhibTable[, "Inhibition.Index"],
      xlim = c(iiFloor, iiCeiling),
      panel.first = c(
        abline(v = seq(-0.5, 2, 0.5), col = "#BBBBBB"),
-       abline(v = 1, col = "blue", lwd = 2),
-       abline(h = seq(iiFloor, iiCeiling, 0.2), col = "#DDDDDD"),
+       abline(h = seq(VrFloor, VrCeiling, 10), col = "#EEEEEE"),
+       abline(h = seq(VrFloor, VrCeiling, 50), col = "#BBBBBB"),
        abline(h = 1)), 
      las = 1)
+abline(v = 1, col = "blue", lwd = 2)
+abline(h = 0, col = "red")
+abline(h = 100, col = "#00BB00")
 
 ## Mark Hydroxychloroquine
 points(x = inhibTable[HOClSindex, "Inhibition.Index"],
@@ -1652,7 +1673,7 @@ points(x = inhibTable[HOClSindex, "Inhibition.Index"],
        pch = markPCh["Hydroxychloroquine"], cex = 0.7)
 
 ## Legends
-legend("topright", legend = names(plateColor), 
+legend("bottomright", legend = names(plateColor), 
        title = "Plate", fill = plateColor, cex = 0.7)
 legend("topleft", 
        title = "Markers", 
@@ -1817,11 +1838,15 @@ kable(ccpp, row.names = TRUE, ccaption = "Candidates per plate depending on the 
 ```
 
 ```{r candidates_per_plate_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Number of candidate molecules per plate depending on the method. " }
+
+#### Compare number of candidates per plate according to the criteria ####
+names(candidatesPerPlate)
 maxc <-  max(candidatesPerPlate)
-plot(candidatesPerPlate[, c("FDR", "ii")],
+plot(candidatesPerPlate[, c("FDR", "arbidolMean")],
      main = "Candidates per plate",
+     type = "n",
      xlab = paste("FDR < ", alpha),
-     ylab = paste("Inhibition index >", 1),
+     ylab = paste("Relative viability arbidol mean"),
      xlim = c(0, maxc * 1.1),
      las = 1, pch = 20,
      panel.first = 
@@ -1830,6 +1855,7 @@ plot(candidatesPerPlate[, c("FDR", "ii")],
          abline(v = seq(0, maxc, by = 1), col = "#EEEEEE"),
          abline(v = seq(0, maxc, by = 5), col = "#BBBBBB")),
      col = plateColor[rownames(candidatesPerPlate)])
+text(candidatesPerPlate[, c("FDR", "arbidolMean")], rownames(candidatesPerPlate), col = plateColor)
 legend("topright", legend = names(plateColor), 
        title = "Plate", col = plateColor, pch = 20, cex = 0.8)
 
