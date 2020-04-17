@@ -129,6 +129,7 @@ markPCh <- c(
 ```
 
 
+********************************************************************
 # Introduction
 
 This document describes in detail the procedure used to select molecules having a potential inhibitory effect on the infection of cultured cells by covid-19.
@@ -141,6 +142,7 @@ This document describes in detail the procedure used to select molecules having 
 
 
 
+********************************************************************
 # Data
 
 ## Sources
@@ -205,6 +207,7 @@ message("\tLoaded main table with ", nrow(supTable), " rows ")
 The supplementary table downloaded from bioRxiv contains `r nrow(supTable)` molecules. 
 
 
+********************************************************************
 # Viability measurements
 
 ## Cell Titer Blue intensity (CTB)
@@ -535,8 +538,6 @@ Importantly, there is a consistency between the inter-plate differences observed
 
 
 ****************************************************************
-
-
 # Plate-wise standardization
 
 ## Plate-wise control points
@@ -1460,6 +1461,7 @@ kable(inhibTable[arbidolWells, c("Plate", "CTB", "Vratio", "Vrel", "z", "FDR", "
 
 
 
+********************************************************************
 # Comparison between viability scores
 
 ## CTB versus viability 
@@ -1711,6 +1713,7 @@ par(par.ori)
 ```
 
 
+********************************************************************
 # Selected hits
 
 ```{r z_candidates}
@@ -1834,6 +1837,7 @@ legend("topright", legend = names(plateColor),
 ```
 
 
+********************************************************************
 # Result files
 
 
@@ -1894,359 +1898,7 @@ kable(fileLinks[, c("name", "link")], row.names = FALSE, caption = "Links to the
 
 ********************************************************************
 
-# Analysis of Touret's original Inhibition Index (II)
 
-## Inhibition index
-
-The inhibition index is derived from the raw viability measurement in the following way. 
-
-
-
-### Descriptive stats
-
-```{r inhib_index_stat}
-ii <- supTable$Inhibition.Index
-iiStat <- list(
-  mean = mean(ii),
-  sd = sd(ii),
-  var = var(ii),
-  min = min(ii),
-  Q1 = as.vector(quantile(ii, probs = 0.25)),
-  median = median(ii),
-  Q3 = as.vector(quantile(ii, probs = 0.75)),
-  max = max(ii)
-)
-
-kable(t(as.data.frame.list(iiStat)), col.names = "Stat")
-
-```
-
-
-### Distribution
-
-The distribution of inhibition index values is trongly asymmetrical. The mode is much lower than the mean and the median (robust estimator of central tendency). A normal fit will tuhs give a poor estimate of the p-values. 
-```{r inhib_index_distribution, fig.width=7, fig.height=5, out.width="60%",  fig.cap="Distribution of the inhibition index"}
-
-hist(supTable$Inhibition.Index, breaks = 100, col = "grey", border = "grey")
-abline(v = iiStat$mean, col = "blue")
-abline(v = iiStat$median, col = "darkgreen")
-
-legend("topright", legend = c("mean", "median"),
-       col = c("blue", "darkgreen"),
-       lwd = 2)
-
-```
-
-
-
-## Normalization
-
-### Log transform
-
-A classical method for normalization is to take the log of the values. We first had to shift the data in order for all of them to take positive values. 
-
-
-```{r ii_log2_transform}
-
-# fit.gamma <- fitdist(data = ii - iiStat$min + 1, distr = "gamma", method = "mge")
-# summary(fit.gamma)
-# 
-# plot(fit.gamma)
-
-#### Compute a normalized distribution from inhibition indices ####
-iiPositive <- ii - iiStat$min + 1 ## shift the distrib to achieve non-negative numbers
-logII <- log(iiPositive)
-
-logIIStat <- list(
-  mean = mean(logII),
-  sd = sd(logII),
-  var = var(logII),
-  min = min(logII),
-  Q1 = as.vector(quantile(logII, probs = 0.25)),
-  median = median(logII),
-  Q3 = as.vector(quantile(logII, probs = 0.75)),
-  max = max(logII)
-)
-
-kable(t(as.data.frame.list(logIIStat)), col.names = "Stat", caption = "Parameters of the log-normalized inhibition index distribution")
-
-```
-
-
-However, even after log transformation the distribution remains highly asymmetrical, with a mode much smaller than the median and mean. 
-
-```{r logII_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the inhibition index"}
-#### Histogram of log-normalized values ####
-hist(logII, breaks = 100, col = "grey", border = "grey")
-abline(v = mean(logII), col = "blue")
-abline(v = median(logII), col = "darkgreen")
-
-legend("topright", legend = c("mean", "median"),
-       col = c("blue", "darkgreen"),
-       lwd = 2)
-
-
-```
-
-
-## Evidence of a plate bias
-
-### Ranked values
-
-We plot the inhibition index values ordered by plate and position number (top) or ranked by decreasing value (bottom). In both cases, the color denotes the plate number. 
-
-
-```{r inhib_index_ranked, fig.width=7, fig.height=10, out.width="60%", fig.cap="Values of the inhibition index for all the tested molecules. Molecules are colored according to the plate number. "}
-par(mfrow = c(2,1))
-plot(ii,
-     panel.first = grid(),
-     main = "Inhibition index values",
-     xlab = "Molecules (ranked by inhibition index)",
-     ylab = "Inhibition index",
-     col = supTable$color,
-     cex = 0.5,
-     xlim = c(0, length(ii)*1.05)
-     )
-legend("topright", 
-       legend = names(plateColor), 
-       col = plateColor, pch = 1, 
-       cex = 0.7)
-
-sortedTable <- supTable[order(supTable$Inhibition.Index, decreasing = TRUE), ]
-plot(sortedTable$Inhibition.Index,
-     panel.first = grid(),
-     main = "Ranked inhibition index values",
-     xlab = "Molecules (ranked by inhibition index)",
-     ylab = "Inhibition index",
-     col = sortedTable$color,
-     cex = 0.5,
-     xlim = c(0, length(ii)*1.05)
-     )
-legend("topright", 
-       legend = names(plateColor), 
-       col = plateColor, pch = 1, 
-       cex = 0.7)
-par(mfrow = c(1, 1))
-
-```
-
-
-The molecule-wised colored plots of inhibition index suggest a plate-wise effect. 
-
-## Plate-wise normalization
-
-We perform a plate-wise normalization using robust estimators, in order to avoid the effect of outliers (in this case, the suspected outliers are the molecules having an actual inhibitory effect).
-
-To this purpose, we use:
-- plate-wise median to estimate the mean
-- plate-wise standardized inter-quantile range (IQR) to estimate the standard deviation
-
-```{r ii_plate_wise_stat}
-#### Compute plate-wise statistics ####
-plateStat <- data.frame(
-  plate = plateNumbers,
-  mean = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = mean)),
-  sd = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = sd)),
-  median = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = median)),
-  min = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = min)),
-  max = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = max)),
-  IQR = as.vector(by(
-    data = supTable$Inhibition.Index, 
-    INDICES = supTable$plateNumber, 
-    FUN = IQR))
-)
-rownames(plateStat) <- plateStat$plate
-
-kable(plateStat, caption = "Plate-wise statistics oninhibition index")
-
-```
-
-```{r normII_computation}
-
-## Centering: substract the median
-## Scaling: divide by IQR
-## Standardize: multiply by IQR of the normal distribution
-normII <- (supTable$Inhibition.Index - plateStat[supTable$plateNumber, "median"]) / plateStat[supTable$plateNumber, "IQR"]
-# IQR(normII)
-# IQR(rnorm(n = 1000000))
-
-normIQR <- qnorm(p = 0.75) - qnorm(p = 0.25)
-normII <- normII * normIQR
-# sd(normII)
-# IQR(normII)
-
-supTable$normInhibIndex <- normII
-
-```
-
-
-
-```{r normIIStat}
-### Descriptive statistics on the normalized Inhibition Index ####
-normIIStat <- list(
-  mean = mean(normII),
-  sd = sd(normII),
-  IQR = IQR(normII),
-  var = var(normII),
-  min = min(normII),
-  Q1 = as.vector(quantile(normII, probs = 0.25)),
-  median = median(normII),
-  Q3 = as.vector(quantile(normII, probs = 0.75)),
-  max = max(normII)
-)
-
-kable(t(as.data.frame.list(normIIStat)), col.names = "Stat", caption = "Statistics of the plate-wise normalized inhibition index")
-
-```
-
-
-The histogram of plate-wise normalized values shows a clear improvement : the median is much closer to the mode than with the raw or log-transformed II values.
-
-```{r normII_distrib, fig.width=7, fig.height=5, out.width="60%", fig.cap="Distribution of the plate-wise normalized inhibition index"}
-
-hist(normII, breaks = 100, col = "grey", border = "grey")
-abline(v = mean(normII), col = "blue")
-abline(v = median(normII), col = "darkgreen")
-
-legend("topright", legend = c("mean", "median"),
-       col = c("blue", "darkgreen"),
-       lwd = 2)
-
-```
-
-### Normalized II plots
-
-The plot of normalized II values (top panel) clearly shows that the plate-wise normalization suppressed the background bias. 
-
-
-```{r normII_ranked, fig.width=7, fig.height=10, out.width="60%", fig.cap="Values of the plate-wise normalized inhibition index for all the tested molecules. Molecules are colored according to the plate number. "}
-par(mfrow = c(2,1))
-plot(normII,
-     panel.first = grid(),
-     main = "Inhibition index values",
-     xlab = "Molecules (ranked by inhibition index)",
-     ylab = "Inhibition index",
-     col = supTable$color,
-     cex = 0.5,
-     xlim = c(0, length(normII)*1.05)
-     )
-legend("topright", 
-       legend = names(plateColor), 
-       col = plateColor, pch = 1, 
-       cex = 0.7)
-
-# names(supTable)
-normIIrank <- order(supTable$normInhibIndex, decreasing = TRUE)
-plot(supTable[normIIrank, "normInhibIndex"],
-     panel.first = grid(),
-     main = "Ranked inhibition index values",
-     xlab = "Molecules (ranked by inhibition index)",
-     ylab = "Inhibition index",
-     col = supTable[normIIrank, "color"],
-     cex = 0.5,
-     xlim = c(0, length(normII)*1.05)
-     )
-legend("topright", 
-       legend = names(plateColor), 
-       col = plateColor, pch = 1, 
-       cex = 0.4)
-par(mfrow = c(1,1))
-
-```
-
-
-
-
-## P-value computation
-
-We compute the p-value as the upper tail of the normal distribution (rigth-side test) in order to detect significantly high values of the plate-wise normalized index.
-
-```{r normIIpval}
-#### Compute P-value for the inhibition index ####
-supTable$p.value <- pnorm(normII, mean = 0, sd = 1, lower.tail = FALSE)
-supTable$log10Pval <- log10(supTable$p.value)
-supTable$e.value <- supTable$p.value * length(normII)
-supTable$FDR <- p.adjust(supTable$p.value, method = "fdr")
-supTable$log10FDR <- log10(supTable$FDR)
-```
-
-
-### P-value histogram
-
-```{r normII_pval_histogram, fig.width=7, fig.height=5, out.width="60%", fig.cap="Histogram of the nominal (unadjusted) p-values derived from the plate-wise normalized inhibition index. "}
-hist(supTable$p.value, breaks = 20, 
-     col = "grey",
-     main = "P-value histogram after plate-wise normalization",
-     xlab = "Nominal P-value (unadjusted)",
-     ylab = "Frequency")
-```
-
-### Volcano plot
-
-```{r normII_volcano_plot, fig.width=7, fig.height=7, out.width="60%", fig.cap="Volcano plot. "}
-#### Volcano plot ####
-
-plot(x = supTable$normInhibIndex,
-     y = -supTable$log10FDR, 
-     col = supTable$color,
-     main = "Volcano plot",
-     xlab = "Normalized inhibition index",
-     ylab = "Significance = -log10(FDR)")
-grid()
-
-```
-
-
-## Selection of candidate molecules
-
-```{r normII_selected}
-
-#### Select significant normalized II values ####
-alpha <- 0.05
-# table(supTable$FDR < alpha)
-selected <- subset(supTable, supTable$FDR < alpha)
-
-## Sort by decreasing adjusted p-value
-selected <- selected[order(selected$FDR, decreasing = FALSE), ]
-# kable(names(selected), row.names=TRUE)
-
-## Print selected molecules
-kable(selected[ , c(1:3, 5:7, 10, 12, 15)], 
-      row.names = FALSE,
-      digits = 4,
-      caption = "Candidate molecules sorted by significance after plate-wise normalization. ")
-
-
-```
-
-
-
-## Conclusions
-
-- The analysis strongly suggests a batch effect: the distribution of viability measures show strong inter-plate differences. In particular, the viability measures of plates 11 to 19 are spread over the whole range from the virus control to the cell control. 
-
-- To select candidate molecules, the fact to set a plate-wise threshold based on the mean viability of the arbidol duplicates might lead to ignore highly interesting candidates. 
-
-- I propose here a plate-wise standardisation based on the median (for centering) and inter-quartile range (to standardise the dispersion). 
-
-- This enables to compute a p-value (expected rate of false positive among all the tested molecules). This nominal p-value has to be corrected for multiple testing, in order to estimate the False Discovery Rate (FDR,i.e. the expected rate of false positives among the molecules declared positive).  With a threshold of `r alpha` on the FDR,  `r nrow(selected)` molecules are declared significant and could be considered as candidate for further characterization. 
-
-******
 # Libraries and versions
 
 For the sake of reproducibility, we list hereafter the R libraries used to generate this report, as well as their versions. 
@@ -2256,39 +1908,11 @@ sessionInfo()
 ```
 
 
-*****
+********************************************************************
 
-## To do
-
-- log2 transformatio before standardizing (and comparison of the targets)
-- Add the formula of the inhibition index
-- distribution de valeurs plaque par plaque --> vérifier si certaines plaques ont l'air d'avoir plus de 20 cibles (percentile75)
+<!-- ## To do -->
 
 
-- $$II = $$ : valeurs relative à la moyenne de l'arbidol. Comme l'arbidol change d'une plaque à l'autre, pas évident qu'on la conserve. Plutôt baser sur la viabilité des deux contrôles. 
-
-
-$$v'_{m,i} = log2(V_{m,i})$$
-
-
-- Afficher les numéros des plaques sur les dot plots, plutôt que le nombre de molécules
-
-- Vérifier si les plaques où il y a plein de molécules comportent des 
-
-- Hybrid approach
-
-    - for each molecule, we compute a statistical significance
-    - intersection: high-confidence molecules, i.e. staistically significant relative to their plate + biologically relevant with respect to the arbidol threshold
-    
-- replace candidates by hits
-    
-- Export 
-
-    - full result table
-    - statistically significant
-    - above arbidol
-    - high-confidence hits (intersection between the two lists)
-
-
+<!-- - Vérifier si les plaques où il y a plein de molécules comportent des molécules de la même famille structurelle -->
 
 
