@@ -4,6 +4,7 @@ author: "Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne 
 date: "`r Sys.Date()`"
 output:
   html_document:
+    df_print: paged
     code_folding: hide
     fig_caption: yes
     highlight: zenburn
@@ -1884,7 +1885,7 @@ outFiles <- list(
     file.path(dir["results"], "result_table_HiConfidence-hits.xlsx")
 )
 
-
+# View(inhibTable) # check before exporting
 write.table(x = inhibTable, 
             file = outFiles$`All results (tsv)`,  
             sep = "\t", quote = FALSE, 
@@ -1894,15 +1895,19 @@ write.xlsx2(x = inhibTable,
             file = outFiles$`All results (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 
-write.xlsx2(x = inhibTable[inhibTable$selected.FDR, ], 
+# table(!is.na(inhibTable$selected.FDR) & (inhibTable$selected.FDR == 1))
+# View(inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.FDR == 1), ]) # check before exporting
+write.xlsx2(x = inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.FDR == 1), ], 
             file = outFiles$`FDR-based hits (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 
-write.xlsx2(x = inhibTable[inhibTable$selected.arbidolMean, ], 
+# View(inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.arbidolMean), ])
+write.xlsx2(x = inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.arbidolMean), ], 
             file = outFiles$`Arbidol-based hits (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 
-write.xlsx2(x = inhibTable[inhibTable$selected.FDRandArbidol, ], 
+# View(inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.FDRandArbidol), ])
+write.xlsx2(x = inhibTable[!is.na(inhibTable$selected.FDR) & (inhibTable$selected.FDRandArbidol), ], 
             file = outFiles$`High confidence hits (xlsx)`, 
             row.names = FALSE, col.names = TRUE)
 

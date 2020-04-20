@@ -11,7 +11,7 @@
 
 <meta name="author" content="Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden." />
 
-<meta name="date" content="2020-04-17" />
+<meta name="date" content="2020-04-20" />
 
 <title>Statistical analysis of in vitro screening for inhibitors of viral infection</title>
 
@@ -26,6 +26,8 @@
 <script src="Touret_2020_sars-cov-2_in-vitro-screening_files/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="Touret_2020_sars-cov-2_in-vitro-screening_files/navigation-1.1/tabsets.js"></script>
 <script src="Touret_2020_sars-cov-2_in-vitro-screening_files/navigation-1.1/codefolding.js"></script>
+<link href="Touret_2020_sars-cov-2_in-vitro-screening_files/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="Touret_2020_sars-cov-2_in-vitro-screening_files/pagedtable-1.1/js/pagedtable.js"></script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -351,7 +353,7 @@ div.tocify {
 <h1 class="title toc-ignore">Statistical analysis of <em>in vitro</em> screening for inhibitors of viral infection</h1>
 <h3 class="subtitle">Normalization and target selection methods</h3>
 <h4 class="author">Franck Touret, Magali Gilles, Karine Barral, Antoine Nougaire, Etienne Decroly, Xavier de Lamballerie, and Bruno Coutard (2020). Statistical analysis by Jacques van Helden.</h4>
-<h4 class="date">2020-04-17</h4>
+<h4 class="date">2020-04-20</h4>
 
 </div>
 
@@ -4499,7 +4501,7 @@ Number of candidate molecules per plate depending on the method.
 <a class="sourceLine" id="cb51-14" data-line-number="14"><span class="st">    </span><span class="kw">file.path</span>(dir[<span class="st">&quot;results&quot;</span>], <span class="st">&quot;result_table_HiConfidence-hits.xlsx&quot;</span>)</a>
 <a class="sourceLine" id="cb51-15" data-line-number="15">)</a>
 <a class="sourceLine" id="cb51-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb51-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb51-17" data-line-number="17"><span class="co"># View(inhibTable) # check before exporting</span></a>
 <a class="sourceLine" id="cb51-18" data-line-number="18"><span class="kw">write.table</span>(<span class="dt">x =</span> inhibTable, </a>
 <a class="sourceLine" id="cb51-19" data-line-number="19">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">All results (tsv)</span><span class="st">`</span>,  </a>
 <a class="sourceLine" id="cb51-20" data-line-number="20">            <span class="dt">sep =</span> <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, <span class="dt">quote =</span> <span class="ot">FALSE</span>, </a>
@@ -4509,30 +4511,34 @@ Number of candidate molecules per plate depending on the method.
 <a class="sourceLine" id="cb51-24" data-line-number="24">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">All results (xlsx)</span><span class="st">`</span>, </a>
 <a class="sourceLine" id="cb51-25" data-line-number="25">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb51-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb51-27" data-line-number="27"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[inhibTable<span class="op">$</span>selected.FDR, ], </a>
-<a class="sourceLine" id="cb51-28" data-line-number="28">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">FDR-based hits (xlsx)</span><span class="st">`</span>, </a>
-<a class="sourceLine" id="cb51-29" data-line-number="29">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb51-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb51-31" data-line-number="31"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[inhibTable<span class="op">$</span>selected.arbidolMean, ], </a>
-<a class="sourceLine" id="cb51-32" data-line-number="32">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">Arbidol-based hits (xlsx)</span><span class="st">`</span>, </a>
-<a class="sourceLine" id="cb51-33" data-line-number="33">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb51-34" data-line-number="34"></a>
-<a class="sourceLine" id="cb51-35" data-line-number="35"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[inhibTable<span class="op">$</span>selected.FDRandArbidol, ], </a>
-<a class="sourceLine" id="cb51-36" data-line-number="36">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">High confidence hits (xlsx)</span><span class="st">`</span>, </a>
-<a class="sourceLine" id="cb51-37" data-line-number="37">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb51-38" data-line-number="38"></a>
-<a class="sourceLine" id="cb51-39" data-line-number="39"><span class="co"># system(paste(&quot;open&quot;, dir[&quot;results&quot;]))</span></a>
-<a class="sourceLine" id="cb51-40" data-line-number="40"></a>
-<a class="sourceLine" id="cb51-41" data-line-number="41"><span class="co">## Prepare a data frame with the relative links to output files</span></a>
-<a class="sourceLine" id="cb51-42" data-line-number="42">fileLinks &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb51-43" data-line-number="43">  <span class="dt">name =</span> <span class="kw">names</span>(outFiles),</a>
-<a class="sourceLine" id="cb51-44" data-line-number="44">  <span class="dt">path =</span> <span class="kw">unlist</span>(outFiles),</a>
-<a class="sourceLine" id="cb51-45" data-line-number="45">  <span class="dt">basename =</span> <span class="kw">basename</span>(<span class="kw">unlist</span>(outFiles))</a>
-<a class="sourceLine" id="cb51-46" data-line-number="46">)</a>
-<a class="sourceLine" id="cb51-47" data-line-number="47"></a>
-<a class="sourceLine" id="cb51-48" data-line-number="48">fileLinks<span class="op">$</span>link &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;&lt;a href=&#39;&quot;</span>, fileLinks<span class="op">$</span>path, <span class="st">&quot;&#39;&gt;&quot;</span>, fileLinks<span class="op">$</span>basename, <span class="st">&quot;&lt;/a&gt;&quot;</span>)</a>
-<a class="sourceLine" id="cb51-49" data-line-number="49"></a>
-<a class="sourceLine" id="cb51-50" data-line-number="50"><span class="kw">kable</span>(fileLinks[, <span class="kw">c</span>(<span class="st">&quot;name&quot;</span>, <span class="st">&quot;link&quot;</span>)], <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">caption =</span> <span class="st">&quot;Links to the result tables. &quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb51-27" data-line-number="27"><span class="co"># table(!is.na(inhibTable$selected.FDR) &amp; (inhibTable$selected.FDR == 1))</span></a>
+<a class="sourceLine" id="cb51-28" data-line-number="28"><span class="co"># View(inhibTable[!is.na(inhibTable$selected.FDR) &amp; (inhibTable$selected.FDR == 1), ]) # check before exporting</span></a>
+<a class="sourceLine" id="cb51-29" data-line-number="29"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[<span class="op">!</span><span class="kw">is.na</span>(inhibTable<span class="op">$</span>selected.FDR) <span class="op">&amp;</span><span class="st"> </span>(inhibTable<span class="op">$</span>selected.FDR <span class="op">==</span><span class="st"> </span><span class="dv">1</span>), ], </a>
+<a class="sourceLine" id="cb51-30" data-line-number="30">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">FDR-based hits (xlsx)</span><span class="st">`</span>, </a>
+<a class="sourceLine" id="cb51-31" data-line-number="31">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb51-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb51-33" data-line-number="33"><span class="co"># View(inhibTable[!is.na(inhibTable$selected.FDR) &amp; (inhibTable$selected.arbidolMean), ])</span></a>
+<a class="sourceLine" id="cb51-34" data-line-number="34"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[<span class="op">!</span><span class="kw">is.na</span>(inhibTable<span class="op">$</span>selected.FDR) <span class="op">&amp;</span><span class="st"> </span>(inhibTable<span class="op">$</span>selected.arbidolMean), ], </a>
+<a class="sourceLine" id="cb51-35" data-line-number="35">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">Arbidol-based hits (xlsx)</span><span class="st">`</span>, </a>
+<a class="sourceLine" id="cb51-36" data-line-number="36">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb51-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb51-38" data-line-number="38"><span class="co"># View(inhibTable[!is.na(inhibTable$selected.FDR) &amp; (inhibTable$selected.FDRandArbidol), ])</span></a>
+<a class="sourceLine" id="cb51-39" data-line-number="39"><span class="kw">write.xlsx2</span>(<span class="dt">x =</span> inhibTable[<span class="op">!</span><span class="kw">is.na</span>(inhibTable<span class="op">$</span>selected.FDR) <span class="op">&amp;</span><span class="st"> </span>(inhibTable<span class="op">$</span>selected.FDRandArbidol), ], </a>
+<a class="sourceLine" id="cb51-40" data-line-number="40">            <span class="dt">file =</span> outFiles<span class="op">$</span><span class="st">`</span><span class="dt">High confidence hits (xlsx)</span><span class="st">`</span>, </a>
+<a class="sourceLine" id="cb51-41" data-line-number="41">            <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">col.names =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb51-42" data-line-number="42"></a>
+<a class="sourceLine" id="cb51-43" data-line-number="43"><span class="co"># system(paste(&quot;open&quot;, dir[&quot;results&quot;]))</span></a>
+<a class="sourceLine" id="cb51-44" data-line-number="44"></a>
+<a class="sourceLine" id="cb51-45" data-line-number="45"><span class="co">## Prepare a data frame with the relative links to output files</span></a>
+<a class="sourceLine" id="cb51-46" data-line-number="46">fileLinks &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb51-47" data-line-number="47">  <span class="dt">name =</span> <span class="kw">names</span>(outFiles),</a>
+<a class="sourceLine" id="cb51-48" data-line-number="48">  <span class="dt">path =</span> <span class="kw">unlist</span>(outFiles),</a>
+<a class="sourceLine" id="cb51-49" data-line-number="49">  <span class="dt">basename =</span> <span class="kw">basename</span>(<span class="kw">unlist</span>(outFiles))</a>
+<a class="sourceLine" id="cb51-50" data-line-number="50">)</a>
+<a class="sourceLine" id="cb51-51" data-line-number="51"></a>
+<a class="sourceLine" id="cb51-52" data-line-number="52">fileLinks<span class="op">$</span>link &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;&lt;a href=&#39;&quot;</span>, fileLinks<span class="op">$</span>path, <span class="st">&quot;&#39;&gt;&quot;</span>, fileLinks<span class="op">$</span>basename, <span class="st">&quot;&lt;/a&gt;&quot;</span>)</a>
+<a class="sourceLine" id="cb51-53" data-line-number="53"></a>
+<a class="sourceLine" id="cb51-54" data-line-number="54"><span class="kw">kable</span>(fileLinks[, <span class="kw">c</span>(<span class="st">&quot;name&quot;</span>, <span class="st">&quot;link&quot;</span>)], <span class="dt">row.names =</span> <span class="ot">FALSE</span>, <span class="dt">caption =</span> <span class="st">&quot;Links to the result tables. &quot;</span>)</a></code></pre></div>
 <table>
 <caption>Links to the result tables.</caption>
 <thead>
