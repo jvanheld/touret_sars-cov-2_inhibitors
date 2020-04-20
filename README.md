@@ -1,5 +1,8 @@
 # Statistical analysis of *in vitro* inhibition of SARS-CoV-2 infection
 
+[![DOI](https://zenodo.org/badge/254349933.svg)](https://zenodo.org/badge/latestdoi/254349933)
+
+
 ## Original publication
 
 
