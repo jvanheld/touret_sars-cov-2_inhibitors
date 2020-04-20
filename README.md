@@ -11,21 +11,20 @@ Franck Touret, Magali Gilles, Karine Barral, Antoine Nougairede, Etienne Decroly
 [DOI 10.1101/2020.04.03.023846](https://doi.org/10.1101/2020.04.03.023846)
 
 
-## Data sources
+## Analysis results
+
+
+- [**Detailed report and links to the result tables**](reports/Touret_2020_sars-cov-2_in-vitro-screening.html)
+
+## Links to the main documents
 
 | Doc | URL |
 |------------------------|------------------------------------------------|
 | bioRxiv article | <https://www.biorxiv.org/content/10.1101/2020.04.03.023846v1> |
 | Supplementary tables | <https://www.biorxiv.org/content/biorxiv/early/2020/04/05/2020.04.03.023846/DC1/embed/media-1.xlsx?download=true>|
-
-
-## Statistical analysis
-
-| Doc | URL |
-|------------------------|------------------------------------------------|
 | Github repository | <https://github.com/jvanheld/touret_sars-cov-2_inhibitors> |
 | Web pages | <https://jvanheld.github.io/touret_sars-cov-2_inhibitors/> |
-| Report | [html](reports/Touret_2020_sars-cov-2_in-vitro-screening.html) [pdf](reports/Touret_2020_sars-cov-2_in-vitro-screening.pdf) [Rmd](https://raw.githubusercontent.com/jvanheld/touret_sars-cov-2_inhibitors/master/reports/Touret_2020_sars-cov-2_in-vitro-screening.Rmd) |
+| Analysis report | [html](reports/Touret_2020_sars-cov-2_in-vitro-screening.html) [pdf](reports/Touret_2020_sars-cov-2_in-vitro-screening.pdf) [Rmd](https://raw.githubusercontent.com/jvanheld/touret_sars-cov-2_inhibitors/master/reports/Touret_2020_sars-cov-2_in-vitro-screening.Rmd) |
 
 ********************************
 
